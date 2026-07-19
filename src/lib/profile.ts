@@ -1,66 +1,65 @@
-import { eq } from "drizzle-orm";
-import { getDb, schema } from "@/lib/db";
+import {
+  getSupabase,
+  isSupabaseConfigured,
+  type DbCafeProfile,
+} from "@/lib/supabase/server";
 import { type CafeProfile, type CafeProfileInput, toneValues, type Tone } from "@/lib/schemas";
 
-const PROFILE_ID = 1; // Single-café pilot mode (see DECISIONS.md 2026-07-19).
+const PROFILE_ID = 1;
 
-function parseStringArray(json: string): string[] {
-  try {
-    const value = JSON.parse(json);
-    return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-export function getCafeProfile(): CafeProfile | null {
-  const db = getDb();
-  const row = db
-    .select()
-    .from(schema.cafeProfile)
-    .where(eq(schema.cafeProfile.id, PROFILE_ID))
-    .get();
-  if (!row) return null;
+function mapRow(row: DbCafeProfile): CafeProfile {
   return {
     name: row.name,
     location: row.location,
     concept: row.concept,
     introduction: row.introduction,
-    menus: parseStringArray(row.menus),
+    menus: Array.isArray(row.menus) ? row.menus.filter((m): m is string => typeof m === "string") : [],
     tone: (toneValues as readonly string[]).includes(row.tone) ? (row.tone as Tone) : "warm",
-    customerType: row.customerType,
-    logoPath: row.logoPath,
-    photoPaths: parseStringArray(row.photoPaths),
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
+    customerType: row.customer_type,
+    logoPath: row.logo_path,
+    photoPaths: Array.isArray(row.photo_paths)
+      ? row.photo_paths.filter((p): p is string => typeof p === "string")
+      : [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
-export function saveCafeProfile(input: CafeProfileInput): CafeProfile {
-  const db = getDb();
+export async function getCafeProfile(): Promise<CafeProfile | null> {
+  if (!isSupabaseConfigured()) return null;
+  const { data, error } = await getSupabase()
+    .from("cafe_profile")
+    .select("*")
+    .eq("id", PROFILE_ID)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return mapRow(data as DbCafeProfile);
+}
+
+export async function saveCafeProfile(input: CafeProfileInput): Promise<CafeProfile> {
+  if (!isSupabaseConfigured()) throw new Error("SUPABASE_NOT_CONFIGURED");
   const now = Date.now();
-  const existing = db
-    .select({ createdAt: schema.cafeProfile.createdAt })
-    .from(schema.cafeProfile)
-    .where(eq(schema.cafeProfile.id, PROFILE_ID))
-    .get();
-  const values = {
+  const existing = await getCafeProfile();
+  const row = {
     id: PROFILE_ID,
     name: input.name,
     location: input.location,
     concept: input.concept,
     introduction: input.introduction,
-    menus: JSON.stringify(input.menus),
+    menus: input.menus,
     tone: input.tone,
-    customerType: input.customerType,
-    logoPath: input.logoPath,
-    photoPaths: JSON.stringify(input.photoPaths),
-    createdAt: existing?.createdAt ?? now,
-    updatedAt: now,
+    customer_type: input.customerType,
+    logo_path: input.logoPath,
+    photo_paths: input.photoPaths,
+    created_at: existing?.createdAt ?? now,
+    updated_at: now,
   };
-  db.insert(schema.cafeProfile)
-    .values(values)
-    .onConflictDoUpdate({ target: schema.cafeProfile.id, set: values })
-    .run();
-  return getCafeProfile()!;
+  const { data, error } = await getSupabase()
+    .from("cafe_profile")
+    .upsert(row)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return mapRow(data as DbCafeProfile);
 }

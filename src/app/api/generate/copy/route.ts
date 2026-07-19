@@ -11,9 +11,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const input = copyGenerationInputSchema.parse(body);
-    const profile = getCafeProfile();
+    const profile = await getCafeProfile();
     const { output, isSample } = await generateCopy(input, profile);
-    const record = saveGeneration({
+    const record = await saveGeneration({
       type: "copy",
       input,
       options: output.options,

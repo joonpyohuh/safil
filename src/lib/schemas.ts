@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { mobileMsg } from "@/lib/mobile-messages";
 
 // ---------------------------------------------------------------------------
 // Café profile
@@ -15,8 +16,8 @@ export const toneLabels: Record<Tone, string> = {
 };
 
 export const cafeProfileInputSchema = z.object({
-  name: z.string().trim().min(1, "카페 이름을 입력해 주세요").max(60),
-  location: z.string().trim().min(1, "카페 위치를 입력해 주세요").max(120),
+  name: z.string().trim().min(1, mobileMsg.profile.nameRequired).max(60),
+  location: z.string().trim().min(1, mobileMsg.profile.locationRequired).max(120),
   concept: z.string().trim().max(200).default(""),
   introduction: z.string().trim().max(500).default(""),
   menus: z.array(z.string().trim().min(1).max(60)).max(20).default([]),
@@ -64,7 +65,7 @@ export type GenerationType = (typeof generationTypeValues)[number];
 
 export const copyGenerationInputSchema = z.object({
   purpose: z.enum(purposeValues),
-  message: z.string().trim().min(2, "홍보하고 싶은 내용을 한 문장 적어 주세요").max(200),
+  message: z.string().trim().min(2, mobileMsg.copy.messageTooShort).max(200),
   channel: z.enum(channelValues),
   photoPath: z.string().trim().max(120).nullable().default(null),
 });
@@ -165,7 +166,7 @@ export const historyPatchSchema = z
       value.selectedIndex !== undefined ||
       value.copied !== undefined ||
       value.downloaded !== undefined,
-    { message: "변경할 항목이 없습니다" },
+    { message: mobileMsg.history.nothingToUpdate },
   );
 
 export type HistoryPatch = z.infer<typeof historyPatchSchema>;

@@ -10,6 +10,7 @@ import {
   buildNoticeUserPrompt,
 } from "./prompts";
 import { sampleCopy, sampleImage, sampleNotice } from "./samples";
+import { mobileMsg } from "@/lib/mobile-messages";
 import {
   copyOptionSchema,
   imageOptionSchema,
@@ -49,7 +50,7 @@ async function callStructured<T>(
   });
   const parsed = completion.choices[0]?.message.parsed;
   if (!parsed || parsed.options.length < expectedCount) {
-    throw new Error("AI가 충분한 결과를 만들지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    throw new Error(mobileMsg.ai.insufficient);
   }
   return { options: parsed.options.slice(0, expectedCount) };
 }

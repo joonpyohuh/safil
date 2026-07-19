@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
@@ -10,18 +10,24 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "SAFIL",
-  description: "카페 사장님을 위한 홍보 결과물 생성 서비스",
+  title: { default: "SAFIL · 카페 홍보 도우미", template: "%s · SAFIL" },
+  description: "카페 사장님을 위한 홍보 문구 생성 서비스",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#faf6f0",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko" className={`${notoSansKR.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-cream text-ink font-sans">
+      <body className="flex min-h-dvh flex-col bg-cream font-sans text-ink">
         <AppShell>{children}</AppShell>
       </body>
     </html>

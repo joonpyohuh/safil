@@ -34,7 +34,10 @@ yarn-error.log*
 .env*
 !.env.example
 
-# local data (sqlite db + uploads)
+# local agent settings
+.claude/
+
+# legacy local data (no longer used)
 /.data/
 
 # vercel

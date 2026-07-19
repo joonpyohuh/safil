@@ -1,80 +1,109 @@
-import { desc, eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
-import { getDb, schema } from "@/lib/db";
+import {
+  getSupabase,
+  isSupabaseConfigured,
+  type DbGeneration,
+} from "@/lib/supabase/server";
 import type { GenerationRecord, GenerationType, HistoryPatch } from "@/lib/schemas";
 import { generationTypeValues } from "@/lib/schemas";
 
-type GenerationRow = typeof schema.generations.$inferSelect;
-
-function toRecord(row: GenerationRow): GenerationRecord {
+function mapRow(row: DbGeneration): GenerationRecord {
   return {
     id: row.id,
     type: row.type as GenerationType,
-    input: JSON.parse(row.input),
-    options: JSON.parse(row.options),
-    selectedIndex: row.selectedIndex,
-    copied: row.copied === 1,
-    downloaded: row.downloaded === 1,
-    isSample: row.isSample === 1,
-    createdAt: row.createdAt,
+    input: row.input,
+    options: row.options,
+    selectedIndex: row.selected_index,
+    copied: row.copied,
+    downloaded: row.downloaded,
+    isSample: row.is_sample,
+    createdAt: row.created_at,
   };
 }
 
-export function saveGeneration(params: {
+export async function saveGeneration(params: {
   type: GenerationType;
   input: unknown;
   options: unknown[];
   isSample: boolean;
-}): GenerationRecord {
-  const db = getDb();
+}): Promise<GenerationRecord> {
+  if (!isSupabaseConfigured()) throw new Error("SUPABASE_NOT_CONFIGURED");
   const row = {
     id: randomUUID(),
     type: params.type,
-    input: JSON.stringify(params.input),
-    options: JSON.stringify(params.options),
-    selectedIndex: null,
-    copied: 0,
-    downloaded: 0,
-    isSample: params.isSample ? 1 : 0,
-    createdAt: Date.now(),
+    input: params.input,
+    options: params.options,
+    selected_index: null,
+    copied: false,
+    downloaded: false,
+    is_sample: params.isSample,
+    created_at: Date.now(),
   };
-  db.insert(schema.generations).values(row).run();
-  return toRecord(row);
+  const { data, error } = await getSupabase()
+    .from("generations")
+    .insert(row)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return mapRow(data as DbGeneration);
 }
 
-export function listGenerations(params: {
+export async function listGenerations(params: {
   type?: string;
   limit?: number;
-}): GenerationRecord[] {
-  const db = getDb();
+}): Promise<GenerationRecord[]> {
+  if (!isSupabaseConfigured()) return [];
   const limit = Math.min(Math.max(params.limit ?? 50, 1), 200);
   const isValidType = (generationTypeValues as readonly string[]).includes(params.type ?? "");
-  let query = db.select().from(schema.generations).$dynamic();
+  let query = getSupabase()
+    .from("generations")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
   if (isValidType) {
-    query = query.where(eq(schema.generations.type, params.type!));
+    query = query.eq("type", params.type!);
   }
-  const rows = query.orderBy(desc(schema.generations.createdAt)).limit(limit).all();
-  return rows.map(toRecord);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data as DbGeneration[]).map(mapRow);
 }
 
-export function getGeneration(id: string): GenerationRecord | null {
-  const db = getDb();
-  const row = db.select().from(schema.generations).where(eq(schema.generations.id, id)).get();
-  return row ? toRecord(row) : null;
+export async function getGeneration(id: string): Promise<GenerationRecord | null> {
+  if (!isSupabaseConfigured()) return null;
+  const { data, error } = await getSupabase()
+    .from("generations")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapRow(data as DbGeneration) : null;
 }
 
-export function patchGeneration(id: string, patch: HistoryPatch): GenerationRecord | null {
-  const db = getDb();
-  const set: Partial<typeof schema.generations.$inferInsert> = {};
-  if (patch.selectedIndex !== undefined) set.selectedIndex = patch.selectedIndex;
-  if (patch.copied !== undefined) set.copied = patch.copied ? 1 : 0;
-  if (patch.downloaded !== undefined) set.downloaded = patch.downloaded ? 1 : 0;
-  db.update(schema.generations).set(set).where(eq(schema.generations.id, id)).run();
-  return getGeneration(id);
+export async function patchGeneration(
+  id: string,
+  patch: HistoryPatch,
+): Promise<GenerationRecord | null> {
+  if (!isSupabaseConfigured()) throw new Error("SUPABASE_NOT_CONFIGURED");
+  const updates: Record<string, unknown> = {};
+  if (patch.selectedIndex !== undefined) updates.selected_index = patch.selectedIndex;
+  if (patch.copied !== undefined) updates.copied = patch.copied;
+  if (patch.downloaded !== undefined) updates.downloaded = patch.downloaded;
+  const { data, error } = await getSupabase()
+    .from("generations")
+    .update(updates)
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapRow(data as DbGeneration) : null;
 }
 
-export function deleteGeneration(id: string): boolean {
-  const db = getDb();
-  const result = db.delete(schema.generations).where(eq(schema.generations.id, id)).run();
-  return result.changes > 0;
+export async function deleteGeneration(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) throw new Error("SUPABASE_NOT_CONFIGURED");
+  const { error, count } = await getSupabase()
+    .from("generations")
+    .delete({ count: "exact" })
+    .eq("id", id);
+  if (error) throw error;
+  return (count ?? 0) > 0;
 }

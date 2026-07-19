@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const type = url.searchParams.get("type") ?? undefined;
     const limitParam = url.searchParams.get("limit");
     const limit = limitParam ? Number.parseInt(limitParam, 10) || undefined : undefined;
-    return jsonOk(listGenerations({ type, limit }));
+    return jsonOk(await listGenerations({ type, limit }));
   } catch (error) {
     return handleRouteError(error);
   }

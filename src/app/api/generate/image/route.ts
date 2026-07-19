@@ -11,9 +11,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const input = imageGenerationInputSchema.parse(body);
-    const profile = getCafeProfile();
+    const profile = await getCafeProfile();
     const { output, isSample } = await generateImage(input, profile);
-    const record = saveGeneration({
+    const record = await saveGeneration({
       type: "image",
       input,
       options: output.options,

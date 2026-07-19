@@ -11,9 +11,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const input = noticeGenerationInputSchema.parse(body);
-    const profile = getCafeProfile();
+    const profile = await getCafeProfile();
     const { output, isSample } = await generateNotice(input, profile);
-    const record = saveGeneration({
+    const record = await saveGeneration({
       type: "notice",
       input,
       options: output.options,
