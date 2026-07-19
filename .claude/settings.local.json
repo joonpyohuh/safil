@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -o \"kafe.ai.mdfile.zip\" -d \"kafe.ai.mdfile\")",
+      "Bash(unzip -l \"/c/Users/hp_user/Desktop/safil/kafe.ai.mdfile.zip\")",
+      "Bash(npm -v)",
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(rm -rf /tmp/safil-scaffold)",
+      "Bash(npx --yes create-next-app@latest /tmp/safil-scaffold --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(ls -la /tmp/safil-scaffold)",
+      "Read(//tmp/**)",
+      "Bash(rm -rf /tmp/safil-scaffold; find \"/c/Users/hp_user/Desktop/safil/src\" -type f)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Skill(run)",
+      "Skill(run:*)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}
