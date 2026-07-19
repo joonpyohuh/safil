@@ -6,7 +6,7 @@
   --color-ink: #2a2320;
   --color-ink-soft: #6b5f56;
   --color-line: #e8ded2;
-  --color-brand: #a9542f;
+  --color-brand: #914321;
   --color-brand-soft: #f3e3d6;
   --mobile-nav-h: 4.5rem;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -33,9 +33,18 @@ body {
   overflow-x: hidden;
   min-height: 100dvh;
 }
+.app-main {
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
 button, a, input, textarea, select {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
 }
 
 .field {
@@ -119,6 +128,19 @@ button, a, input, textarea, select {
 }
 @media (min-width: 768px) {
   .sticky-action { display: none; }
+  .app-main {
+    padding-top: 2rem;
+    padding-inline: 2rem;
+  }
+}
+@media (max-height: 500px) {
+  .sticky-action {
+    position: static;
+    padding: 0;
+    border-top: 0;
+    background: transparent;
+    backdrop-filter: none;
+  }
 }
 
 .alert-error {
@@ -140,3 +162,12 @@ button, a, input, textarea, select {
 
 .spin { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

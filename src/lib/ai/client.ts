@@ -4,8 +4,17 @@ export function isAiConfigured(): boolean {
   return Boolean(process.env.OPENAI_API_KEY);
 }
 
+export function getTextModel(): string {
+  return process.env.OPENAI_TEXT_MODEL ?? "gpt-5-mini";
+}
+
+export function getImageModel(): string {
+  return process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1";
+}
+
+/** @deprecated use getTextModel */
 export function getModel(): string {
-  return process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+  return getTextModel();
 }
 
 let client: OpenAI | null = null;

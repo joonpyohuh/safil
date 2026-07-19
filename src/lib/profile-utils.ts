@@ -1,7 +1,7 @@
 import type { CafeProfile } from "@/lib/schemas";
 
 /** 홍보 문구 생성에 필요한 최소 프로필 (이름·위치) */
-export function isProfileReady(profile: CafeProfile | null): boolean {
+export function isProfileReady(profile: CafeProfile | null): profile is CafeProfile {
   return Boolean(profile?.name?.trim() && profile?.location?.trim());
 }
 

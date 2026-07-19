@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { getModel, getOpenAI, isAiConfigured } from "./client";
+import { getOpenAI, getTextModel, isAiConfigured } from "./client";
 import {
   buildCopySystemPrompt,
   buildCopyUserPrompt,
@@ -29,6 +29,8 @@ export type GenerationResult<T> = {
   isSample: boolean;
 };
 
+const AI_TEXT_TIMEOUT_MS = 20_000;
+
 // OpenAI structured outputs reject array length constraints, so the model is
 // asked for an unconstrained array and the count is enforced here.
 async function callStructured<T>(
@@ -41,13 +43,13 @@ async function callStructured<T>(
   const openai = getOpenAI();
   const responseSchema = z.object({ options: z.array(optionSchema) });
   const completion = await openai.chat.completions.parse({
-    model: getModel(),
+    model: getTextModel(),
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
     response_format: zodResponseFormat(responseSchema, schemaName),
-  });
+  }, { timeout: AI_TEXT_TIMEOUT_MS });
   const parsed = completion.choices[0]?.message.parsed;
   if (!parsed || parsed.options.length < expectedCount) {
     throw new Error(mobileMsg.ai.insufficient);
@@ -62,14 +64,19 @@ export async function generateCopy(
   if (!isAiConfigured()) {
     return { output: sampleCopy(input, profile), isSample: true };
   }
-  const output = await callStructured(
-    buildCopySystemPrompt(profile),
-    buildCopyUserPrompt(input),
-    copyOptionSchema,
-    3,
-    "promo_copy",
-  );
-  return { output, isSample: false };
+  try {
+    const output = await callStructured(
+      buildCopySystemPrompt(profile),
+      buildCopyUserPrompt(input),
+      copyOptionSchema,
+      3,
+      "promo_copy",
+    );
+    return { output, isSample: false };
+  } catch (error) {
+    console.error("[safil copy fallback]", error);
+    return { output: sampleCopy(input, profile), isSample: true };
+  }
 }
 
 export async function generateImage(

@@ -1,6 +1,8 @@
 import {
   channelLabels,
   noticeTypeLabels,
+  purposeLabels,
+  toneLabels,
   type CafeProfile,
   type CopyGenerationInput,
   type CopyGenerationOutput,
@@ -19,24 +21,59 @@ export function sampleCopy(
 ): CopyGenerationOutput {
   const cafe = profile?.name ?? "우리 카페";
   const isInstagram = input.channel === "instagram";
+  const location = profile?.location ? profile.location.split(" ").slice(-2).join("") : "동네";
+  const menuTag = profile?.menus[0]?.replace(/\s/g, "");
+  const purposeTag = purposeLabels[input.purpose].replace(/\s/g, "");
   const hashtags = isInstagram
-    ? ["동네카페", "카페추천", "신메뉴", cafe.replace(/\s/g, "")]
+    ? [
+        location,
+        "동네카페",
+        purposeTag,
+        cafe.replace(/\s/g, ""),
+        ...(menuTag ? [menuTag] : []),
+      ].filter((tag, index, all) => tag && all.indexOf(tag) === index)
     : [];
+  const profileReason = profile
+    ? `${cafe}의 ${toneLabels[profile.tone]} 말투와 ${profile.location} 정보를 반영했어요.`
+    : "입력하신 내용을 중심으로 작성했어요.";
+
+  if (!isInstagram) {
+    return {
+      options: [
+        {
+          text: `[${purposeLabels[input.purpose]}] ${input.message}\n\n${cafe}에서 준비한 소식입니다. 자세한 내용은 매장에서 확인해 주세요.`,
+          reason: `네이버 플레이스에서 핵심 정보가 먼저 보이도록 제목과 내용을 분리했어요. ${profileReason}`,
+          hashtags: [],
+        },
+        {
+          text: `${cafe} 소식\n\n${input.message}\n\n${profile?.location ? `${profile.location}에서` : "매장에서"} 편하게 만나보세요.`,
+          reason: `카페 이름과 위치를 자연스럽게 넣어 처음 보는 손님도 이해하기 쉽게 했어요. ${profileReason}`,
+          hashtags: [],
+        },
+        {
+          text: `${input.message}\n\n찾아주시는 분들이 편하게 확인하실 수 있도록 소식으로 전해드립니다. ${cafe}에서 기다릴게요.`,
+          reason: `단골 손님에게 직접 안내하는 듯한 문장으로 부담 없이 읽히게 했어요. ${profileReason}`,
+          hashtags: [],
+        },
+      ],
+    };
+  }
+
   return {
     options: [
       {
-        text: `${cafe} 소식입니다. ${input.message} 매장에서 직접 확인해 보세요.`,
-        reason: `핵심 내용을 담백하게 전하는 안내형 문구입니다. ${channelLabels[input.channel]}에 무난하게 어울립니다.`,
+        text: `${input.message}\n\n${cafe}에서 준비했어요. 오늘도 편하게 들러주세요.`,
+        reason: `첫 줄에 핵심 소식을 두어 피드에서 바로 읽히는 안내형이에요. ${profileReason}`,
         hashtags,
       },
       {
-        text: `오늘의 ${cafe}. ${input.message} 잠시 들러 천천히 즐겨 보세요.`,
-        reason: "카페의 분위기를 살린 감성형 문구입니다. 사진과 함께 올리면 좋습니다.",
+        text: `오늘, ${cafe}에서 만나는 작은 즐거움.\n\n${input.message}\n\n천천히 머물다 가세요.`,
+        reason: `카페의 분위기가 느껴지도록 여백과 짧은 문장을 사용했어요. ${profileReason}`,
         hashtags,
       },
       {
-        text: `안녕하세요, ${cafe}입니다! ${input.message} 오시는 길에 편하게 들러 주세요 :)`,
-        reason: "손님에게 말을 거는 친근한 대화형 문구입니다. 단골 손님에게 반응이 좋은 스타일입니다.",
+        text: `안녕하세요, ${cafe}입니다.\n${input.message}\n\n궁금하셨다면 이번에 가볍게 맛보러 오세요!`,
+        reason: `단골 손님에게 직접 말을 거는 친근한 방식이에요. ${channelLabels[input.channel]}에서 댓글과 대화를 이어가기 좋아요. ${profileReason}`,
         hashtags,
       },
     ],

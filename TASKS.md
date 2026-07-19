@@ -22,6 +22,8 @@
 - [x] `POST /api/generate/copy` → 3 options + reasons
 - [x] Select + copy → `PATCH /api/history/[id]`
 - [x] Home recent copy generations
+- [x] History list, re-copy, and input reuse
+- [x] Three-round Human Judge loop — all final scores ≥ 90
 
 ## NEXT
 
@@ -34,7 +36,8 @@
 - [ ] Connect `POST /api/generate/notice`
 
 ### History Page
-- [ ] List and filter generations UI
+- [x] List copy generations UI
+- [ ] Search and filter generations UI
 
 ### Production Hardening
 - [ ] Supabase Auth
