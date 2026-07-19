@@ -1,22 +1,10 @@
+import { Clock3 } from "lucide-react";
+
 export function RecentHistoryEmpty() {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line bg-paper/60 px-6 py-10 text-center">
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        className="text-ink-soft"
-      >
-        <circle cx="12" cy="12" r="8" />
-        <path d="M12 8v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <p className="text-sm font-medium text-ink">아직 만든 결과물이 없어요</p>
-      <p className="text-sm text-ink-soft">
-        위에서 하나를 선택하면 여기에서 최근 결과물을 확인할 수 있어요
-      </p>
+    <div className="flex flex-col items-center gap-3 rounded-[1.5rem] border border-dashed border-border bg-card/60 px-6 py-10 text-center">
+      <span className="flex size-12 items-center justify-center rounded-full bg-primary-soft text-primary"><Clock3 className="size-5" aria-hidden="true" /></span>
+      <div className="flex flex-col gap-1"><p className="font-semibold">첫 결과물을 기다리고 있어요</p><p className="max-w-sm text-sm leading-6 text-muted">위의 메뉴에서 하나를 선택해 만들어보세요. 완성한 작업은 여기에 차곡차곡 모아드려요.</p></div>
     </div>
   );
 }

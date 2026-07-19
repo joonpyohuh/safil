@@ -1,10 +1,5 @@
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import type { Metadata } from "next";
+import { GenerationStudio } from "@/components/create/generation-studio";
 
-export default function CreateNoticePage() {
-  return (
-    <PlaceholderPage
-      title="매장 안내물 만들기"
-      description="곧 매장 안내문을 만드는 화면이 준비돼요"
-    />
-  );
-}
+export const metadata: Metadata = { title: "매장 안내물 만들기" };
+export default function CreateNoticePage() { return <GenerationStudio type="notice" />; }

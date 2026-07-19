@@ -1,10 +1,5 @@
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import type { Metadata } from "next";
+import { GenerationStudio } from "@/components/create/generation-studio";
 
-export default function CreateImagePage() {
-  return (
-    <PlaceholderPage
-      title="홍보 이미지 만들기"
-      description="곧 사진으로 홍보 이미지를 만드는 화면이 준비돼요"
-    />
-  );
-}
+export const metadata: Metadata = { title: "홍보 이미지 만들기" };
+export default function CreateImagePage() { return <GenerationStudio type="image" />; }

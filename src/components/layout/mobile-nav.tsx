@@ -2,59 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { History, Home, Settings } from "lucide-react";
 import { NAV_ITEMS } from "./nav-items";
 
-const ICONS: Record<string, React.ReactNode> = {
-  "/": (
-    <path d="M4 11.5 12 4l8 7.5M6 10v9h12v-9" strokeLinecap="round" strokeLinejoin="round" />
-  ),
-  "/history": (
-    <>
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 8v4l3 2" strokeLinecap="round" strokeLinejoin="round" />
-    </>
-  ),
-  "/settings": (
-    <>
-      <circle cx="12" cy="12" r="3" />
-      <path
-        d="M19 12a7 7 0 0 0-.1-1.2l1.9-1.5-2-3.4-2.2.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.2-.9-2 3.4L5.1 10.8A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.2l-1.9 1.5 2 3.4 2.2-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.6a7 7 0 0 0 2-1.2l2.2.9 2-3.4-1.9-1.5A7 7 0 0 0 19 12Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </>
-  ),
-};
+const icons = { "/": Home, "/history": History, "/settings": Settings };
 
 export function MobileNav() {
   const pathname = usePathname();
-
   return (
-    <nav className="md:hidden sticky bottom-0 z-10 flex border-t border-line bg-paper/95 backdrop-blur">
+    <nav className="fixed inset-x-3 bottom-3 z-20 flex rounded-[1.4rem] border border-border bg-card/90 p-1.5 shadow-[0_12px_40px_rgb(36_31_27/.16)] backdrop-blur-xl md:hidden" aria-label="주요 메뉴">
       {NAV_ITEMS.map((item) => {
-        const active =
-          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium ${
-              active ? "text-brand" : "text-ink-soft"
-            }`}
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={active ? 2 : 1.6}
-            >
-              {ICONS[item.href]}
-            </svg>
-            {item.label}
-          </Link>
-        );
+        const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        const Icon = icons[item.href as keyof typeof icons];
+        return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-1 rounded-2xl text-xs font-semibold transition-all duration-200 ${active ? "bg-foreground text-card" : "text-muted active:scale-95"}`}><Icon className="size-5" aria-hidden="true" />{item.label}</Link>;
       })}
     </nav>
   );
