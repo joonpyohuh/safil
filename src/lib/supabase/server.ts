@@ -30,9 +30,19 @@ export type DbGeneration = {
 let client: SupabaseClient | null = null;
 
 export function isSupabaseConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY,
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    process.env.SUPABASE_ANON_KEY?.trim();
+  return Boolean(url && key);
+}
+
+function getSupabaseKey(): string {
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    process.env.SUPABASE_ANON_KEY?.trim();
+  if (!key) throw new Error("SUPABASE_NOT_CONFIGURED");
+  return key;
 }
 
 export function getSupabase(): SupabaseClient {
@@ -41,7 +51,7 @@ export function getSupabase(): SupabaseClient {
   }
   client ??= createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    getSupabaseKey(),
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
   return client;

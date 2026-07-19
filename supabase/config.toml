@@ -1,0 +1,22 @@
+# Supabase CLI / Cursor 플러그인 연결
+# project_id: yxuxokgrngttlqniorof (design · ap-northeast-1)
+
+project_id = "yxuxokgrngttlqniorof"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[storage]
+enabled = true

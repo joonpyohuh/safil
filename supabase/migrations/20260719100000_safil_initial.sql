@@ -1,0 +1,41 @@
+-- SAFIL Supabase schema (Postgres)
+-- Applied via Supabase MCP to project yxuxokgrngttlqniorof (design)
+
+CREATE TABLE IF NOT EXISTS cafe_profile (
+  id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  name TEXT NOT NULL DEFAULT '',
+  location TEXT NOT NULL DEFAULT '',
+  concept TEXT NOT NULL DEFAULT '',
+  introduction TEXT NOT NULL DEFAULT '',
+  menus JSONB NOT NULL DEFAULT '[]'::jsonb,
+  tone TEXT NOT NULL DEFAULT 'warm',
+  customer_type TEXT NOT NULL DEFAULT '',
+  logo_path TEXT,
+  photo_paths JSONB NOT NULL DEFAULT '[]'::jsonb,
+  created_at BIGINT NOT NULL,
+  updated_at BIGINT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS generations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type TEXT NOT NULL CHECK (type IN ('copy', 'image', 'notice')),
+  input JSONB NOT NULL,
+  options JSONB NOT NULL,
+  selected_index INTEGER,
+  copied BOOLEAN NOT NULL DEFAULT FALSE,
+  downloaded BOOLEAN NOT NULL DEFAULT FALSE,
+  is_sample BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at BIGINT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_generations_type_created
+  ON generations (type, created_at DESC);
+
+-- Pilot: single-store mode without auth. Enable RLS + policies before public launch.
+ALTER TABLE cafe_profile DISABLE ROW LEVEL SECURITY;
+ALTER TABLE generations DISABLE ROW LEVEL SECURITY;
+
+-- Storage bucket for photo uploads
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('uploads', 'uploads', true)
+ON CONFLICT (id) DO NOTHING;
