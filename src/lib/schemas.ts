@@ -86,15 +86,54 @@ export type CopyGenerationOutput = z.infer<typeof copyGenerationOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // 2. Promotional image
-// AI는 글자 없는 배경 이미지만 만들고, 한글 문구는 클라이언트 캔버스로
-// 또렷하게 얹는다 (AI 한글 렌더링 깨짐 방지 + 즉시 수정 가능).
+// AI는 글자 없는 배경만 만들고, 한글·레이아웃은 HTML→PNG(html-to-image)로
+// 얹는다 (한글 깨짐 방지 + 광고형 타이포 퀄리티).
 // ---------------------------------------------------------------------------
 
-export const imagePaletteValues = ["cream", "espresso", "forest", "berry"] as const;
+export const imagePaletteValues = ["cream", "espresso", "forest", "berry", "auto"] as const;
 export type ImagePalette = (typeof imagePaletteValues)[number];
 
-export const imageTemplateValues = ["bottom_band", "top_band", "center_card"] as const;
+/** HTML 포스터 레이아웃 — 서로 다른 인스타 광고 구도 */
+export const imageTemplateValues = [
+  "fade_bottom",
+  "story_chip",
+  "glass_center",
+  "frame_border",
+  "side_rail",
+  "bottom_card",
+  "bold_cover",
+  "minimal_bar",
+  // 하위 호환 (이전 기록)
+  "bottom_band",
+  "top_band",
+  "center_card",
+] as const;
 export type ImageTemplate = (typeof imageTemplateValues)[number];
+
+export const IMAGE_TEMPLATE_LABELS: Record<ImageTemplate, string> = {
+  fade_bottom: "하단 페이드",
+  story_chip: "스토리형",
+  glass_center: "글래스 카드",
+  frame_border: "프레임",
+  side_rail: "사이드 레일",
+  bottom_card: "하단 카드",
+  bold_cover: "빅 타이틀",
+  minimal_bar: "미니멀",
+  bottom_band: "하단 페이드",
+  top_band: "스토리형",
+  center_card: "글래스 카드",
+};
+
+/** 구 템플릿 ID → 신규 */
+export function normalizeImageTemplate(id: string | undefined): ImageTemplate {
+  if (id === "bottom_band") return "fade_bottom";
+  if (id === "top_band") return "story_chip";
+  if (id === "center_card") return "glass_center";
+  if ((imageTemplateValues as readonly string[]).includes(id ?? "")) {
+    return id as ImageTemplate;
+  }
+  return "fade_bottom";
+}
 
 export const MAX_IMAGE_REFERENCE_PHOTOS = 6;
 

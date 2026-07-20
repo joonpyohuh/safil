@@ -111,10 +111,27 @@ export async function generateCopy(
 // 한글 문구는 클라이언트 캔버스에서 얹으므로 AI 한글 깨짐이 없다.
 // ---------------------------------------------------------------------------
 
+const PLAN_TEMPLATES = [
+  "fade_bottom",
+  "story_chip",
+  "glass_center",
+  "frame_border",
+  "side_rail",
+  "bottom_card",
+  "bold_cover",
+  "minimal_bar",
+] as const;
+
+type PlanTemplate = (typeof PLAN_TEMPLATES)[number];
+
 type ImagePlan = {
   scene: string;
   suggestedTitle: string;
-  options: { headline: string; subline: string }[];
+  options: {
+    headline: string;
+    subline: string;
+    templateId: PlanTemplate;
+  }[];
 };
 
 const imagePlanSchema = z.object({
@@ -125,9 +142,12 @@ const imagePlanSchema = z.object({
       z.object({
         headline: z.string().describe("12자 이내 한글 헤드라인"),
         subline: z.string().describe("18자 이내 보조 문구, 없으면 빈 문자열"),
+        templateId: z
+          .enum(PLAN_TEMPLATES)
+          .describe("서로 다른 레이아웃. fade_bottom|story_chip|glass_center|frame_border|side_rail|bottom_card|bold_cover|minimal_bar"),
       }),
     )
-    .describe("서로 다른 두 안"),
+    .describe("서로 다른 두 안 (템플릿도 다르게)"),
 });
 
 function fallbackPlan(input: ImageGenerationInput): ImagePlan {
@@ -136,8 +156,8 @@ function fallbackPlan(input: ImageGenerationInput): ImagePlan {
     scene: "",
     suggestedTitle: title,
     options: [
-      { headline: title, subline: input.message.slice(0, 18) },
-      { headline: title, subline: "" },
+      { headline: title, subline: input.message.slice(0, 18), templateId: "fade_bottom" },
+      { headline: title, subline: "", templateId: "glass_center" },
     ],
   };
 }
@@ -280,6 +300,14 @@ export async function generateImage(
         ? "사진 반영이 어려워 새로 그렸고, "
         : "";
 
+  const templateA = plan.options[0]?.templateId ?? "fade_bottom";
+  const templateB =
+    plan.options[1]?.templateId && plan.options[1].templateId !== templateA
+      ? plan.options[1].templateId
+      : templateA === "glass_center"
+        ? "bold_cover"
+        : "glass_center";
+
   const options: ImageOption[] = [
     {
       imagePath: clean.storedName,
@@ -287,10 +315,10 @@ export async function generateImage(
       headline: headlineA.slice(0, 16),
       subline: plan.options[0]?.subline?.slice(0, 18) ?? "",
       dateText: input.dateText,
-      templateId: "bottom_band",
-      palette: "espresso",
+      templateId: templateA,
+      palette: "auto",
       usedReferencePhotos: clean.usedReferencePhotos,
-      reason: `${photoNoteFor(clean.usedReferencePhotos)}인스타 피드에 맞는 깔끔한 스타일로 만들었어요. 글자는 아래에서 바로 고칠 수 있어요.`,
+      reason: `${photoNoteFor(clean.usedReferencePhotos)}사진 색에 맞춘 인스타 피드형으로 만들었어요. 레이아웃은 아래에서 바꿀 수 있어요.`,
     },
     {
       imagePath: warm.storedName,
@@ -298,10 +326,10 @@ export async function generateImage(
       headline: headlineB.slice(0, 16),
       subline: plan.options[1]?.subline?.slice(0, 18) ?? "",
       dateText: input.dateText,
-      templateId: "center_card",
-      palette: "cream",
+      templateId: templateB,
+      palette: "auto",
       usedReferencePhotos: warm.usedReferencePhotos,
-      reason: `${photoNoteFor(warm.usedReferencePhotos)}부드러운 카드형으로 만들었어요. 글자는 아래에서 바로 고칠 수 있어요.`,
+      reason: `${photoNoteFor(warm.usedReferencePhotos)}다른 구도의 안으로 만들었어요. 마음에 드는 쪽을 고르세요.`,
     },
   ];
 

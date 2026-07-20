@@ -2,297 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ImagePalette, ImageTemplate } from "@/lib/schemas";
+import {
+  IMAGE_TEMPLATE_LABELS,
+  imagePaletteValues,
+  imageTemplateValues,
+  normalizeImageTemplate,
+} from "@/lib/schemas";
 import { fetchWithTimeout } from "@/lib/client/fetch-with-timeout";
+import {
+  extractPosterColors,
+  PRESET_COLORS,
+  type PosterColors,
+} from "@/lib/client/extract-colors";
+import { posterToBlob } from "@/lib/client/export-poster";
+import { PromoPoster, POSTER_SIZE } from "@/components/create/promo-poster";
 
-const SIZE = 1024;
-/** 깔끔한 인스타 스타일 — 시스템/앱에 로드된 Noto Sans KR 우선 */
-const FONT_STACK =
-  '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Pretendard, sans-serif';
+const EDIT_TEMPLATES = imageTemplateValues.filter(
+  (t) => !["bottom_band", "top_band", "center_card"].includes(t),
+) as ImageTemplate[];
 
-const PALETTES: Record<
-  ImagePalette,
-  { overlay: string; text: string; muted: string; accent: string; label: string }
-> = {
-  cream: {
-    overlay: "rgba(250,246,240,0.92)",
-    text: "#1f1a17",
-    muted: "#5c524c",
-    accent: "#914321",
-    label: "크림",
-  },
-  espresso: {
-    overlay: "rgba(20,14,12,0.78)",
-    text: "#faf6f0",
-    muted: "rgba(250,246,240,0.78)",
-    accent: "#e8c4a8",
-    label: "진갈색",
-  },
-  forest: {
-    overlay: "rgba(12,28,20,0.78)",
-    text: "#f2f7f2",
-    muted: "rgba(242,247,242,0.78)",
-    accent: "#b8d8b8",
-    label: "딥그린",
-  },
-  berry: {
-    overlay: "rgba(40,14,24,0.78)",
-    text: "#fdf1f4",
-    muted: "rgba(253,241,244,0.78)",
-    accent: "#f0c2d0",
-    label: "버건디",
-  },
-};
-
-const TEMPLATES: Record<ImageTemplate, string> = {
-  bottom_band: "아래 그라데이션",
-  top_band: "위쪽 라벨",
-  center_card: "중앙 카드",
-};
-
-function wrapLines(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string[] {
-  const lines: string[] = [];
-  let line = "";
-  for (const ch of [...text]) {
-    if (ctx.measureText(line + ch).width > maxWidth && line) {
-      lines.push(line);
-      line = ch === " " ? "" : ch;
-    } else {
-      line += ch;
-    }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
-
-function fitHeadline(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): { size: number; lines: string[] } {
-  for (let size = 88; size >= 52; size -= 4) {
-    ctx.font = `800 ${size}px ${FONT_STACK}`;
-    const lines = wrapLines(ctx, text, maxWidth);
-    if (lines.length <= 2) return { size, lines };
-  }
-  ctx.font = `800 52px ${FONT_STACK}`;
-  return { size: 52, lines: wrapLines(ctx, text, maxWidth).slice(0, 2) };
-}
-
-function fitSingleLine(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-  baseSize: number,
-  weight: number,
-): { size: number; text: string } {
-  for (let size = baseSize; size >= Math.round(baseSize * 0.7); size -= 2) {
-    ctx.font = `${weight} ${size}px ${FONT_STACK}`;
-    if (ctx.measureText(text).width <= maxWidth) return { size, text };
-  }
-  const size = Math.round(baseSize * 0.7);
-  ctx.font = `${weight} ${size}px ${FONT_STACK}`;
-  let cut = text;
-  while (cut.length > 1 && ctx.measureText(`${cut}…`).width > maxWidth) {
-    cut = cut.slice(0, -1);
-  }
-  return { size, text: `${cut}…` };
-}
-
-function drawSoftGradient(
-  ctx: CanvasRenderingContext2D,
-  fromY: number,
-  toY: number,
-  color: string,
-) {
-  const g = ctx.createLinearGradient(0, fromY, 0, toY);
-  g.addColorStop(0, "rgba(0,0,0,0)");
-  // color is like rgba(r,g,b,a) — extract rgb for stop mid
-  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  if (match) {
-    const [, r, gch, b] = match;
-    g.addColorStop(0.35, `rgba(${r},${gch},${b},0)`);
-    g.addColorStop(0.7, `rgba(${r},${gch},${b},0.55)`);
-    g.addColorStop(1, color);
-  } else {
-    g.addColorStop(1, color);
-  }
-  ctx.fillStyle = g;
-  ctx.fillRect(0, fromY, SIZE, toY - fromY);
-}
-
-type OverlaySpec = {
-  headline: string;
-  subline: string;
-  dateText: string;
-  templateId: ImageTemplate;
-  palette: ImagePalette;
-};
-
-function drawOverlay(
-  ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement | null,
-  spec: OverlaySpec,
-) {
-  ctx.clearRect(0, 0, SIZE, SIZE);
-  if (image) {
-    const scale = Math.max(SIZE / image.naturalWidth, SIZE / image.naturalHeight);
-    const w = image.naturalWidth * scale;
-    const h = image.naturalHeight * scale;
-    ctx.drawImage(image, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
-  } else {
-    ctx.fillStyle = "#efe6da";
-    ctx.fillRect(0, 0, SIZE, SIZE);
-  }
-
-  const colors = PALETTES[spec.palette];
-  const hasSub = Boolean(spec.subline);
-  const hasDate = Boolean(spec.dateText);
-  const pad = 72;
-  const textWidth = SIZE - pad * 2;
-
-  ctx.textBaseline = "middle";
-
-  if (spec.templateId === "center_card") {
-    // 중앙 글래스 카드 — 깔끔한 인스타 피드형
-    const head = fitHeadline(ctx, spec.headline, textWidth * 0.88);
-    const headH = head.lines.length * Math.round(head.size * 1.15);
-    const cardH = headH + (hasSub ? 52 : 0) + (hasDate ? 48 : 0) + 96;
-    const cardW = SIZE * 0.86;
-    const cardX = (SIZE - cardW) / 2;
-    const cardY = (SIZE - cardH) / 2;
-
-    ctx.fillStyle = colors.overlay;
-    ctx.beginPath();
-    if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(cardX, cardY, cardW, cardH, 28);
-    } else {
-      ctx.rect(cardX, cardY, cardW, cardH);
-    }
-    ctx.fill();
-
-    // 상단 악센트 라인
-    ctx.fillStyle = colors.accent;
-    ctx.fillRect(cardX + cardW * 0.35, cardY + 28, cardW * 0.3, 4);
-
-    ctx.textAlign = "center";
-    let y = cardY + 64;
-    ctx.fillStyle = colors.text;
-    ctx.shadowColor = "rgba(0,0,0,0.08)";
-    ctx.shadowBlur = 8;
-    ctx.font = `800 ${head.size}px ${FONT_STACK}`;
-    for (const line of head.lines) {
-      y += Math.round(head.size * 1.15) / 2;
-      ctx.fillText(line, SIZE / 2, y);
-      y += Math.round(head.size * 1.15) / 2;
-    }
-    ctx.shadowBlur = 0;
-
-    if (hasSub) {
-      const sub = fitSingleLine(ctx, spec.subline, textWidth * 0.8, 36, 500);
-      ctx.fillStyle = colors.muted;
-      ctx.font = `500 ${sub.size}px ${FONT_STACK}`;
-      y += 36;
-      ctx.fillText(sub.text, SIZE / 2, y);
-    }
-    if (hasDate) {
-      const date = fitSingleLine(ctx, spec.dateText, textWidth * 0.7, 30, 600);
-      ctx.fillStyle = colors.accent;
-      ctx.font = `600 ${date.size}px ${FONT_STACK}`;
-      y += 42;
-      ctx.fillText(date.text, SIZE / 2, y);
-    }
-    return;
-  }
-
-  if (spec.templateId === "top_band") {
-    // 위쪽 라벨 + 하단 제목 (스토리형)
-    drawSoftGradient(ctx, 0, 280, colors.overlay);
-    drawSoftGradient(ctx, SIZE - 420, SIZE, colors.overlay);
-
-    if (hasDate) {
-      const date = fitSingleLine(ctx, spec.dateText, textWidth * 0.6, 28, 600);
-      const chipW = Math.min(textWidth, ctx.measureText(date.text).width + 48);
-      ctx.fillStyle = colors.accent;
-      ctx.beginPath();
-      if (typeof ctx.roundRect === "function") {
-        ctx.roundRect(pad, 64, chipW, 48, 24);
-      } else {
-        ctx.rect(pad, 64, chipW, 48);
-      }
-      ctx.fill();
-      ctx.fillStyle = "#1f1a17";
-      ctx.textAlign = "left";
-      ctx.font = `600 ${date.size}px ${FONT_STACK}`;
-      ctx.fillText(date.text, pad + 24, 88);
-    }
-
-    ctx.textAlign = "left";
-    const head = fitHeadline(ctx, spec.headline, textWidth);
-    let y = SIZE - 140 - (hasSub ? 48 : 0);
-    ctx.fillStyle = colors.text;
-    ctx.shadowColor = "rgba(0,0,0,0.35)";
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 4;
-    ctx.font = `800 ${head.size}px ${FONT_STACK}`;
-    for (const line of head.lines) {
-      ctx.fillText(line, pad, y);
-      y += Math.round(head.size * 1.12);
-    }
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
-    if (hasSub) {
-      const sub = fitSingleLine(ctx, spec.subline, textWidth, 34, 500);
-      ctx.fillStyle = colors.muted;
-      ctx.font = `500 ${sub.size}px ${FONT_STACK}`;
-      ctx.fillText(sub.text, pad, y + 8);
-    }
-    return;
-  }
-
-  // 기본: 하단 그라데이션 — 깔끔한 인스타 피드
-  drawSoftGradient(ctx, SIZE - 520, SIZE, colors.overlay);
-
-  // 좌측 악센트 바
-  ctx.fillStyle = colors.accent;
-  ctx.fillRect(pad, SIZE - 200, 6, hasSub || hasDate ? 120 : 80);
-
-  ctx.textAlign = "left";
-  const head = fitHeadline(ctx, spec.headline, textWidth - 24);
-  const headLineH = Math.round(head.size * 1.12);
-  let y = SIZE - 96 - (hasSub ? 44 : 0) - (hasDate ? 40 : 0) - head.lines.length * headLineH;
-
-  ctx.fillStyle = colors.text;
-  ctx.shadowColor = "rgba(0,0,0,0.28)";
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 3;
-  ctx.font = `800 ${head.size}px ${FONT_STACK}`;
-  for (const line of head.lines) {
-    y += headLineH / 2;
-    ctx.fillText(line, pad + 24, y);
-    y += headLineH / 2;
-  }
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetY = 0;
-
-  if (hasSub) {
-    const sub = fitSingleLine(ctx, spec.subline, textWidth - 24, 34, 500);
-    ctx.fillStyle = colors.muted;
-    ctx.font = `500 ${sub.size}px ${FONT_STACK}`;
-    y += 36;
-    ctx.fillText(sub.text, pad + 24, y);
-  }
-  if (hasDate) {
-    const date = fitSingleLine(ctx, spec.dateText, textWidth - 24, 28, 600);
-    ctx.fillStyle = colors.accent;
-    ctx.font = `600 ${date.size}px ${FONT_STACK}`;
-    y += 36;
-    ctx.fillText(date.text, pad + 24, y);
-  }
-}
+const EDIT_PALETTES = imagePaletteValues;
 
 type ImageResultCardProps = {
   label: string;
@@ -302,6 +31,7 @@ type ImageResultCardProps = {
   initialDateText: string;
   initialTemplate: ImageTemplate;
   initialPalette: ImagePalette;
+  cafeName?: string;
   reason?: string;
   isSample?: boolean;
   usedReferencePhotos?: boolean;
@@ -318,6 +48,7 @@ export function ImageResultCard({
   initialDateText,
   initialTemplate,
   initialPalette,
+  cafeName,
   reason,
   isSample,
   usedReferencePhotos,
@@ -325,82 +56,98 @@ export function ImageResultCard({
   persistId,
   onSaved,
 }: ImageResultCardProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
+  /** 내보내기 전용 1080 노드 (화면 밖) */
+  const exportRef = useRef<HTMLDivElement>(null);
   const blobRef = useRef<Blob | null>(null);
   const blobSeqRef = useRef(0);
+  const scaleWrapRef = useRef<HTMLDivElement>(null);
+
   const [headline, setHeadline] = useState(initialHeadline);
   const [subline, setSubline] = useState(initialSubline);
   const [dateText, setDateText] = useState(initialDateText);
-  const [templateId, setTemplateId] = useState<ImageTemplate>(initialTemplate);
-  const [palette, setPalette] = useState<ImagePalette>(initialPalette);
+  const [templateId, setTemplateId] = useState<ImageTemplate>(
+    normalizeImageTemplate(initialTemplate),
+  );
+  const [palette, setPalette] = useState<ImagePalette>(
+    initialPalette === "auto" || PRESET_COLORS[initialPalette as keyof typeof PRESET_COLORS]
+      ? initialPalette
+      : "auto",
+  );
+  const [colors, setColors] = useState<PosterColors>(PRESET_COLORS.espresso);
+  const [scale, setScale] = useState(0.35);
   const [imageReady, setImageReady] = useState(false);
   const [blobReady, setBlobReady] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState<"share" | "download" | null>(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
-  const redraw = useCallback(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    drawOverlay(ctx, imageRef.current, {
-      headline: headline || " ",
-      subline,
-      dateText,
-      templateId,
-      palette,
-    });
-    const seq = ++blobSeqRef.current;
-    blobRef.current = null;
-    setBlobReady(false);
-    canvas.toBlob((blob) => {
-      if (seq === blobSeqRef.current) {
-        blobRef.current = blob;
-        setBlobReady(Boolean(blob));
-      }
-    }, "image/png");
-  }, [headline, subline, dateText, templateId, palette]);
+  useEffect(() => {
+    const el = scaleWrapRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (w > 0) setScale(w / POSTER_SIZE);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      if (cancelled) return;
-      imageRef.current = img;
-      setImageReady(true);
-      setImageFailed(false);
-    };
-    img.onerror = () => {
-      if (cancelled) return;
-      imageRef.current = null;
-      setImageFailed(true);
-      setImageReady(true);
-    };
-    img.src = imageUrl;
+    setImageReady(false);
+    (async () => {
+      if (palette === "auto") {
+        const extracted = await extractPosterColors(imageUrl);
+        if (!cancelled) setColors(extracted);
+      } else if (palette in PRESET_COLORS) {
+        if (!cancelled) setColors(PRESET_COLORS[palette as keyof typeof PRESET_COLORS]);
+      }
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = imageUrl;
+      });
+      if (!cancelled) setImageReady(true);
+    })();
     return () => {
       cancelled = true;
     };
-  }, [imageUrl]);
+  }, [imageUrl, palette]);
+
+  const rebuildBlob = useCallback(async () => {
+    const node = exportRef.current;
+    if (!node || !imageReady) return;
+    const seq = ++blobSeqRef.current;
+    blobRef.current = null;
+    setBlobReady(false);
+    try {
+      // 레이아웃·이미지 페인트 한 프레임 대기
+      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+      const blob = await posterToBlob(node);
+      if (seq === blobSeqRef.current) {
+        blobRef.current = blob;
+        setBlobReady(true);
+      }
+    } catch (err) {
+      console.error("[safil poster export]", err);
+      if (seq === blobSeqRef.current) setBlobReady(false);
+    }
+  }, [imageReady, headline, subline, dateText, templateId, colors, cafeName]);
 
   useEffect(() => {
     if (!imageReady) return;
-    redraw();
-    let active = true;
-    if (typeof document !== "undefined" && "fonts" in document) {
-      document.fonts.ready.then(() => {
-        if (active) redraw();
-      });
-    }
-    return () => {
-      active = false;
-    };
-  }, [imageReady, redraw]);
+    const t = window.setTimeout(() => {
+      void rebuildBlob();
+    }, 180);
+    return () => window.clearTimeout(t);
+  }, [imageReady, rebuildBlob]);
 
-  function downloadBlob(blob: Blob, fileName: string) {
+  function downloadBlobFile(blob: Blob, fileName: string) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -410,15 +157,12 @@ export function ImageResultCard({
   }
 
   async function getBlob(): Promise<Blob> {
-    let blob = blobRef.current;
-    if (!blob) {
-      const canvas = canvasRef.current;
-      if (!canvas) throw new Error("EXPORT_FAILED");
-      blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/png"),
-      );
-    }
-    if (!blob) throw new Error("EXPORT_FAILED");
+    if (blobRef.current) return blobRef.current;
+    const node = exportRef.current;
+    if (!node) throw new Error("EXPORT_FAILED");
+    const blob = await posterToBlob(node);
+    blobRef.current = blob;
+    setBlobReady(true);
     return blob;
   }
 
@@ -439,11 +183,11 @@ export function ImageResultCard({
     setPending("download");
     try {
       const blob = await getBlob();
-      downloadBlob(blob, `${headline || "safil"}-홍보이미지.png`);
+      downloadBlobFile(blob, `${headline || "safil"}-홍보이미지.png`);
       setStatus("이미지를 저장했어요.");
       await markDownloaded();
     } catch {
-      setError("저장하지 못했어요. 화면을 캡처해서 사용하셔도 돼요.");
+      setError("저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setPending(null);
     }
@@ -465,12 +209,12 @@ export function ImageResultCard({
           await markDownloaded();
         } catch (shareError) {
           if (shareError instanceof Error && shareError.name === "AbortError") return;
-          downloadBlob(blob, fileName);
+          downloadBlobFile(blob, fileName);
           setStatus("공유가 안 되어 이미지로 저장했어요.");
           await markDownloaded();
         }
       } else {
-        downloadBlob(blob, fileName);
+        downloadBlobFile(blob, fileName);
         setStatus("이 기기에서는 공유가 안 되어 이미지로 저장했어요.");
         await markDownloaded();
       }
@@ -482,9 +226,34 @@ export function ImageResultCard({
   }
 
   const busy = pending !== null || !imageReady || !blobReady;
+  const posterProps = {
+    imageUrl,
+    headline,
+    subline,
+    dateText,
+    cafeName,
+    templateId,
+    colors,
+  };
 
   return (
     <article className="card flex flex-col gap-3">
+      {/* 내보내기 전용 1080px — 화면 밖 고정 */}
+      <div
+        aria-hidden
+        style={{
+          position: "fixed",
+          left: -10000,
+          top: 0,
+          width: POSTER_SIZE,
+          height: POSTER_SIZE,
+          pointerEvents: "none",
+          opacity: 0,
+        }}
+      >
+        <PromoPoster posterRef={exportRef} {...posterProps} scale={1} />
+      </div>
+
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-bold text-brand">{label}</span>
         <div className="flex items-center gap-1.5">
@@ -507,26 +276,17 @@ export function ImageResultCard({
         </div>
       </div>
 
-      <div className="relative">
-        <canvas
-          ref={canvasRef}
-          width={SIZE}
-          height={SIZE}
-          role="img"
-          aria-label={`${headline} 홍보 이미지 미리보기`}
-          className="aspect-square w-full rounded-2xl bg-cream"
-        />
+      <div
+        ref={scaleWrapRef}
+        className="relative aspect-square w-full overflow-hidden rounded-2xl bg-cream"
+      >
+        <PromoPoster {...posterProps} scale={scale} />
         {!imageReady && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-cream/80">
+          <div className="absolute inset-0 flex items-center justify-center bg-cream/80">
             <span className="text-sm font-semibold text-ink-soft">미리보기 준비 중…</span>
           </div>
         )}
       </div>
-      {imageFailed && (
-        <p className="text-xs leading-5 text-ink-soft">
-          배경을 불러오지 못해 단색 배경으로 보여드려요. 저장은 그대로 가능해요.
-        </p>
-      )}
 
       <button
         type="button"
@@ -534,13 +294,13 @@ export function ImageResultCard({
         onClick={() => setEditing((v) => !v)}
         aria-expanded={editing}
       >
-        {editing ? "글자 수정 닫기" : "글자·위치·색 바꾸기"}
+        {editing ? "꾸미기 닫기" : "글자·레이아웃·색 바꾸기"}
       </button>
 
       {editing && (
         <div className="flex flex-col gap-3 rounded-2xl bg-cream p-3">
           <p className="text-xs leading-5 text-ink-soft">
-            바꾸는 즉시 위 미리보기에 반영돼요. 다시 만들 필요 없어요.
+            바꾸는 즉시 미리보기에 반영돼요. 다시 만들 필요 없어요.
           </p>
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-semibold text-ink-soft">제목 (16자까지)</span>
@@ -570,9 +330,9 @@ export function ImageResultCard({
             />
           </label>
           <fieldset className="flex flex-col gap-1.5">
-            <legend className="text-xs font-semibold text-ink-soft">글자 위치</legend>
-            <div className="grid grid-cols-3 gap-2">
-              {(Object.keys(TEMPLATES) as ImageTemplate[]).map((t) => (
+            <legend className="text-xs font-semibold text-ink-soft">레이아웃</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {EDIT_TEMPLATES.map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -580,15 +340,15 @@ export function ImageResultCard({
                   onClick={() => setTemplateId(t)}
                   aria-pressed={templateId === t}
                 >
-                  {TEMPLATES[t]}
+                  {IMAGE_TEMPLATE_LABELS[t]}
                 </button>
               ))}
             </div>
           </fieldset>
           <fieldset className="flex flex-col gap-1.5">
-            <legend className="text-xs font-semibold text-ink-soft">글자 배경색</legend>
-            <div className="grid grid-cols-4 gap-2">
-              {(Object.keys(PALETTES) as ImagePalette[]).map((p) => (
+            <legend className="text-xs font-semibold text-ink-soft">색</legend>
+            <div className="grid grid-cols-3 gap-2">
+              {EDIT_PALETTES.map((p) => (
                 <button
                   key={p}
                   type="button"
@@ -596,7 +356,15 @@ export function ImageResultCard({
                   onClick={() => setPalette(p)}
                   aria-pressed={palette === p}
                 >
-                  {PALETTES[p].label}
+                  {p === "auto"
+                    ? "사진 맞춤"
+                    : p === "cream"
+                      ? "크림"
+                      : p === "espresso"
+                        ? "진갈색"
+                        : p === "forest"
+                          ? "딥그린"
+                          : "버건디"}
                 </button>
               ))}
             </div>
@@ -625,22 +393,10 @@ export function ImageResultCard({
       )}
 
       <div className="grid grid-cols-1 gap-2">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={shareOnly}
-          disabled={busy}
-        >
-          {pending === "share" || (!blobReady && imageReady)
-            ? "준비 중…"
-            : "공유하기"}
+        <button type="button" className="btn-primary" onClick={shareOnly} disabled={busy}>
+          {pending === "share" || (!blobReady && imageReady) ? "준비 중…" : "공유하기"}
         </button>
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={downloadOnly}
-          disabled={busy}
-        >
+        <button type="button" className="btn-secondary" onClick={downloadOnly} disabled={busy}>
           {pending === "download" ? "저장 중…" : "다운로드"}
         </button>
       </div>

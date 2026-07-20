@@ -82,6 +82,7 @@ ${COMMON_RULES}
 - scene: 사진(또는 요청)의 피사체·분위기를 영어 한 문장으로 (이미지 생성 프롬프트용)
 - suggestedTitle: 사진에 어울리는 12자 이내 한글 제목
 - options: 서로 다른 두 안. headline 12자 이내, subline 18자 이내(없으면 빈 문자열)
+- 각 option의 templateId는 서로 다르게: fade_bottom(하단 페이드), story_chip(상단칩), glass_center(중앙카드), frame_border(프레임), side_rail(좌측레일), bottom_card(하단카드), bold_cover(큰제목), minimal_bar(미니멀바)
 - 사진에 없는 메뉴·가격·혜택을 지어내지 않는다`;
 }
 

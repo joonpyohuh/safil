@@ -107,8 +107,8 @@ export default async function HistoryPage() {
                       initialHeadline={headline}
                       initialSubline={option.subline ?? ""}
                       initialDateText={option.dateText ?? input.dateText ?? ""}
-                      initialTemplate={option.templateId ?? "bottom_band"}
-                      initialPalette={option.palette ?? "cream"}
+                      initialTemplate={option.templateId ?? "fade_bottom"}
+                      initialPalette={option.palette ?? "auto"}
                       isSample={record.isSample}
                       shareTitle="카페 홍보 이미지"
                       persistId={record.id}

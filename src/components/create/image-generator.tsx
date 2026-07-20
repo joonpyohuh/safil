@@ -531,13 +531,14 @@ export function ImageGenerator({
           {(record.options as ImageOption[]).map((option, index) => (
             <ImageResultCard
               key={`${record.id}-${index}-${option.imageUrl}`}
-              label={index === 0 ? "인스타 피드형" : "카드형"}
+              label={index === 0 ? "안 A" : "안 B"}
               imageUrl={option.imageUrl}
               initialHeadline={option.headline}
               initialSubline={option.subline ?? ""}
               initialDateText={option.dateText ?? dateText}
-              initialTemplate={option.templateId ?? (index === 0 ? "bottom_band" : "center_card")}
-              initialPalette={option.palette ?? (index === 0 ? "espresso" : "cream")}
+              initialTemplate={option.templateId ?? (index === 0 ? "fade_bottom" : "glass_center")}
+              initialPalette={option.palette ?? "auto"}
+              cafeName={profile.name}
               reason={option.reason}
               isSample={record.isSample}
               usedReferencePhotos={

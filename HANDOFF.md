@@ -5,11 +5,10 @@
 
 - Supabase + Vercel 연결 완료 (`safil` / `safil-uo56` env 모두 설정)
 - Copy: `gpt-5-mini`
-- Image: **배경만 AI 생성(글자 금지 프롬프트) + 한글은 클라이언트 캔버스 오버레이**
-  - 한글 깨짐 원천 제거, 글자·위치·색 즉시 수정(재생성 불필요)
-  - 비전(`gpt-5-mini`)이 사진 분위기 분석 → 제목·보조문구 자동 제안
-  - 사진만 올리면 자동 생성 시작(원탭), 제목 선택사항
-  - 클라이언트 압축(HEIC→JPEG, 1600px)으로 업로드 실패 해결
+- Image: **배경만 AI 생성 + 한글/레이아웃은 HTML→PNG(`html-to-image`)**
+  - 1080 포스터 템플릿 8종, 사진 색 추출(`auto`), AI가 구도 선택
+  - 만들기 버튼으로 생성, 공유/다운로드 분리
+  - 클라이언트 압축(HEIC→JPEG)으로 업로드 안정화
 - Human Judge(40대 아이폰 사장님): **92/100 PASS** (1차 81 → 2차 92)
 - Notice frontend는 placeholder
 
