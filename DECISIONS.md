@@ -27,8 +27,13 @@
 - **Status**: Confirmed
 
 ### MVP Frontend Scope
-- **Decision**: Complete user loop for **promotional copy only**; image/notice UI deferred
+- **Decision**: Promotional copy + promotional image loops shipped; notice UI deferred
+- **Status**: Confirmed (updated 2026-07-20)
+
+### AI Models
+- **Decision**: Text `gpt-5-mini` (`OPENAI_TEXT_MODEL`), image `gpt-image-1` (`OPENAI_IMAGE_MODEL`, quality `low` for speed)
 - **Status**: Confirmed
+- **Reason**: Owner asked for these models; low quality keeps image generation within Vercel 60s
 
 ### Documentation Layout
 - **Decision**: Product docs at repo root; `docs/` for architecture/research; `CLAUDE.md` + `AGENTS.md` at root

@@ -26,10 +26,11 @@ export async function saveGeneration(params: {
   input: unknown;
   options: unknown[];
   isSample: boolean;
+  id?: string;
 }): Promise<GenerationRecord> {
   if (!isSupabaseConfigured()) throw new Error("SUPABASE_NOT_CONFIGURED");
-  const row = {
-    id: randomUUID(),
+  const row: DbGeneration = {
+    id: params.id ?? randomUUID(),
     type: params.type,
     input: params.input,
     options: params.options,
@@ -39,13 +40,9 @@ export async function saveGeneration(params: {
     is_sample: params.isSample,
     created_at: Date.now(),
   };
-  const { data, error } = await getSupabase()
-    .from("generations")
-    .insert(row)
-    .select("*")
-    .single();
+  const { error } = await getSupabase().from("generations").insert(row);
   if (error) throw error;
-  return mapRow(data as DbGeneration);
+  return mapRow(row);
 }
 
 export async function listGenerations(params: {

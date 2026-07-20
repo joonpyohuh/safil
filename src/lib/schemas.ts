@@ -85,28 +85,26 @@ export const copyGenerationOutputSchema = z.object({
 export type CopyGenerationOutput = z.infer<typeof copyGenerationOutputSchema>;
 
 // ---------------------------------------------------------------------------
-// 2. Promotional image (design spec — the photo itself is never altered)
+// 2. Promotional image (gpt-image-1)
 // ---------------------------------------------------------------------------
 
-export const imageTemplateValues = ["bottom_band", "top_band", "center_card"] as const;
 export const imagePaletteValues = ["cream", "espresso", "forest", "berry"] as const;
 
 export const imageGenerationInputSchema = z.object({
   purpose: z.enum(purposeValues),
-  photoPath: z.string().trim().min(1, "사진을 업로드해 주세요").max(120),
-  title: z.string().trim().max(60).default(""),
+  /** 참고 사진(선택). 있으면 edit, 없으면 텍스트로 생성 */
+  photoPath: z.string().trim().max(120).nullable().default(null),
+  title: z.string().trim().min(1, mobileMsg.image.titleRequired).max(60),
   dateText: z.string().trim().max(40).default(""),
 });
 
 export type ImageGenerationInput = z.infer<typeof imageGenerationInputSchema>;
 
 export const imageOptionSchema = z.object({
-  templateId: z.enum(imageTemplateValues).describe("텍스트 배치 템플릿"),
-  headline: z.string().describe("이미지 위에 올릴 짧은 헤드라인 (12자 이내 권장)"),
-  subline: z.string().describe("보조 문구, 없으면 빈 문자열"),
-  dateText: z.string().describe("날짜/기간 표기, 없으면 빈 문자열"),
-  palette: z.enum(imagePaletteValues).describe("오버레이 색 팔레트"),
-  reason: z.string().describe("이 구성을 제안한 이유"),
+  imagePath: z.string().describe("저장된 파일명"),
+  imageUrl: z.string().describe("다운로드/표시용 URL"),
+  headline: z.string().describe("이미지에 들어간 짧은 제목"),
+  reason: z.string().describe("이 이미지를 제안한 짧은 이유"),
 });
 
 export const imageGenerationOutputSchema = z.object({

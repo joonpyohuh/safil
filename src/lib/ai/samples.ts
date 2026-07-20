@@ -80,28 +80,47 @@ export function sampleCopy(
   };
 }
 
+function sampleImageDataUrl(headline: string, subtitle: string, tone: "clean" | "warm"): string {
+  const bg = tone === "clean" ? "#f7f1e8" : "#3d2a22";
+  const fg = tone === "clean" ? "#2a2320" : "#faf6f0";
+  const accent = tone === "clean" ? "#914321" : "#e8c4a8";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="${bg}"/>
+  <rect x="72" y="72" width="880" height="880" rx="36" fill="none" stroke="${accent}" stroke-width="4"/>
+  <text x="512" y="430" text-anchor="middle" font-family="sans-serif" font-size="64" font-weight="700" fill="${fg}">${escapeXml(headline)}</text>
+  <text x="512" y="520" text-anchor="middle" font-family="sans-serif" font-size="36" fill="${accent}">${escapeXml(subtitle)}</text>
+  <text x="512" y="900" text-anchor="middle" font-family="sans-serif" font-size="28" fill="${accent}">체험용 이미지</text>
+</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
 export function sampleImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
 ): ImageGenerationOutput {
   const headline = input.title || "새로운 소식";
+  const subtitle = [profile?.name, input.dateText].filter(Boolean).join(" · ") || "우리 카페";
   return {
     options: [
       {
-        templateId: "bottom_band",
+        imagePath: "",
+        imageUrl: sampleImageDataUrl(headline, subtitle, "clean"),
         headline,
-        subline: profile?.name ?? "",
-        dateText: input.dateText,
-        palette: "espresso",
-        reason: "사진을 가리지 않도록 하단에 띠를 두는 구성입니다. 피드에서 안정적으로 보입니다.",
+        reason: "체험용으로 만든 깔끔한 버전이에요. API 키를 연결하면 실제 이미지가 만들어져요.",
       },
       {
-        templateId: "center_card",
+        imagePath: "",
+        imageUrl: sampleImageDataUrl(headline, subtitle, "warm"),
         headline,
-        subline: input.dateText ? "" : (profile?.location ?? ""),
-        dateText: input.dateText,
-        palette: "cream",
-        reason: "중앙 카드형은 제목을 또렷하게 강조하고 싶을 때 좋습니다.",
+        reason: "체험용으로 만든 따뜻한 버전이에요. API 키를 연결하면 실제 이미지가 만들어져요.",
       },
     ],
   };

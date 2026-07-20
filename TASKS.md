@@ -1,7 +1,7 @@
 # SAFIL — Tasks
 
 ## Current Phase
-**Phase 2 — First complete user loop (copy)**
+**Phase 2 — Copy + Image loops**
 
 ## DONE
 
@@ -27,9 +27,10 @@
 
 ## NEXT
 
-### Promotional Image (frontend)
-- [ ] Build image creation UI
-- [ ] Connect `POST /api/generate/image`
+### Promotional Image
+- [x] Build image creation UI (`ImageGenerator`)
+- [x] Connect `POST /api/generate/image` with `gpt-image-1`
+- [x] Upload optional reference photo + download results
 
 ### In-store Notice (frontend)
 - [ ] Build notice creation UI

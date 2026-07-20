@@ -69,8 +69,7 @@ export default async function Home() {
         <ActionCard
           href="/create/image"
           title="홍보 이미지 만들기"
-          description="사진으로 만드는 SNS 홍보 이미지"
-          disabled
+          description="제목만 적으면 SNS용 이미지를 바로 만들기"
           icon={
             <svg {...ICON_PROPS}>
               <rect x="3.5" y="5" width="17" height="14" rx="2" />

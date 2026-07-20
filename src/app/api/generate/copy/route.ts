@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       return null;
     });
     const { output, isSample } = await generateCopy(input, profile);
+
     let record;
     try {
       const saved = await saveGeneration({

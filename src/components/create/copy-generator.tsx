@@ -65,7 +65,7 @@ export function CopyGenerator({
     setError("");
     setStatus("");
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 45_000);
+    const timeout = window.setTimeout(() => controller.abort(), 30_000);
     try {
       const body: CopyGenerationInput = { purpose, message, channel, photoPath: null };
       const res = await fetch("/api/generate/copy", {
@@ -317,7 +317,7 @@ export function CopyGenerator({
 
         {loading && (
           <p role="status" aria-live="polite" className="text-center text-sm text-ink-soft">
-            카페 정보와 채널에 맞춰 문구를 만들고 있어요. 보통 30초 안에 끝나요.
+            카페 정보에 맞춰 문구를 만들고 있어요. 보통 10초 안에 끝나요.
           </p>
         )}
 

@@ -1,19 +1,26 @@
 import { z } from "zod";
+import { toFile } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { getOpenAI, getTextModel, isAiConfigured } from "./client";
+import {
+  AI_IMAGE_TIMEOUT_MS,
+  AI_TEXT_TIMEOUT_MS,
+  getImageModel,
+  getOpenAI,
+  getTextModel,
+  isAiConfigured,
+} from "./client";
 import {
   buildCopySystemPrompt,
   buildCopyUserPrompt,
-  buildImageSystemPrompt,
-  buildImageUserPrompt,
+  buildImagePrompt,
   buildNoticeSystemPrompt,
   buildNoticeUserPrompt,
 } from "./prompts";
 import { sampleCopy, sampleImage, sampleNotice } from "./samples";
 import { mobileMsg } from "@/lib/mobile-messages";
+import { downloadUpload, uploadImageBuffer } from "@/lib/storage";
 import {
   copyOptionSchema,
-  imageOptionSchema,
   noticeOptionSchema,
   type CafeProfile,
   type CopyGenerationInput,
@@ -29,10 +36,6 @@ export type GenerationResult<T> = {
   isSample: boolean;
 };
 
-const AI_TEXT_TIMEOUT_MS = 20_000;
-
-// OpenAI structured outputs reject array length constraints, so the model is
-// asked for an unconstrained array and the count is enforced here.
 async function callStructured<T>(
   systemPrompt: string,
   userPrompt: string,
@@ -42,15 +45,34 @@ async function callStructured<T>(
 ): Promise<{ options: T[] }> {
   const openai = getOpenAI();
   const responseSchema = z.object({ options: z.array(optionSchema) });
-  const completion = await openai.chat.completions.parse({
+  const base = {
     model: getTextModel(),
     messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
+      { role: "system" as const, content: systemPrompt },
+      { role: "user" as const, content: userPrompt },
     ],
     response_format: zodResponseFormat(responseSchema, schemaName),
-  }, { timeout: AI_TEXT_TIMEOUT_MS });
-  const parsed = completion.choices[0]?.message.parsed;
+    max_completion_tokens: 1200,
+  };
+
+  let completion;
+  try {
+    completion = await openai.chat.completions.parse(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { ...base, reasoning_effort: "minimal" } as any,
+      { timeout: AI_TEXT_TIMEOUT_MS },
+    );
+  } catch (firstError) {
+    console.error("[safil structured retry]", firstError);
+    completion = await openai.chat.completions.parse(base, {
+      timeout: AI_TEXT_TIMEOUT_MS,
+    });
+  }
+
+  const parsed = completion.choices[0]?.message.parsed as
+    | { options: T[] }
+    | null
+    | undefined;
   if (!parsed || parsed.options.length < expectedCount) {
     throw new Error(mobileMsg.ai.insufficient);
   }
@@ -79,6 +101,64 @@ export async function generateCopy(
   }
 }
 
+async function generateOneImage(
+  input: ImageGenerationInput,
+  profile: CafeProfile | null,
+  variant: "clean" | "warm",
+): Promise<ImageGenerationOutput["options"][number]> {
+  const openai = getOpenAI();
+  const prompt = buildImagePrompt(input, profile, variant);
+  const model = getImageModel();
+  let b64: string | undefined;
+
+  if (input.photoPath) {
+    try {
+      const { buffer, contentType } = await downloadUpload(input.photoPath);
+      const file = await toFile(buffer, input.photoPath, { type: contentType });
+      const edited = await openai.images.edit(
+        {
+          model,
+          image: file,
+          prompt: `${prompt} Keep the original cafe/menu photo recognizable. Add clear promotional text overlay only. Do not invent fake food appearance.`,
+          size: "1024x1024",
+          quality: "low",
+        },
+        { timeout: AI_IMAGE_TIMEOUT_MS },
+      );
+      b64 = edited.data?.[0]?.b64_json ?? undefined;
+    } catch (error) {
+      console.error("[safil image edit fallback]", error);
+    }
+  }
+
+  if (!b64) {
+    const generated = await openai.images.generate(
+      {
+        model,
+        prompt,
+        size: "1024x1024",
+        quality: "low",
+        output_format: "png",
+      },
+      { timeout: AI_IMAGE_TIMEOUT_MS },
+    );
+    b64 = generated.data?.[0]?.b64_json ?? undefined;
+  }
+
+  if (!b64) throw new Error(mobileMsg.image.generateFailed);
+
+  const uploaded = await uploadImageBuffer(Buffer.from(b64, "base64"), "image/png");
+  return {
+    imagePath: uploaded.storedName,
+    imageUrl: uploaded.url,
+    headline: input.title,
+    reason:
+      variant === "clean"
+        ? "글씨가 잘 보이도록 깔끔하게 정리한 버전이에요."
+        : "카페 분위기가 따뜻하게 느껴지도록 만든 버전이에요.",
+  };
+}
+
 export async function generateImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
@@ -86,14 +166,16 @@ export async function generateImage(
   if (!isAiConfigured()) {
     return { output: sampleImage(input, profile), isSample: true };
   }
-  const output = await callStructured(
-    buildImageSystemPrompt(profile),
-    buildImageUserPrompt(input),
-    imageOptionSchema,
-    2,
-    "promo_image_spec",
-  );
-  return { output, isSample: false };
+  try {
+    const options = await Promise.all([
+      generateOneImage(input, profile, "clean"),
+      generateOneImage(input, profile, "warm"),
+    ]);
+    return { output: { options }, isSample: false };
+  } catch (error) {
+    console.error("[safil image fallback]", error);
+    return { output: sampleImage(input, profile), isSample: true };
+  }
 }
 
 export async function generateNotice(
