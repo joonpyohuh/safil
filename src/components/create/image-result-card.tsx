@@ -16,6 +16,7 @@ import {
 } from "@/lib/client/extract-colors";
 import { posterToBlob } from "@/lib/client/export-poster";
 import { PromoPoster, POSTER_SIZE } from "@/components/create/promo-poster";
+import { MarkPostedButton } from "@/components/history/mark-posted-button";
 
 const EDIT_TEMPLATES = imageTemplateValues.filter(
   (t) => !["bottom_band", "top_band", "center_card"].includes(t),
@@ -424,10 +425,11 @@ export function ImageResultCard({
         <button type="button" className="btn-secondary" onClick={shareToApps} disabled={busy}>
           {pending === "share" ? "준비 중…" : "공유하기"}
         </button>
+        {persistId && <MarkPostedButton id={persistId} />}
       </div>
       <p className="text-center text-xs leading-5 text-ink-soft">
         아이폰·안드로이드에서는 &apos;갤러리에 저장&apos; → 공유 화면의 &apos;이미지 저장&apos;을
-        누르면 사진 앱으로 들어가요.
+        누르면 사진 앱으로 들어가요. SNS에 올린 뒤에는 &apos;실제로 올렸어요&apos;를 눌러 주세요.
       </p>
     </article>
   );

@@ -78,7 +78,7 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
     }
     setResearching(true);
     setError("");
-    setStatus("네이버·구글에서 카페를 찾는 중…");
+    setStatus("카페를 찾는 중…");
     setCandidates([]);
     try {
       const res = await fetchWithTimeout(
@@ -92,7 +92,7 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
             location: form.location.trim(),
           }),
         },
-        55_000,
+        35_000,
       );
       const json = await res.json().catch(() => null);
       if (!json?.ok) throw new Error(json?.error || "검색하지 못했어요.");

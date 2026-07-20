@@ -12,6 +12,7 @@ import type {
 import { purposeLabels, channelLabels } from "@/lib/schemas";
 import { copyToClipboard } from "@/lib/client/clipboard";
 import { fetchWithTimeout } from "@/lib/client/fetch-with-timeout";
+import { MarkPostedButton } from "@/components/history/mark-posted-button";
 
 const purposes: Purpose[] = ["new_menu", "event", "daily", "notice"];
 const channels: Channel[] = ["instagram", "naver_place"];
@@ -117,15 +118,18 @@ export function CopyGenerator({
     setError("");
     setActionPending(index);
     try {
+      const discardedIndices = (record.options as CopyOption[])
+        .map((_, i) => i)
+        .filter((i) => i !== index);
       const response = await fetchWithTimeout(`/api/history/${record.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedIndex: index }),
+        body: JSON.stringify({ selectedIndex: index, discardedIndices }),
       });
       const json = await response.json();
       if (!json.ok) throw new Error(json.error);
       setSelected(index);
-      setStatus(`${index + 1}번 문구를 선택했어요.`);
+      setStatus(`${index + 1}번 문구를 선택했어요. 나머지 안은 학습용으로 버려진 결과로 기록해요.`);
     } catch (err) {
       setError(
         err instanceof Error && err.name === "AbortError"
@@ -155,7 +159,9 @@ export function CopyGenerator({
 
     setCopied(index);
     setSelected(index);
-    setStatus("문구를 복사했어요. 인스타그램이나 네이버에 붙여넣으세요.");
+    setStatus(
+      "문구를 복사했어요. 인스타·네이버에 붙인 뒤 ‘실제로 올렸어요’를 눌러 주세요.",
+    );
 
     if (!record || !record.persisted) {
       setStatus("문구를 복사했어요. 기록 저장은 잠시 안 되지만 바로 사용할 수 있어요.");
@@ -164,10 +170,17 @@ export function CopyGenerator({
     }
 
     try {
+      const discardedIndices = (record.options as CopyOption[])
+        .map((_, i) => i)
+        .filter((i) => i !== index);
       const response = await fetchWithTimeout(`/api/history/${record.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ copied: true, selectedIndex: index }),
+        body: JSON.stringify({
+          copied: true,
+          selectedIndex: index,
+          discardedIndices,
+        }),
       });
       const json = await response.json();
       if (!json.ok) {
@@ -402,10 +415,13 @@ export function CopyGenerator({
           ))}
 
           <div className="card flex flex-col gap-2 text-center">
-            <p className="font-bold">문구를 사용하셨나요?</p>
+            <p className="font-bold">실제로 올리셨나요?</p>
             <p className="text-sm leading-6 text-ink-soft">
-              복사한 문구는 최근 만든 것과 히스토리에 저장돼요.
+              복사·다운로드와 별개로, 올린 뒤에만 눌러 주세요. 다음 문구가 더 맞게 배워요.
             </p>
+            {record.persisted && (
+              <MarkPostedButton id={record.id} initialPosted={record.posted} />
+            )}
             <div className="mt-1 grid grid-cols-2 gap-2">
               <Link href="/" className="btn-secondary">
                 홈으로

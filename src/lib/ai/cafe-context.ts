@@ -1,5 +1,9 @@
 import { listGenerations } from "@/lib/history";
 import {
+  formatPreferenceContext,
+  toPreferencePairs,
+} from "@/lib/eval/preference";
+import {
   vibeTagLabels,
   type CafeProfile,
   type VibeTag,
@@ -35,7 +39,7 @@ export async function buildCafeLearningContext(
   ].filter(Boolean);
 
   try {
-    const recent = await listGenerations({ limit: 12 });
+    const recent = await listGenerations({ limit: 24 });
     const copyBits: string[] = [];
     const imageBits: string[] = [];
     for (const record of recent) {
@@ -65,6 +69,18 @@ export async function buildCafeLearningContext(
     if (imageBits.length) {
       lines.push(`최근 이미지 주제 참고: ${imageBits.slice(0, 4).join(" || ")}`);
     }
+
+    const preference = formatPreferenceContext(toPreferencePairs(recent));
+    if (preference) lines.push(preference);
+
+    const postedCount = recent.filter((r) => r.posted).length;
+    const copiedOnly = recent.filter((r) => r.copied && !r.posted).length;
+    if (postedCount || copiedOnly) {
+      lines.push(
+        `성과 신호: 실제 게시 ${postedCount}건 / 복사만 ${copiedOnly}건 — 게시된 톤을 우선 학습하세요.`,
+      );
+    }
+
     if (profile.photoPaths.length) {
       lines.push(
         `등록된 매장·메뉴 사진 ${profile.photoPaths.length}장이 있음. 사진의 실제 분위기와 맞게 표현할 것.`,

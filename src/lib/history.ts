@@ -7,6 +7,11 @@ import {
 import type { GenerationRecord, GenerationType, HistoryPatch } from "@/lib/schemas";
 import { generationTypeValues } from "@/lib/schemas";
 
+function asNumberArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((n): n is number => typeof n === "number" && Number.isInteger(n));
+}
+
 function mapRow(row: DbGeneration): GenerationRecord {
   return {
     id: row.id,
@@ -16,9 +21,21 @@ function mapRow(row: DbGeneration): GenerationRecord {
     selectedIndex: row.selected_index,
     copied: row.copied,
     downloaded: row.downloaded,
+    posted: Boolean(row.posted),
+    postedAt: row.posted_at ?? null,
+    discardedIndices: asNumberArray(row.discarded_indices),
     isSample: row.is_sample,
     createdAt: row.created_at,
   };
+}
+
+function discardedForSelection(
+  optionCount: number,
+  selectedIndex: number,
+): number[] {
+  return Array.from({ length: optionCount }, (_, i) => i).filter(
+    (i) => i !== selectedIndex,
+  );
 }
 
 export async function saveGeneration(params: {
@@ -37,6 +54,9 @@ export async function saveGeneration(params: {
     selected_index: null,
     copied: false,
     downloaded: false,
+    posted: false,
+    posted_at: null,
+    discarded_indices: [],
     is_sample: params.isSample,
     created_at: Date.now(),
   };
@@ -81,10 +101,28 @@ export async function patchGeneration(
   patch: HistoryPatch,
 ): Promise<GenerationRecord | null> {
   if (!isSupabaseConfigured()) throw new Error("SUPABASE_NOT_CONFIGURED");
+
+  const existing = await getGeneration(id);
+  if (!existing) return null;
+
   const updates: Record<string, unknown> = {};
-  if (patch.selectedIndex !== undefined) updates.selected_index = patch.selectedIndex;
+  if (patch.selectedIndex !== undefined) {
+    updates.selected_index = patch.selectedIndex;
+    if (patch.selectedIndex != null) {
+      updates.discarded_indices =
+        patch.discardedIndices ??
+        discardedForSelection(existing.options.length, patch.selectedIndex);
+    }
+  } else if (patch.discardedIndices !== undefined) {
+    updates.discarded_indices = patch.discardedIndices;
+  }
   if (patch.copied !== undefined) updates.copied = patch.copied;
   if (patch.downloaded !== undefined) updates.downloaded = patch.downloaded;
+  if (patch.posted !== undefined) {
+    updates.posted = patch.posted;
+    updates.posted_at = patch.posted ? Date.now() : null;
+  }
+
   const { data, error } = await getSupabase()
     .from("generations")
     .update(updates)

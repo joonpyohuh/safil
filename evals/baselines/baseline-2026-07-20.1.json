@@ -1,0 +1,26 @@
+{
+  "name": "baseline-2026-07-20.1",
+  "createdAt": "2026-07-20T05:48:41.521Z",
+  "datasetVersion": "2026-07-20.1",
+  "meanScores": {
+    "brandFit": 8.7,
+    "typography": 8.2,
+    "photoAuthenticity": 8.3,
+    "postability": 8.6,
+    "specificity": 8.5,
+    "toneMatch": 8.5,
+    "noHype": 9
+  },
+  "meanTotal": 8.5,
+  "passRate": 100,
+  "maxDropPerAxis": {
+    "brandFit": 0.8,
+    "typography": 0.8,
+    "photoAuthenticity": 0.8,
+    "postability": 0.8,
+    "specificity": 0.8,
+    "toneMatch": 0.8,
+    "noHype": 0.8
+  },
+  "maxDropTotal": 0.5
+}

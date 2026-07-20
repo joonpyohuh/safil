@@ -209,26 +209,51 @@ export function PromoPoster({
                   "linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 55%, rgba(0,0,0,0.72) 100%)",
               }}
             />
-            {date || cafe ? (
+            {(date || cafe) && (
               <div
                 style={{
                   position: "absolute",
                   top: 72,
                   left: 72,
-                  display: "inline-flex",
-                  alignItems: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
                   gap: 12,
-                  padding: "14px 28px",
-                  borderRadius: 999,
-                  background: colors.accent,
-                  color: colors.ink,
-                  fontSize: 26,
-                  fontWeight: 700,
                 }}
               >
-                {date || cafe}
+                {cafe ? (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 26,
+                      fontWeight: 700,
+                      letterSpacing: "0.1em",
+                      color: colors.paper,
+                      textShadow: "0 2px 12px rgba(0,0,0,0.45)",
+                    }}
+                  >
+                    {cafe}
+                  </p>
+                ) : null}
+                {date ? (
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 12,
+                      padding: "14px 28px",
+                      borderRadius: 999,
+                      background: colors.accent,
+                      color: colors.ink,
+                      fontSize: 26,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {date}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            )}
             <div
               style={{
                 position: "absolute",

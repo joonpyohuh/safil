@@ -1,13 +1,18 @@
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { getOpenAI, getTextModel, isAiConfigured } from "@/lib/ai/client";
+import {
+  getOpenAI,
+  getSearchModel,
+  getTextModel,
+  isAiConfigured,
+} from "@/lib/ai/client";
+import {
+  searchKakaoPlaces,
+  searchNaverPlaces,
+  type CafePlaceCandidate,
+} from "@/lib/places/search";
 
-export type CafePlaceCandidate = {
-  placeName: string;
-  placeAddress: string;
-  placeUrl: string;
-  whyMatch: string;
-};
+export type { CafePlaceCandidate };
 
 export type CafeResearchDeep = {
   concept: string;
@@ -46,51 +51,87 @@ const deepSchema = z.object({
     .describe("분위기 키워드 한글 3~6개 (예: 아늑함, 원두향)"),
 });
 
-async function webResearchText(query: string): Promise<string> {
-  const openai = getOpenAI();
-  try {
-    // Responses API + web_search (네이버/구글 공개 검색 결과 활용)
-    const response = await openai.responses.create(
-      {
-        model: getTextModel(),
-        tools: [{ type: "web_search" }],
-        tool_choice: "required",
-        input: query,
-      },
-      { timeout: 45_000 },
-    );
-    const text =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (response as any).output_text ??
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (response as any).output
-        ?.map((item: { content?: { text?: string }[] }) =>
-          item.content?.map((c) => c.text).join("") ?? "",
-        )
-        .join("\n") ??
-      "";
-    if (text.trim()) return text.trim();
-  } catch (error) {
-    console.error("[safil web_search fallback]", error);
+function extractOutputText(response: unknown): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const r = response as any;
+  if (typeof r?.output_text === "string" && r.output_text.trim()) {
+    return r.output_text.trim();
   }
+  const chunks =
+    r?.output
+      ?.map((item: { content?: { text?: string }[] }) =>
+        item.content?.map((c) => c.text).join("") ?? "",
+      )
+      .join("\n") ?? "";
+  return String(chunks).trim();
+}
 
-  // 웹검색 도구 실패 시: 모델 지식만으로 후보/요약 (사장님 확인 필수)
-  const completion = await openai.chat.completions.create(
+function parseCandidatesJson(text: string): CafePlaceCandidate[] {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const raw = fenced?.[1]?.trim() ?? text.trim();
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
+  if (start < 0 || end <= start) return [];
+  try {
+    const parsed = candidatesSchema.safeParse(
+      JSON.parse(raw.slice(start, end + 1)),
+    );
+    if (!parsed.success) return [];
+    return parsed.data.candidates.slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+/** 상호명이 검색어와 전혀 안 맞는 후보 제거 */
+function filterRelevant(
+  candidates: CafePlaceCandidate[],
+  name: string,
+): CafePlaceCandidate[] {
+  const tokens = name
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t.length >= 2);
+  if (tokens.length === 0) return candidates.slice(0, 5);
+
+  const scored = candidates
+    .map((c) => {
+      const hay = `${c.placeName} ${c.placeAddress}`.toLowerCase();
+      const hits = tokens.filter((t) => hay.includes(t)).length;
+      return { c, hits };
+    })
+    .filter((x) => x.hits > 0)
+    .sort((a, b) => b.hits - a.hits)
+    .map((x) => x.c);
+
+  return scored.length > 0 ? scored.slice(0, 5) : candidates.slice(0, 3);
+}
+
+async function webSearchJsonCandidates(
+  name: string,
+  location: string,
+): Promise<CafePlaceCandidate[]> {
+  const openai = getOpenAI();
+  const response = await openai.responses.create(
     {
-      model: getTextModel(),
-      messages: [
-        {
-          role: "system",
-          content:
-            "한국 카페 조사 도우미. 확실하지 않으면 추측이라고 밝히고, 없는 URL을 지어내지 않는다.",
-        },
-        { role: "user", content: query },
-      ],
-      max_completion_tokens: 1200,
+      model: getSearchModel(),
+      tools: [{ type: "web_search" }],
+      tool_choice: "required",
+      max_output_tokens: 900,
+      input: [
+        "한국 카페 장소 검색. 절대 질문하지 말고 JSON만 출력.",
+        `찾을 카페: "${name}"`,
+        `위치 힌트: "${location}"`,
+        "네이버 지도/플레이스·구글 맵에서 같은 상호(또는 분점)만 찾아라.",
+        "근처의 다른 카페를 끼워 넣지 마라.",
+        '형식: {"candidates":[{"placeName":"","placeAddress":"","placeUrl":"","whyMatch":""}]}',
+        "최대 5개. 없으면 {\"candidates\":[]}",
+      ].join("\n"),
     },
-    { timeout: 25_000 },
+    { timeout: 22_000 },
   );
-  return completion.choices[0]?.message.content?.trim() ?? "";
+  return parseCandidatesJson(extractOutputText(response));
 }
 
 async function parseStructured<T>(
@@ -120,12 +161,49 @@ async function parseStructured<T>(
   return parsed;
 }
 
+async function webResearchText(query: string): Promise<string> {
+  const openai = getOpenAI();
+  try {
+    const response = await openai.responses.create(
+      {
+        model: getSearchModel(),
+        tools: [{ type: "web_search" }],
+        tool_choice: "required",
+        max_output_tokens: 1600,
+        input: `${query}\n\n규칙: 질문하지 말고 바로 조사 결과만 한국어로 요약.`,
+      },
+      { timeout: 28_000 },
+    );
+    const text = extractOutputText(response);
+    if (text) return text;
+  } catch (error) {
+    console.error("[safil web_search fallback]", error);
+  }
+
+  const completion = await openai.chat.completions.create(
+    {
+      model: getSearchModel(),
+      messages: [
+        {
+          role: "system",
+          content:
+            "한국 카페 조사 도우미. 확실하지 않으면 추측이라고 밝히고, 없는 URL을 지어내지 않는다.",
+        },
+        { role: "user", content: query },
+      ],
+      max_completion_tokens: 1200,
+    },
+    { timeout: 20_000 },
+  );
+  return completion.choices[0]?.message.content?.trim() ?? "";
+}
+
 /** 1단계: 카페 이름·위치로 후보 검색 → 사장님 확인용 */
 export async function searchCafePlaces(
   name: string,
   location: string,
 ): Promise<{ candidates: CafePlaceCandidate[]; rawNote: string }> {
-  if (!isAiConfigured()) {
+  if (!isAiConfigured() && !process.env.KAKAO_REST_API_KEY && !process.env.NAVER_CLIENT_ID) {
     return {
       candidates: [
         {
@@ -139,26 +217,64 @@ export async function searchCafePlaces(
     };
   }
 
-  const raw = await webResearchText(
-    [
-      `한국에서 카페 "${name}" (${location})를 네이버 지도/플레이스와 구글 맵에서 찾아줘.`,
-      "같은 이름 분점이 있으면 주소가 다른 후보를 나눠 적어줘.",
-      "각 후보: 상호, 주소, 공개 URL(네이버/구글), 왜 이 카페인지 한 줄.",
-      "리뷰 요약은 아직 하지 말고 후보 목록만.",
-    ].join("\n"),
-  );
+  // 1) 카카오·네이버 로컬 API (빠르고 정확)
+  try {
+    const [kakao, naver] = await Promise.all([
+      searchKakaoPlaces(name, location).catch((e) => {
+        console.error("[safil kakao]", e);
+        return [] as CafePlaceCandidate[];
+      }),
+      searchNaverPlaces(name, location).catch((e) => {
+        console.error("[safil naver]", e);
+        return [] as CafePlaceCandidate[];
+      }),
+    ]);
+    const merged = dedupeCandidates([...kakao, ...naver]);
+    if (merged.length > 0) {
+      return { candidates: filterRelevant(merged, name), rawNote: "local_api" };
+    }
+  } catch (error) {
+    console.error("[safil place api]", error);
+  }
 
-  const parsed = await parseStructured(
-    "당신은 검색 결과를 정리하는 도우미다. URL이 없으면 빈 문자열. 없는 가게를 만들지 않는다.",
-    `카페 검색 원문:\n${raw}\n\n위 내용을 후보 JSON으로 정리해.`,
-    candidatesSchema,
-    "cafe_candidates",
-  );
+  // 2) OpenAI web_search (검색 전용 빠른 모델)
+  if (isAiConfigured()) {
+    try {
+      const fromWeb = await webSearchJsonCandidates(name, location);
+      const filtered = filterRelevant(fromWeb, name);
+      if (filtered.length > 0) {
+        return { candidates: filtered, rawNote: "web_search" };
+      }
+    } catch (error) {
+      console.error("[safil place web_search]", error);
+    }
+  }
 
+  // 3) 최후: 입력값으로 확인 진행 가능하게
   return {
-    candidates: parsed.candidates.slice(0, 5),
-    rawNote: raw.slice(0, 500),
+    candidates: [
+      {
+        placeName: name,
+        placeAddress: location,
+        placeUrl: "",
+        whyMatch:
+          "자동으로 못 찾아 입력하신 정보로 보여드려요. 맞으면 골라 주세요.",
+      },
+    ],
+    rawNote: "user_input_fallback",
   };
+}
+
+function dedupeCandidates(list: CafePlaceCandidate[]): CafePlaceCandidate[] {
+  const seen = new Set<string>();
+  const out: CafePlaceCandidate[] = [];
+  for (const c of list) {
+    const key = `${c.placeName}|${c.placeAddress}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(c);
+  }
+  return out.slice(0, 5);
 }
 
 /** 2단계: 확인된 매장에 대해 리뷰·소개 딥리서치 */

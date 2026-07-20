@@ -33,6 +33,11 @@
 - [x] Multi reference photos (up to 6) + download/share
 - [x] Owner persona Human Judge loop ≥ 90 (30s cafe owner)
 
+### Quality Eval
+- [x] Golden dataset 72 curated café posts (`evals/golden`)
+- [x] Axis rubrics + regression runner (`npm run eval` / `eval:compare`)
+- [x] `posted` / `discarded_indices` outcome tracking + preference context
+
 ### In-store Notice (frontend)
 - [ ] Build notice creation UI
 - [ ] Connect `POST /api/generate/notice`

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CopyHistoryActions } from "@/components/history/copy-history-actions";
 import { ImageResultCard } from "@/components/create/image-result-card";
 import { listGenerations } from "@/lib/history";
+import { getCafeProfile } from "@/lib/profile";
 import type { Channel, ImagePalette, ImageTemplate, Purpose } from "@/lib/schemas";
 
 type CopyOption = {
@@ -18,6 +19,8 @@ type ImageOption = {
   templateId?: ImageTemplate;
   palette?: ImagePalette;
   reason?: string;
+  cafeName?: string;
+  brandCue?: string;
 };
 
 type CopyInput = {
@@ -37,8 +40,12 @@ type ImageInput = {
 export const dynamic = "force-dynamic";
 
 export default async function HistoryPage() {
-  const records = await listGenerations({ limit: 50 });
+  const [records, profile] = await Promise.all([
+    listGenerations({ limit: 50 }),
+    getCafeProfile().catch(() => null),
+  ]);
   const visible = records.filter((record) => record.type === "copy" || record.type === "image");
+  const profileName = profile?.name?.trim() || "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,11 +93,15 @@ export default async function HistoryPage() {
                   <div className="flex items-center justify-between gap-3 px-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-brand">홍보 이미지</span>
-                      {record.downloaded && (
+                      {record.posted ? (
                         <span className="rounded-full bg-brand-soft px-2 py-1 text-[0.6875rem] font-semibold text-brand">
-                          저장함
+                          올림
                         </span>
-                      )}
+                      ) : record.downloaded ? (
+                        <span className="rounded-full bg-cream px-2 py-1 text-[0.6875rem] font-semibold text-ink-soft">
+                          저장만
+                        </span>
+                      ) : null}
                     </div>
                     <time className="shrink-0 text-xs text-ink-soft">
                       {new Intl.DateTimeFormat("ko-KR", {
@@ -105,12 +116,18 @@ export default async function HistoryPage() {
                       label={headline}
                       imageUrl={option.imageUrl}
                       initialHeadline={headline}
-                      initialSubline={option.subline ?? ""}
+                      initialSubline={
+                        option.subline ||
+                        option.brandCue ||
+                        profile?.concept?.slice(0, 18) ||
+                        ""
+                      }
                       initialDateText={option.dateText ?? input.dateText ?? ""}
                       initialTemplate={option.templateId ?? "fade_bottom"}
                       initialPalette={option.palette ?? "auto"}
+                      cafeName={option.cafeName || profileName}
                       isSample={record.isSample}
-                      shareTitle="카페 홍보 이미지"
+                      shareTitle={`${option.cafeName || profileName || "카페"} 홍보 이미지`}
                       persistId={record.id}
                     />
                   ) : (
@@ -190,6 +207,7 @@ export default async function HistoryPage() {
                   text={text}
                   hashtags={hashtags}
                   reuseHref={`/create/copy?${query.toString()}`}
+                  posted={record.posted}
                 />
               </li>
             );

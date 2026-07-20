@@ -210,6 +210,10 @@ export const imageOptionSchema = z.object({
   palette: z.enum(imagePaletteValues).describe("문구 배경 색"),
   reason: z.string().describe("이 구성을 제안한 짧은 이유"),
   usedReferencePhotos: z.boolean().describe("참고 사진을 실제로 반영했는지"),
+  /** 포스터에 찍을 카페명 (히스토리 재표시용) */
+  cafeName: z.string().default(""),
+  /** 브랜드 한 줄 큐 */
+  brandCue: z.string().default(""),
 });
 
 export type ImageOption = z.infer<typeof imageOptionSchema>;
@@ -265,12 +269,18 @@ export const historyPatchSchema = z
     selectedIndex: z.number().int().min(0).max(4).nullable().optional(),
     copied: z.boolean().optional(),
     downloaded: z.boolean().optional(),
+    /** 실제로 SNS/네이버에 올렸는지 (복사·다운로드와 별개) */
+    posted: z.boolean().optional(),
+    /** 선택 시 버려진 옵션 인덱스 (학습용) */
+    discardedIndices: z.array(z.number().int().min(0).max(4)).max(4).optional(),
   })
   .refine(
     (value) =>
       value.selectedIndex !== undefined ||
       value.copied !== undefined ||
-      value.downloaded !== undefined,
+      value.downloaded !== undefined ||
+      value.posted !== undefined ||
+      value.discardedIndices !== undefined,
     { message: mobileMsg.history.nothingToUpdate },
   );
 
@@ -284,6 +294,9 @@ export type GenerationRecord = {
   selectedIndex: number | null;
   copied: boolean;
   downloaded: boolean;
+  posted: boolean;
+  postedAt: number | null;
+  discardedIndices: number[];
   isSample: boolean;
   createdAt: number;
 };

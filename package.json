@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "eval": "node scripts/run-eval.mjs",
+    "eval:judge": "node scripts/run-eval.mjs --judge",
+    "eval:baseline": "node scripts/run-eval.mjs --save-baseline",
+    "eval:compare": "node scripts/run-eval.mjs --compare",
+    "eval:golden": "node scripts/build-golden-dataset.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",

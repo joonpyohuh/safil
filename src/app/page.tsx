@@ -146,9 +146,13 @@ export default async function Home() {
                         />
                       ) : null}
                       <p className="mt-2 line-clamp-2 text-sm leading-6">{preview}</p>
-                      {(item.copied || item.downloaded) && (
+                      {(item.posted || item.copied || item.downloaded) && (
                         <span className="mt-2 inline-block text-xs font-semibold text-brand">
-                          {item.downloaded ? "저장함" : "복사함"}
+                          {item.posted
+                            ? "올림"
+                            : item.downloaded
+                              ? "저장만"
+                              : "복사만"}
                         </span>
                       )}
                       <span className="float-right mt-2 text-xs font-bold text-brand">

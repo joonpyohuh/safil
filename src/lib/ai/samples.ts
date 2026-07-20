@@ -108,7 +108,15 @@ export function sampleImage(
   profile: CafeProfile | null,
 ): ImageGenerationOutput {
   const headline = (input.title || "오늘의 카페 소식").slice(0, 14);
-  const subline = (input.message || profile?.name || "").slice(0, 20);
+  const subline = (
+    input.message ||
+    profile?.concept ||
+    profile?.atmosphere ||
+    profile?.name ||
+    ""
+  ).slice(0, 18);
+  const cafeName = profile?.name || "";
+  const brandCue = (profile?.concept || profile?.location || "").slice(0, 18);
   return {
     options: [
       {
@@ -120,7 +128,11 @@ export function sampleImage(
         templateId: "fade_bottom",
         palette: "auto",
         usedReferencePhotos: false,
-        reason: "체험용 배경이에요. 글자·레이아웃은 지금도 자유롭게 고칠 수 있어요.",
+        cafeName,
+        brandCue,
+        reason: cafeName
+          ? `${cafeName} 톤에 맞춘 체험용 배경이에요. 글자는 바로 고칠 수 있어요.`
+          : "체험용 배경이에요. 글자·레이아웃은 지금도 자유롭게 고칠 수 있어요.",
       },
       {
         imagePath: "",
@@ -131,6 +143,8 @@ export function sampleImage(
         templateId: "glass_center",
         palette: "cream",
         usedReferencePhotos: false,
+        cafeName,
+        brandCue,
         reason: "체험용 배경이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
       },
     ],

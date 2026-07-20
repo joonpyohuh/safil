@@ -1,12 +1,13 @@
 # SAFIL — Handoff
 
 ## Current Status (2026-07-20)
-**홍보 문구 + 이미지 + 카페 딥리서치/분위기 정렬 루프.**
+**홍보 문구 + 이미지 + 카페 딥리서치/분위기 정렬 + 품질 eval 루프.**
 
 - Supabase + Vercel (`safil` / `safil-uo56`)
-- 설정: 카페 이름 검색(네이버·구글 web_search) → “이 카페가 맞나요?” → 리뷰 요약 → 컨셉·분위기 저장
-- 생성: 프로필 분위기 + 최근 히스토리 컨텍스트로 문구/이미지 정렬
+- 설정: 카페 찾기(카카오/네이버 로컬 API 또는 `gpt-4o-mini` web_search) → “이 카페가 맞나요?” → 리뷰 요약 → 컨셉·분위기 저장
+- 생성: 프로필 분위기 + 브랜드 시각 브리프(`brand-visual`) + 선택/폐기/게시 컨텍스트로 문구/이미지 정렬
 - Image: HTML→PNG 포스터, 갤러리 저장(모바일 공유 시트)
+- Eval: `evals/` 골든셋 72건, `npm run eval:compare` 회귀, KPI=`posted`
 - Notice frontend는 placeholder
 
 ## Active Task
@@ -30,13 +31,20 @@ SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=   # optional but preferred
 OPENAI_API_KEY=
 OPENAI_TEXT_MODEL=gpt-5-mini
+OPENAI_SEARCH_MODEL=gpt-4o-mini
 OPENAI_IMAGE_MODEL=gpt-image-1
+KAKAO_REST_API_KEY=          # optional, faster place search
+NAVER_CLIENT_ID=             # optional
+NAVER_CLIENT_SECRET=         # optional
 ```
 
 ## Key Files
+- `evals/README.md` — golden / regression / posted KPI
+- `src/lib/eval/` — rubrics, judge, preference learning
+- `src/components/history/mark-posted-button.tsx` — 「실제로 올렸어요」
 - `src/components/create/copy-generator.tsx`
-- `src/components/create/image-generator.tsx` — 원탭 업로드→자동 생성
-- `src/components/create/image-result-card.tsx` — 캔버스 한글 오버레이·즉시 편집·공유
+- `src/components/create/image-generator.tsx`
+- `src/components/create/image-result-card.tsx` — HTML→PNG·갤러리 저장
 - `src/lib/client/compress-image.ts` — HEIC/대용량 클라이언트 압축
 - `src/lib/ai/generate.ts` — 비전 기획(planImage) + 배경 생성
 - `src/lib/storage.ts` — Supabase Storage + publicUploadUrl

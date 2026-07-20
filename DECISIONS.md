@@ -35,6 +35,16 @@
 - **Status**: Confirmed (updated 2026-07-20)
 - **Reason**: Owner asked for these models; medium quality for usable SNS output
 
+### Café Place Search
+- **Decision**: Place lookup uses Kakao/Naver Local APIs when keys exist; otherwise OpenAI Responses `web_search` with `gpt-4o-mini` (`OPENAI_SEARCH_MODEL`). Do **not** use `gpt-5-mini` for web_search (slow / asks clarifying questions).
+- **Status**: Confirmed (2026-07-20)
+- **Reason**: Search step was timing out and returning empty results with gpt-5-mini + web_search
+
+### Quality Eval & Outcomes
+- **Decision**: Golden dataset (`evals/golden`, 50–100 posts) with axis scores (brandFit, typography, photoAuthenticity, postability, specificity, toneMatch, noHype). Regression via `npm run eval:compare` against committed baselines. Product KPI is **`posted`**, not copy/download. Selected vs discarded options stored for preference learning.
+- **Status**: Confirmed (2026-07-20)
+- **Reason**: Prompt/model changes need same-data comparison; copy rate overstates success vs actual posting
+
 ### Image References
 - **Decision**: Up to 6 reference photos via `photoPaths`; edit API when present, generate fallback with honest UX copy
 - **Status**: Confirmed

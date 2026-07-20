@@ -11,6 +11,11 @@ export function getTextModel(): string {
   return process.env.OPENAI_TEXT_MODEL?.trim() || "gpt-5-mini";
 }
 
+/** 장소 검색·웹 리서치용 (gpt-5-mini + web_search 는 느리거나 되묻기만 함) */
+export function getSearchModel(): string {
+  return process.env.OPENAI_SEARCH_MODEL?.trim() || "gpt-4o-mini";
+}
+
 export function getImageModel(): string {
   return process.env.OPENAI_IMAGE_MODEL?.trim() || "gpt-image-1";
 }

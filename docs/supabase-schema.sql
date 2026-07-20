@@ -29,6 +29,9 @@ CREATE TABLE IF NOT EXISTS generations (
   selected_index INTEGER,
   copied BOOLEAN NOT NULL DEFAULT FALSE,
   downloaded BOOLEAN NOT NULL DEFAULT FALSE,
+  posted BOOLEAN NOT NULL DEFAULT FALSE,
+  posted_at BIGINT,
+  discarded_indices JSONB NOT NULL DEFAULT '[]'::jsonb,
   is_sample BOOLEAN NOT NULL DEFAULT FALSE,
   created_at BIGINT NOT NULL
 );

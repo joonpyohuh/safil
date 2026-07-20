@@ -4,12 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { copyToClipboard } from "@/lib/client/clipboard";
 import { fetchWithTimeout } from "@/lib/client/fetch-with-timeout";
+import { MarkPostedButton } from "@/components/history/mark-posted-button";
 
 type CopyHistoryActionsProps = {
   id: string;
   text: string;
   hashtags: string[];
   reuseHref: string;
+  posted?: boolean;
 };
 
 export function CopyHistoryActions({
@@ -17,6 +19,7 @@ export function CopyHistoryActions({
   text,
   hashtags,
   reuseHref,
+  posted = false,
 }: CopyHistoryActionsProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +34,7 @@ export function CopyHistoryActions({
     try {
       await copyToClipboard(value);
       setCopied(true);
-      setStatus("문구를 복사했어요.");
+      setStatus("문구를 복사했어요. 올린 뒤에는 ‘실제로 올렸어요’를 눌러 주세요.");
       const response = await fetchWithTimeout(`/api/history/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -66,6 +69,7 @@ export function CopyHistoryActions({
           비슷하게 만들기
         </Link>
       </div>
+      <MarkPostedButton id={id} initialPosted={posted} />
     </div>
   );
 }

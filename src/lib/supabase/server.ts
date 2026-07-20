@@ -28,6 +28,9 @@ export type DbGeneration = {
   selected_index: number | null;
   copied: boolean;
   downloaded: boolean;
+  posted?: boolean;
+  posted_at?: number | null;
+  discarded_indices?: number[];
   is_sample: boolean;
   created_at: number;
 };

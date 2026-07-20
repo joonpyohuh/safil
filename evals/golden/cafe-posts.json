@@ -1,0 +1,3967 @@
+{
+  "version": "2026-07-20.1",
+  "createdAt": "2026-07-20",
+  "description": "한국 독립 카페 SNS·네이버 플레이스 게시 패턴을 반영한 큐레이션 골든셋 72건. 브랜드 적합성·타이포·사진 진정성·게시 가능성 등 축별 점수와 회귀 minAccept 포함.",
+  "posts": [
+    {
+      "id": "gp-001",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "both",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "원두향 로스터리에 에티오피아 워시드가 새로 나왔어요.\n직접 로스팅한 싱글오리진 그대로, 원두 향이 느껴지는 정갈한 바에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "원두향로스터리",
+          "성수",
+          "에티오피아워시드"
+        ],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "new_menu",
+        "instagram",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-002",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 에티오피아 워시드를 준비해 두었어요. 원두향 로스터리의 원두 향이 느껴지는 정갈한 바과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "계절 메뉴 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "seasonal",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-003",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "원두향 로스터리 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-004",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "image",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "원두 향이 느껴지는 정갈한 바.\n원두향 로스터리은 직접 로스팅한 싱글오리진을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "매장 분위기 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "mood",
+        "kakao",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-005",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "이번 주 원두향 로스터리 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "원두향로스터리",
+          "성수",
+          "에티오피아워시드"
+        ],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "작은 이벤트 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "event",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-006",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "both",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 에티오피아 워시드. 직접 로스팅한 싱글오리진을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 원두 향이 느껴지는 정갈한 바이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "원두·로스팅 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "bean",
+        "naver_place",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-007",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "image",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "늘 원두향 로스터리에 와 주셔서 고마워요.\n오늘은 에티오피아 워시드를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "단골 인사 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "thanks",
+        "blog",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-008",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "원두향 로스터리",
+        "location": "서울 성수",
+        "concept": "직접 로스팅한 싱글오리진",
+        "atmosphere": "원두 향이 느껴지는 정갈한 바",
+        "menus": [
+          "에티오피아 워시드",
+          "필터커피"
+        ],
+        "tone": "calm",
+        "customerType": "커피 애호가"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 원두 향이 느껴지는 정갈한 바이 더 잘 어울려요.\n원두향 로스터리에서 에티오피아 워시드 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "비 오는 날 목적에 맞고, 원두향 로스터리 컨셉(직접 로스팅한 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 에티오피아 워시드, 필터커피",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "rainy",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-009",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "새벽그라인드에 게이샤가 새로 나왔어요.\n라이트 로스팅 스페셜티 그대로, 조용하고 집중되는 공간에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "새벽그라인드",
+          "전포",
+          "게이샤"
+        ],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "new_menu",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-010",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "image",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 게이샤를 준비해 두었어요. 새벽그라인드의 조용하고 집중되는 공간과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "계절 메뉴 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "seasonal",
+        "naver_place",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-011",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "새벽그라인드 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-012",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "조용하고 집중되는 공간.\n새벽그라인드은 라이트 로스팅 스페셜티을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "매장 분위기 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "mood",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-013",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "image",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "이번 주 새벽그라인드 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "새벽그라인드",
+          "전포",
+          "게이샤"
+        ],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "작은 이벤트 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "event",
+        "instagram",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-014",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 게이샤. 라이트 로스팅 스페셜티을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 조용하고 집중되는 공간이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "원두·로스팅 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "bean",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-015",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "늘 새벽그라인드에 와 주셔서 고마워요.\n오늘은 게이샤를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "단골 인사 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "thanks",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-016",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "both",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "새벽그라인드",
+        "location": "부산 전포",
+        "concept": "라이트 로스팅 스페셜티",
+        "atmosphere": "조용하고 집중되는 공간",
+        "menus": [
+          "게이샤",
+          "콜드브루"
+        ],
+        "tone": "professional",
+        "customerType": "직장인·취미 홈바리스타"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 조용하고 집중되는 공간이 더 잘 어울려요.\n새벽그라인드에서 게이샤 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "비 오는 날 목적에 맞고, 새벽그라인드 컨셉(라이트 로스팅 스페셜티)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 게이샤, 콜드브루",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "rainy",
+        "kakao",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-017",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "나무사이 커피에 한라산 블렌드가 새로 나왔어요.\n제주의 바람과 싱글오리진 그대로, 창밖으로 바다가 보이는 차분함에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "나무사이커피",
+          "애월",
+          "한라산블렌드"
+        ],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "new_menu",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-018",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 한라산 블렌드를 준비해 두었어요. 나무사이 커피의 창밖으로 바다가 보이는 차분함과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "계절 메뉴 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "seasonal",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-019",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "나무사이 커피 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-020",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "창밖으로 바다가 보이는 차분함.\n나무사이 커피은 제주의 바람과 싱글오리진을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "매장 분위기 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "mood",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-021",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "both",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "이번 주 나무사이 커피 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "나무사이커피",
+          "애월",
+          "한라산블렌드"
+        ],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "작은 이벤트 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "event",
+        "instagram",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-022",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "image",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 한라산 블렌드. 제주의 바람과 싱글오리진을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 창밖으로 바다가 보이는 차분함이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "원두·로스팅 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "bean",
+        "naver_place",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-023",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "늘 나무사이 커피에 와 주셔서 고마워요.\n오늘은 한라산 블렌드를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "단골 인사 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "thanks",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-024",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "specialty_roastery",
+      "cafe": {
+        "name": "나무사이 커피",
+        "location": "제주 애월",
+        "concept": "제주의 바람과 싱글오리진",
+        "atmosphere": "창밖으로 바다가 보이는 차분함",
+        "menus": [
+          "한라산 블렌드",
+          "아메리카노"
+        ],
+        "tone": "calm",
+        "customerType": "여행객·로컬"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 창밖으로 바다가 보이는 차분함이 더 잘 어울려요.\n나무사이 커피에서 한라산 블렌드 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "원두·드리퍼·바 클로즈업. 과한 필터 없이 실제 매장 톤.",
+        "whyGood": "비 오는 날 목적에 맞고, 나무사이 커피 컨셉(제주의 바람과 싱글오리진)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 한라산 블렌드, 아메리카노",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "specialty_roastery",
+        "rainy",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-025",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "image",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "골목다방에 시그니처 라떼가 새로 나왔어요.\n동네 사랑방 같은 카페 그대로, 낯설지 않은 따뜻함에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "골목다방",
+          "연남",
+          "시그니처라떼"
+        ],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "new_menu",
+        "instagram",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-026",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "both",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 시그니처 라떼를 준비해 두었어요. 골목다방의 낯설지 않은 따뜻함과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "계절 메뉴 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "seasonal",
+        "naver_place",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-027",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "골목다방 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-028",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "image",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "낯설지 않은 따뜻함.\n골목다방은 동네 사랑방 같은 카페을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "매장 분위기 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "mood",
+        "kakao",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-029",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "이번 주 골목다방 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "골목다방",
+          "연남",
+          "시그니처라떼"
+        ],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "작은 이벤트 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "event",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-030",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 시그니처 라떼. 동네 사랑방 같은 카페을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 낯설지 않은 따뜻함이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "원두·로스팅 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "bean",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-031",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "both",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "늘 골목다방에 와 주셔서 고마워요.\n오늘은 시그니처 라떼를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "단골 인사 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "thanks",
+        "blog",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-032",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "골목다방",
+        "location": "서울 연남",
+        "concept": "동네 사랑방 같은 카페",
+        "atmosphere": "낯설지 않은 따뜻함",
+        "menus": [
+          "시그니처 라떼",
+          "수제 쿠키"
+        ],
+        "tone": "warm",
+        "customerType": "동네 손님"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 낯설지 않은 따뜻함이 더 잘 어울려요.\n골목다방에서 시그니처 라떼 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "비 오는 날 목적에 맞고, 골목다방 컨셉(동네 사랑방 같은 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 시그니처 라떼, 수제 쿠키",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "rainy",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-033",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "오후세시에 고구마라떼가 새로 나왔어요.\n퇴근 후 잠깐 쉬는 곳 그대로, 부드러운 조명과 편한 의자에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "오후세시",
+          "동성로",
+          "고구마라떼"
+        ],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "new_menu",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-034",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "image",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 고구마라떼를 준비해 두었어요. 오후세시의 부드러운 조명과 편한 의자과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "계절 메뉴 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "seasonal",
+        "naver_place",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-035",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "오후세시 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-036",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "both",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "부드러운 조명과 편한 의자.\n오후세시은 퇴근 후 잠깐 쉬는 곳을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "매장 분위기 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "mood",
+        "kakao",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-037",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "image",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "이번 주 오후세시 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "오후세시",
+          "동성로",
+          "고구마라떼"
+        ],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "작은 이벤트 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "event",
+        "instagram",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-038",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 고구마라떼. 퇴근 후 잠깐 쉬는 곳을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 부드러운 조명과 편한 의자이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "원두·로스팅 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "bean",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-039",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "늘 오후세시에 와 주셔서 고마워요.\n오늘은 고구마라떼를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "단골 인사 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "thanks",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-040",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "image",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "오후세시",
+        "location": "대구 동성로",
+        "concept": "퇴근 후 잠깐 쉬는 곳",
+        "atmosphere": "부드러운 조명과 편한 의자",
+        "menus": [
+          "고구마라떼",
+          "치즈케이크"
+        ],
+        "tone": "warm",
+        "customerType": "회사원"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 부드러운 조명과 편한 의자이 더 잘 어울려요.\n오후세시에서 고구마라떼 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "비 오는 날 목적에 맞고, 오후세시 컨셉(퇴근 후 잠깐 쉬는 곳)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 고구마라떼, 치즈케이크",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "rainy",
+        "kakao",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-041",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "both",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "느린오후에 핸드드립가 새로 나왔어요.\n천천히 머무르는 골목 카페 그대로, 책과 커피가 어울리는 조용함에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "느린오후",
+          "동명동",
+          "핸드드립"
+        ],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "new_menu",
+        "instagram",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-042",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 핸드드립를 준비해 두었어요. 느린오후의 책과 커피가 어울리는 조용함과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "계절 메뉴 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "seasonal",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-043",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "느린오후 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-044",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "책과 커피가 어울리는 조용함.\n느린오후은 천천히 머무르는 골목 카페을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "매장 분위기 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "mood",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-045",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "이번 주 느린오후 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "느린오후",
+          "동명동",
+          "핸드드립"
+        ],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "작은 이벤트 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "event",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-046",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "both",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 핸드드립. 천천히 머무르는 골목 카페을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 책과 커피가 어울리는 조용함이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "원두·로스팅 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "bean",
+        "naver_place",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-047",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "늘 느린오후에 와 주셔서 고마워요.\n오늘은 핸드드립를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "단골 인사 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "thanks",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-048",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "neighborhood",
+      "cafe": {
+        "name": "느린오후",
+        "location": "광주 동명동",
+        "concept": "천천히 머무르는 골목 카페",
+        "atmosphere": "책과 커피가 어울리는 조용함",
+        "menus": [
+          "핸드드립",
+          "브라우니"
+        ],
+        "tone": "calm",
+        "customerType": "학생·프리랜서"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 책과 커피가 어울리는 조용함이 더 잘 어울려요.\n느린오후에서 핸드드립 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "홀 전경 또는 창가 좌석. 사람 얼굴보다 공간·잔.",
+        "whyGood": "비 오는 날 목적에 맞고, 느린오후 컨셉(천천히 머무르는 골목 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 핸드드립, 브라우니",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8,
+        "photoAuthenticity": 8,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 6.5,
+        "photoAuthenticity": 6,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "neighborhood",
+        "rainy",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-049",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "image",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "설탕공방에 말차티라미수가 새로 나왔어요.\n수제 디저트가 주인공 그대로, 밝고 산뜻한 테이블에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "설탕공방",
+          "연희",
+          "말차티라미수"
+        ],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "new_menu",
+        "instagram",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-050",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 말차티라미수를 준비해 두었어요. 설탕공방의 밝고 산뜻한 테이블과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "계절 메뉴 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "seasonal",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-051",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "설탕공방 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-052",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "image",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "밝고 산뜻한 테이블.\n설탕공방은 수제 디저트가 주인공을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "매장 분위기 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "mood",
+        "kakao",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-053",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "이번 주 설탕공방 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "설탕공방",
+          "연희",
+          "말차티라미수"
+        ],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "작은 이벤트 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "event",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-054",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 말차티라미수. 수제 디저트가 주인공을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 밝고 산뜻한 테이블이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "원두·로스팅 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "bean",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-055",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "image",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "늘 설탕공방에 와 주셔서 고마워요.\n오늘은 말차티라미수를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "단골 인사 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "thanks",
+        "blog",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-056",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "both",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "설탕공방",
+        "location": "서울 연희",
+        "concept": "수제 디저트가 주인공",
+        "atmosphere": "밝고 산뜻한 테이블",
+        "menus": [
+          "말차티라미수",
+          "딸기생크림"
+        ],
+        "tone": "warm",
+        "customerType": "데이트·친구"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 밝고 산뜻한 테이블이 더 잘 어울려요.\n설탕공방에서 말차티라미수 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "비 오는 날 목적에 맞고, 설탕공방 컨셉(수제 디저트가 주인공)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 말차티라미수, 딸기생크림",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "rainy",
+        "kakao",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-057",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "크림앤빈에 바스크치즈가 새로 나왔어요.\n비주얼 좋은 케이크 카페 그대로, 흰 테이블과 꽃에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "크림앤빈",
+          "송도",
+          "바스크치즈"
+        ],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "new_menu",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-058",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "image",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 바스크치즈를 준비해 두었어요. 크림앤빈의 흰 테이블과 꽃과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "계절 메뉴 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "seasonal",
+        "naver_place",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-059",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "크림앤빈 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-060",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "흰 테이블과 꽃.\n크림앤빈은 비주얼 좋은 케이크 카페을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "매장 분위기 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "mood",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-061",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "both",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "이번 주 크림앤빈 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "크림앤빈",
+          "송도",
+          "바스크치즈"
+        ],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "작은 이벤트 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "event",
+        "instagram",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-062",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 바스크치즈. 비주얼 좋은 케이크 카페을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 흰 테이블과 꽃이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "원두·로스팅 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "bean",
+        "naver_place",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-063",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "늘 크림앤빈에 와 주셔서 고마워요.\n오늘은 바스크치즈를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "단골 인사 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "thanks",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-064",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "image",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "크림앤빈",
+        "location": "인천 송도",
+        "concept": "비주얼 좋은 케이크 카페",
+        "atmosphere": "흰 테이블과 꽃",
+        "menus": [
+          "바스크치즈",
+          "레몬타르트"
+        ],
+        "tone": "witty",
+        "customerType": "2030 여성"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 흰 테이블과 꽃이 더 잘 어울려요.\n크림앤빈에서 바스크치즈 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "비 오는 날 목적에 맞고, 크림앤빈 컨셉(비주얼 좋은 케이크 카페)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 바스크치즈, 레몬타르트",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "rainy",
+        "kakao",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-065",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "달콤한점에 크로플가 새로 나왔어요.\n사진 찍고 싶은 디저트 그대로, 파스텔톤 인테리어에서 천천히 드셔 보세요.\n궁금하시면 매장에서 먼저 맛보셔도 좋아요.",
+        "hashtags": [
+          "달콤한점",
+          "둔산",
+          "크로플"
+        ],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "신메뉴 소개 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "신메뉴 소개",
+        "message": "이번 주 새로 나온 메뉴를 알려요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "new_menu",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-066",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "both",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "날씨에 맞춰 크로플를 준비해 두었어요. 달콤한점의 파스텔톤 인테리어과 잘 어울려요. 오늘은 테이크아웃도 가능해요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "계절 메뉴 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "계절 메뉴",
+        "message": "계절에 맞는 음료·디저트를 알려요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "seasonal",
+        "naver_place",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-067",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "달콤한점 이번 주 안내예요.\n평일 10:00–20:00 / 주말 10:00–21:00\n재료 소진 시 조기 마감될 수 있어요. 방문 전 확인해 주세요.",
+        "hashtags": [],
+        "visualNotes": "텍스트 중심. 사진 없이도 게시 가능.",
+        "whyGood": "영업 안내 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "영업 안내",
+        "message": "영업시간·휴무를 알려요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 9.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 8.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "hours",
+        "blog",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-068",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "파스텔톤 인테리어.\n달콤한점은 사진 찍고 싶은 디저트을 지키는 공간이에요.\n잠깐 쉬고 싶을 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "매장 분위기 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "매장 분위기",
+        "message": "와서 쉬고 싶게 매장 느낌을 전해요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "mood",
+        "kakao",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-069",
+      "source": "curated_public_pattern",
+      "channel": "instagram",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "이번 주 달콤한점 작은 소식이에요.\n음료 4잔 도장 모으시면 쿠키를 드려요.\n자세한 내용은 매장에서 안내해 드릴게요.",
+        "hashtags": [
+          "달콤한점",
+          "둔산",
+          "크로플"
+        ],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "작은 이벤트 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "작은 이벤트",
+        "message": "스탬프·사이드 증정 등 작은 소식을 알려요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "instagram"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "event",
+        "instagram",
+        "copy"
+      ]
+    },
+    {
+      "id": "gp-070",
+      "source": "curated_public_pattern",
+      "channel": "naver_place",
+      "kind": "image",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "이번 주 로스팅: 크로플. 사진 찍고 싶은 디저트을 기준으로 향과 산미를 맞춰 봤어요. 드립으로 드시면 파스텔톤 인테리어이 더 잘 느껴져요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "원두·로스팅 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "원두·로스팅",
+        "message": "이번 주 로스팅·원두 이야기를 알려요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "naver"
+      },
+      "referenceScores": {
+        "brandFit": 9,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 9,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7.5,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 7.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "bean",
+        "naver_place",
+        "image"
+      ]
+    },
+    {
+      "id": "gp-071",
+      "source": "curated_public_pattern",
+      "channel": "blog",
+      "kind": "both",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "늘 달콤한점에 와 주셔서 고마워요.\n오늘은 크로플를 천천히 준비해 둘게요.\n편하실 때 들러 주세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "단골 인사 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "단골 인사",
+        "message": "단골 손님께 짧은 인사를 전해요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "blog"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "thanks",
+        "blog",
+        "both"
+      ]
+    },
+    {
+      "id": "gp-072",
+      "source": "curated_public_pattern",
+      "channel": "kakao",
+      "kind": "copy",
+      "archetype": "dessert_aesthetic",
+      "cafe": {
+        "name": "달콤한점",
+        "location": "대전 둔산",
+        "concept": "사진 찍고 싶은 디저트",
+        "atmosphere": "파스텔톤 인테리어",
+        "menus": [
+          "크로플",
+          "아이스크림라떼"
+        ],
+        "tone": "warm",
+        "customerType": "학생"
+      },
+      "reference": {
+        "caption": "비 오는 날엔 파스텔톤 인테리어이 더 잘 어울려요.\n달콤한점에서 크로플 한 잔과 잠시 쉬어 가세요.",
+        "hashtags": [],
+        "visualNotes": "디저트 45도 각도. 배경은 테이블 질감만.",
+        "whyGood": "비 오는 날 목적에 맞고, 달콤한점 컨셉(사진 찍고 싶은 디저트)이 드러나며 과장 없이 바로 게시 가능한 톤."
+      },
+      "promptInput": {
+        "purpose": "비 오는 날",
+        "message": "비 오는 날 오기 좋은 이유를 알려요. 대표 메뉴: 크로플, 아이스크림라떼",
+        "channel": "kakao"
+      },
+      "referenceScores": {
+        "brandFit": 8.5,
+        "typography": 8.5,
+        "photoAuthenticity": 9,
+        "postability": 8.5,
+        "specificity": 8,
+        "toneMatch": 8.5,
+        "noHype": 9
+      },
+      "minAccept": {
+        "brandFit": 7,
+        "typography": 7,
+        "photoAuthenticity": 7,
+        "postability": 7.3,
+        "specificity": 6.5,
+        "toneMatch": 7,
+        "noHype": 8
+      },
+      "tags": [
+        "dessert_aesthetic",
+        "rainy",
+        "kakao",
+        "copy"
+      ]
+    }
+  ]
+}

@@ -19,6 +19,7 @@ import {
   buildNoticeUserPrompt,
   type ImageShotBrief,
 } from "./prompts";
+import { buildBrandVisualBrief } from "./brand-visual";
 import { buildCafeLearningContext } from "./cafe-context";
 import { sampleCopy, sampleImage, sampleNotice } from "./samples";
 import { mobileMsg } from "@/lib/mobile-messages";
@@ -148,6 +149,7 @@ type ImagePlanOption = {
 
 type ImagePlan = {
   cafeSymbol: string;
+  brandCue: string;
   suggestedTitle: string;
   options: ImagePlanOption[];
 };
@@ -170,48 +172,75 @@ const COMPOSITION_HINTS: Record<PlanComposition, string> = {
 const imagePlanSchema = z.object({
   cafeSymbol: z
     .string()
-    .describe("사진에서 찾은 카페 상징/홍보 포인트 한 줄 한글"),
+    .describe("이 카페만의 상징/홍보 포인트 한 줄 한글"),
+  brandCue: z
+    .string()
+    .describe("브랜드를 한눈에 알려주는 짧은 한글 큐 (위치·컨셉·시그니처)"),
   suggestedTitle: z.string().describe("12자 이내 한글 제목 제안"),
   options: z
     .array(
       z.object({
         headline: z.string().describe("12자 이내 한글 헤드라인"),
-        subline: z.string().describe("18자 이내 보조 문구, 없으면 빈 문자열"),
+        subline: z
+          .string()
+          .describe("18자 이내 보조 문구 — 컨셉·분위기·시그니처 힌트"),
         templateId: z.enum(PLAN_TEMPLATES),
         composition: z.enum(PLAN_COMPOSITIONS),
-        heroSubject: z.string().describe("영어, 강조할 피사체"),
+        heroSubject: z.string().describe("영어, 브랜드 반영 피사체"),
         shotBrief: z
           .string()
-          .describe("영어 2~3문장 촬영 지시. 평면 배경 금지, 재구도 명시"),
+          .describe("영어 2~3문장 촬영 지시. 브랜드 분위기·평면 배경 금지"),
       }),
     )
     .describe("서로 다른 구도·템플릿 두 안"),
 });
 
-function fallbackPlan(input: ImageGenerationInput): ImagePlan {
+function fallbackPlan(
+  input: ImageGenerationInput,
+  profile: CafeProfile | null,
+): ImagePlan {
+  const brand = buildBrandVisualBrief(profile);
   const title = input.title || purposeLabels[input.purpose];
-  const subject = input.message || title || "signature cafe drink";
+  const menu = brand?.menus[0];
+  const subject =
+    menu ||
+    input.message ||
+    brand?.concept ||
+    title ||
+    "signature cafe drink";
+  const sub =
+    brand?.defaultSubline ||
+    input.message.slice(0, 18) ||
+    brand?.location.slice(0, 18) ||
+    "";
+  const brandLook = brand?.englishLook || "independent Korean neighborhood cafe";
   return {
-    cafeSymbol: input.message || "카페의 시그니처 분위기",
+    cafeSymbol:
+      brand?.concept ||
+      input.message ||
+      (menu ? `시그니처 ${menu}` : "카페의 시그니처 분위기"),
+    brandCue:
+      [brand?.location.split(" ").pop(), brand?.concept || menu]
+        .filter(Boolean)
+        .join(" ")
+        .slice(0, 18) || brand?.cafeName || "",
     suggestedTitle: title,
     options: [
       {
         headline: title,
-        subline: input.message.slice(0, 18),
+        subline: sub,
         templateId: "fade_bottom",
         composition: "hero_closeup",
         heroSubject: subject,
-        shotBrief:
-          "Recompose as a hero close-up promotional photo. Do not use the reference as a flat background. Emphasize the signature item with shallow depth of field.",
+        shotBrief: `Recompose as a hero close-up for this brand. ${brandLook} Do not use the reference as a flat background. Emphasize the signature item with shallow depth of field.`,
       },
       {
         headline: title,
-        subline: "",
+        subline: brand?.atmosphere.slice(0, 18) || sub,
         templateId: "glass_center",
         composition: "atmosphere_wide",
         heroSubject: subject,
-        shotBrief:
-          "Recompose as a wider atmospheric cafe scene. Different angle from a product close-up. Keep the space inviting with soft natural light.",
+        shotBrief: `Wider atmospheric scene that reads as this specific cafe brand. ${brandLook} Different angle from product close-up. Soft natural light matching brand mood.`,
       },
     ],
   };
@@ -238,7 +267,7 @@ async function planImage(
     | { type: "text"; text: string }
     | { type: "image_url"; image_url: { url: string; detail: "low" | "high" } };
   const content: ContentPart[] = [
-    { type: "text", text: buildImagePlanUserPrompt(input) },
+    { type: "text", text: buildImagePlanUserPrompt(input, profile) },
   ];
   // 첫 장은 high로 상징 요소를 더 잘 보고, 나머지는 low (비용 균형)
   input.photoPaths.slice(0, 3).forEach((path, index) => {
@@ -361,9 +390,10 @@ export async function generateImage(
     plan = await planImage(input, profile, learning);
   } catch (planError) {
     console.error("[safil image plan fallback]", planError);
-    plan = fallbackPlan(input);
+    plan = fallbackPlan(input, profile);
   }
 
+  const brand = buildBrandVisualBrief(profile);
   const referenceFiles =
     input.photoPaths.length > 0 ? await loadReferenceFiles(input.photoPaths) : [];
 
@@ -379,12 +409,21 @@ export async function generateImage(
   const headlineA = input.title || plan.options[0]?.headline || plan.suggestedTitle;
   const headlineB = input.title || plan.options[1]?.headline || plan.suggestedTitle;
   const symbol = plan.cafeSymbol?.trim();
+  const brandCue = (plan.brandCue || brand?.defaultSubline || "").trim().slice(0, 18);
+  const pickSubline = (raw?: string) => {
+    const s = (raw || "").trim();
+    if (s) return s.slice(0, 18);
+    return brandCue || brand?.defaultSubline || "";
+  };
   const photoNoteFor = (used: boolean) => {
     if (used && symbol) return `"${symbol}"을(를) 살려 `;
     if (used) return "올려주신 사진의 포인트를 살려 ";
     if (input.photoPaths.length > 0) return "사진 반영이 어려워 새로 그렸고, ";
     return "";
   };
+  const brandNote = brand
+    ? `${brand.cafeName} 브랜드 톤에 맞춰 `
+    : "";
 
   const templateA = plan.options[0]?.templateId ?? "fade_bottom";
   const templateB =
@@ -409,28 +448,34 @@ export async function generateImage(
                 ? "여백 구도"
                 : "다른 구도";
 
+  const cafeName = brand?.cafeName || profile?.name || "";
+
   const options: ImageOption[] = [
     {
       imagePath: clean.storedName,
       imageUrl: clean.url,
       headline: headlineA.slice(0, 16),
-      subline: plan.options[0]?.subline?.slice(0, 18) ?? "",
+      subline: pickSubline(plan.options[0]?.subline),
       dateText: input.dateText,
       templateId: templateA,
       palette: "auto",
       usedReferencePhotos: clean.usedReferencePhotos,
-      reason: `${photoNoteFor(clean.usedReferencePhotos)}${compLabel(plan.options[0]?.composition)} 구도로 만들었어요.`,
+      cafeName,
+      brandCue,
+      reason: `${brandNote}${photoNoteFor(clean.usedReferencePhotos)}${compLabel(plan.options[0]?.composition)} 구도로 만들었어요.`,
     },
     {
       imagePath: warm.storedName,
       imageUrl: warm.url,
       headline: headlineB.slice(0, 16),
-      subline: plan.options[1]?.subline?.slice(0, 18) ?? "",
+      subline: pickSubline(plan.options[1]?.subline),
       dateText: input.dateText,
       templateId: templateB,
       palette: "auto",
       usedReferencePhotos: warm.usedReferencePhotos,
-      reason: `${photoNoteFor(warm.usedReferencePhotos)}${compLabel(plan.options[1]?.composition)} 구도로 만들었어요.`,
+      cafeName,
+      brandCue,
+      reason: `${brandNote}${photoNoteFor(warm.usedReferencePhotos)}${compLabel(plan.options[1]?.composition)} 구도로 만들었어요.`,
     },
   ];
 

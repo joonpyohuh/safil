@@ -534,11 +534,13 @@ export function ImageGenerator({
               label={index === 0 ? "안 A" : "안 B"}
               imageUrl={option.imageUrl}
               initialHeadline={option.headline}
-              initialSubline={option.subline ?? ""}
+              initialSubline={
+                option.subline || option.brandCue || profile.concept.slice(0, 18) || ""
+              }
               initialDateText={option.dateText ?? dateText}
               initialTemplate={option.templateId ?? (index === 0 ? "fade_bottom" : "glass_center")}
               initialPalette={option.palette ?? "auto"}
-              cafeName={profile.name}
+              cafeName={option.cafeName || profile.name}
               reason={option.reason}
               isSample={record.isSample}
               usedReferencePhotos={
