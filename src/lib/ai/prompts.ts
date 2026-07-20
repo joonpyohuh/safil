@@ -16,19 +16,39 @@ const COMMON_RULES = `
 - reason은 쉬운 한국어 한 문장
 `;
 
-function profileContext(profile: CafeProfile | null): string {
+function profileContext(profile: CafeProfile | null, learning?: string): string {
+  if (learning?.trim()) {
+    return `【이 카페만의 컨텍스트 — 반드시 준수】\n${learning}`;
+  }
   if (!profile) {
     return "카페 프로필 미등록. 일반적인 동네 카페 톤. 사실을 지어내지 말 것.";
   }
   const menus = profile.menus.length > 0 ? profile.menus.join(", ") : "미등록";
-  return `카페: ${profile.name} / ${profile.location} / ${profile.concept || "콘셉트 미등록"} / 메뉴: ${menus} / 말투: ${toneLabels[profile.tone]} / 고객: ${profile.customerType || "미등록"}`;
+  return [
+    `카페: ${profile.name} / ${profile.location}`,
+    `컨셉: ${profile.concept || "미등록"}`,
+    `분위기: ${profile.atmosphere || "미등록"}`,
+    `소개: ${profile.introduction || "미등록"}`,
+    `메뉴: ${menus}`,
+    `말투: ${toneLabels[profile.tone]}`,
+    `고객: ${profile.customerType || "미등록"}`,
+    profile.researchSummary
+      ? `리뷰·검색 요약: ${profile.researchSummary.slice(0, 400)}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
-export function buildCopySystemPrompt(profile: CafeProfile | null): string {
+export function buildCopySystemPrompt(
+  profile: CafeProfile | null,
+  learning?: string,
+): string {
   return `동네 카페 홍보 문구 카피라이터. 한국어.
-${profileContext(profile)}
+${profileContext(profile, learning)}
 ${COMMON_RULES}
-- 분위기 다른 문구 3개 (안내형 / 감성형 / 친근형)
+- 반드시 위 카페 컨셉·분위기에 맞게 쓸 것. 다른 스타일 카페처럼 쓰지 말 것
+- 분위기 다른 문구 3개 (안내형 / 감성형 / 친근형) — 톤만 다르게, 브랜드 정체성은 동일
 - 인스타: 80~180자, 문단 2~3개, 이모지 최대 1개, hashtags 4~6개(# 없이)
 - 네이버: 100~220자, 첫 줄에 핵심, 이모지·해시태그 없음, hashtags=[]
 - 입력에 없는 기간·가격·혜택 금지
@@ -63,11 +83,14 @@ export function buildImageBackgroundPrompt(
   variant: "clean" | "warm",
 ): string {
   const concept = profile?.concept ? ` Cafe concept: ${profile.concept}.` : "";
+  const atmosphere = profile?.atmosphere
+    ? ` Brand atmosphere (must match visually): ${profile.atmosphere}.`
+    : "";
   const cafe = profile?.name ? ` Cafe name context (do not render as text): ${profile.name}.` : "";
   const mood =
     variant === "clean"
-      ? "Lighting: bright natural daylight, clean airy palette, crisp food photography."
-      : "Lighting: warm golden-hour cafe light, soft shadows, cozy inviting tones.";
+      ? "Lighting: bright natural daylight, clean airy palette, crisp food photography — still matching the cafe's stated atmosphere."
+      : "Lighting: warm golden-hour cafe light, soft shadows, cozy inviting tones — still matching the cafe's stated atmosphere.";
 
   const hasPhotos = input.photoPaths.length > 0;
   const photoDirection = hasPhotos
@@ -78,6 +101,7 @@ export function buildImageBackgroundPrompt(
         `Composition: ${shot.composition}.`,
         shot.shotBrief,
         "Keep the real drink/food/interior identity from the references. Do not invent a different menu item.",
+        "Match the cafe's concept and atmosphere — do not make it look like a generic franchise cafe.",
         "Leave calm negative space (often lower third or side) for a caption overlay later.",
       ].join(" ")
     : [
@@ -85,6 +109,7 @@ export function buildImageBackgroundPrompt(
         `Hero: ${shot.heroSubject || purposeLabels[input.purpose]}.`,
         `Composition: ${shot.composition}.`,
         shot.shotBrief,
+        "Match the cafe's concept and atmosphere.",
         "Leave calm negative space for a caption overlay later.",
       ].join(" ");
 
@@ -93,6 +118,7 @@ export function buildImageBackgroundPrompt(
     photoDirection,
     mood,
     concept,
+    atmosphere,
     cafe,
     "High-end cafe/food photography. Photorealistic. No collage, no mockup UI, no watermark.",
     NO_TEXT_RULE,
@@ -102,10 +128,14 @@ export function buildImageBackgroundPrompt(
 }
 
 /** 사진을 보고 상징 요소·구도·문구를 기획 */
-export function buildImagePlanSystemPrompt(profile: CafeProfile | null): string {
+export function buildImagePlanSystemPrompt(
+  profile: CafeProfile | null,
+  learning?: string,
+): string {
   return `너는 카페 사진을 보고 '무엇을 홍보할지'와 '어떤 구도로 찍을지'를 정하는 한국어 아트 디렉터다.
-${profileContext(profile)}
+${profileContext(profile, learning)}
 ${COMMON_RULES}
+- 반드시 이 카페의 컨셉·분위기에 맞는 구도·헤드라인을 고를 것
 첨부 사진이 있으면 반드시:
 1) 카페를 상징하는 포인트(메뉴 디테일, 라떼아트, 원두, 인테리어 시그니처, 조명·테이블 분위기 등)를 찾는다
 2) 사진을 그대로 배경으로 쓰지 말고, 그 포인트를 살린 서로 다른 촬영 구도 2안을 제안한다

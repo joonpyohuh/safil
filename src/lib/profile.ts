@@ -3,23 +3,42 @@ import {
   isSupabaseConfigured,
   type DbCafeProfile,
 } from "@/lib/supabase/server";
-import { type CafeProfile, type CafeProfileInput, toneValues, type Tone } from "@/lib/schemas";
+import {
+  type CafeProfile,
+  type CafeProfileInput,
+  toneValues,
+  type Tone,
+  vibeTagValues,
+  type VibeTag,
+} from "@/lib/schemas";
 
 const PROFILE_ID = 1;
 
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
 function mapRow(row: DbCafeProfile): CafeProfile {
+  const vibeTags = asStringArray(row.vibe_tags).filter((tag): tag is VibeTag =>
+    (vibeTagValues as readonly string[]).includes(tag),
+  );
   return {
     name: row.name,
     location: row.location,
-    concept: row.concept,
-    introduction: row.introduction,
-    menus: Array.isArray(row.menus) ? row.menus.filter((m): m is string => typeof m === "string") : [],
+    concept: row.concept ?? "",
+    introduction: row.introduction ?? "",
+    atmosphere: row.atmosphere ?? "",
+    vibeTags,
+    menus: asStringArray(row.menus),
     tone: (toneValues as readonly string[]).includes(row.tone) ? (row.tone as Tone) : "warm",
-    customerType: row.customer_type,
+    customerType: row.customer_type ?? "",
     logoPath: row.logo_path,
-    photoPaths: Array.isArray(row.photo_paths)
-      ? row.photo_paths.filter((p): p is string => typeof p === "string")
-      : [],
+    photoPaths: asStringArray(row.photo_paths),
+    researchSummary: row.research_summary ?? "",
+    researchSources: asStringArray(row.research_sources),
+    placeConfirmed: Boolean(row.place_confirmed),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -47,11 +66,16 @@ export async function saveCafeProfile(input: CafeProfileInput): Promise<CafeProf
     location: input.location,
     concept: input.concept,
     introduction: input.introduction,
+    atmosphere: input.atmosphere,
+    vibe_tags: input.vibeTags,
     menus: input.menus,
     tone: input.tone,
     customer_type: input.customerType,
     logo_path: input.logoPath,
     photo_paths: input.photoPaths,
+    research_summary: input.researchSummary,
+    research_sources: input.researchSources,
+    place_confirmed: input.placeConfirmed,
     created_at: existing?.createdAt ?? now,
     updated_at: now,
   };

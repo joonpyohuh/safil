@@ -19,6 +19,7 @@ import {
   buildNoticeUserPrompt,
   type ImageShotBrief,
 } from "./prompts";
+import { buildCafeLearningContext } from "./cafe-context";
 import { sampleCopy, sampleImage, sampleNotice } from "./samples";
 import { mobileMsg } from "@/lib/mobile-messages";
 import { downloadUpload, publicUploadUrl, uploadImageBuffer } from "@/lib/storage";
@@ -92,8 +93,9 @@ export async function generateCopy(
     return { output: sampleCopy(input, profile), isSample: true };
   }
   try {
+    const learning = await buildCafeLearningContext(profile);
     const output = await callStructured(
-      buildCopySystemPrompt(profile),
+      buildCopySystemPrompt(profile, learning),
       buildCopyUserPrompt(input),
       copyOptionSchema,
       3,
@@ -229,6 +231,7 @@ function toShotBrief(plan: ImagePlan, index: 0 | 1): ImageShotBrief {
 async function planImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
+  learning: string,
 ): Promise<ImagePlan> {
   const openai = getOpenAI();
   type ContentPart =
@@ -252,7 +255,7 @@ async function planImage(
     {
       model: getTextModel(),
       messages: [
-        { role: "system", content: buildImagePlanSystemPrompt(profile) },
+        { role: "system", content: buildImagePlanSystemPrompt(profile, learning) },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { role: "user", content: content as any },
       ],
@@ -352,9 +355,10 @@ export async function generateImage(
     return { output: sampleImage(input, profile), isSample: true };
   }
   // 런타임 실패는 체험용으로 숨기지 않고 그대로 에러를 올린다 (정직한 안내)
+  const learning = await buildCafeLearningContext(profile);
   let plan: ImagePlan;
   try {
-    plan = await planImage(input, profile);
+    plan = await planImage(input, profile, learning);
   } catch (planError) {
     console.error("[safil image plan fallback]", planError);
     plan = fallbackPlan(input);

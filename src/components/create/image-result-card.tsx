@@ -177,23 +177,50 @@ export function ImageResultCard({
     }
   }
 
-  async function downloadOnly() {
+  function isMobileDevice() {
+    if (typeof navigator === "undefined") return false;
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
+  }
+
+  /** 핸드폰: 공유 시트로 '이미지 저장' → 갤러리. PC: 파일 다운로드 */
+  async function saveToGallery() {
     setError("");
     setStatus("");
     setPending("download");
     try {
       const blob = await getBlob();
-      downloadBlobFile(blob, `${headline || "safil"}-홍보이미지.png`);
-      setStatus("이미지를 저장했어요.");
+      const fileName = `${headline || "safil"}-홍보이미지.png`;
+      const file = new File([blob], fileName, { type: "image/png" });
+
+      if (isMobileDevice() && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: shareTitle,
+          });
+          setStatus("공유 화면에서 '이미지 저장' 또는 '사진에 추가'를 누르면 갤러리에 들어가요.");
+          await markDownloaded();
+          return;
+        } catch (shareError) {
+          if (shareError instanceof Error && shareError.name === "AbortError") return;
+        }
+      }
+
+      downloadBlobFile(blob, fileName);
+      setStatus(
+        isMobileDevice()
+          ? "파일을 받았어요. 안 보이면 미리보기를 길게 눌러 저장해 주세요."
+          : "이미지를 저장했어요.",
+      );
       await markDownloaded();
     } catch {
-      setError("저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+      setError("저장하지 못했어요. 미리보기를 길게 눌러 저장해 주세요.");
     } finally {
       setPending(null);
     }
   }
 
-  async function shareOnly() {
+  async function shareToApps() {
     setError("");
     setStatus("");
     setPending("share");
@@ -209,17 +236,13 @@ export function ImageResultCard({
           await markDownloaded();
         } catch (shareError) {
           if (shareError instanceof Error && shareError.name === "AbortError") return;
-          downloadBlobFile(blob, fileName);
-          setStatus("공유가 안 되어 이미지로 저장했어요.");
-          await markDownloaded();
+          setError("공유하지 못했어요. 갤러리 저장을 이용해 주세요.");
         }
       } else {
-        downloadBlobFile(blob, fileName);
-        setStatus("이 기기에서는 공유가 안 되어 이미지로 저장했어요.");
-        await markDownloaded();
+        await saveToGallery();
       }
     } catch {
-      setError("공유하지 못했어요. 아래 다운로드를 이용해 주세요.");
+      setError("공유하지 못했어요. 갤러리 저장을 이용해 주세요.");
     } finally {
       setPending(null);
     }
@@ -393,13 +416,19 @@ export function ImageResultCard({
       )}
 
       <div className="grid grid-cols-1 gap-2">
-        <button type="button" className="btn-primary" onClick={shareOnly} disabled={busy}>
-          {pending === "share" || (!blobReady && imageReady) ? "준비 중…" : "공유하기"}
+        <button type="button" className="btn-primary" onClick={saveToGallery} disabled={busy}>
+          {pending === "download" || (!blobReady && imageReady)
+            ? "준비 중…"
+            : "갤러리에 저장"}
         </button>
-        <button type="button" className="btn-secondary" onClick={downloadOnly} disabled={busy}>
-          {pending === "download" ? "저장 중…" : "다운로드"}
+        <button type="button" className="btn-secondary" onClick={shareToApps} disabled={busy}>
+          {pending === "share" ? "준비 중…" : "공유하기"}
         </button>
       </div>
+      <p className="text-center text-xs leading-5 text-ink-soft">
+        아이폰·안드로이드에서는 &apos;갤러리에 저장&apos; → 공유 화면의 &apos;이미지 저장&apos;을
+        누르면 사진 앱으로 들어가요.
+      </p>
     </article>
   );
 }

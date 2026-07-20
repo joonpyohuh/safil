@@ -15,16 +15,47 @@ export const toneLabels: Record<Tone, string> = {
   witty: "위트 있고 경쾌한",
 };
 
+/** 카페 분위기 태그 (사장님이 고르는 칩) */
+export const vibeTagValues = [
+  "cozy",
+  "minimal",
+  "roastery",
+  "dessert",
+  "study",
+  "vintage",
+  "nature",
+  "trendy",
+] as const;
+export type VibeTag = (typeof vibeTagValues)[number];
+
+export const vibeTagLabels: Record<VibeTag, string> = {
+  cozy: "아늑하고 따뜻한",
+  minimal: "미니멀·깔끔한",
+  roastery: "로스터리·원두 중심",
+  dessert: "디저트·베이커리",
+  study: "공부·작업하기 좋은",
+  vintage: "빈티지·감성",
+  nature: "자연광·식물",
+  trendy: "트렌디·핫플",
+};
+
 export const cafeProfileInputSchema = z.object({
   name: z.string().trim().min(1, mobileMsg.profile.nameRequired).max(60),
   location: z.string().trim().min(1, mobileMsg.profile.locationRequired).max(120),
   concept: z.string().trim().max(200).default(""),
   introduction: z.string().trim().max(500).default(""),
+  /** 사장님이 직접 적은 분위기·컨셉 설명 */
+  atmosphere: z.string().trim().max(400).default(""),
+  vibeTags: z.array(z.enum(vibeTagValues)).max(6).default([]),
   menus: z.array(z.string().trim().min(1).max(60)).max(20).default([]),
   tone: z.enum(toneValues).default("warm"),
   customerType: z.string().trim().max(120).default(""),
   logoPath: z.string().trim().max(120).nullable().default(null),
   photoPaths: z.array(z.string().trim().max(120)).max(10).default([]),
+  /** 네이버/구글 딥리서치 요약 (확인 후 저장) */
+  researchSummary: z.string().trim().max(2000).default(""),
+  researchSources: z.array(z.string().trim().max(300)).max(12).default([]),
+  placeConfirmed: z.boolean().default(false),
 });
 
 export type CafeProfileInput = z.infer<typeof cafeProfileInputSchema>;
@@ -33,6 +64,19 @@ export type CafeProfile = CafeProfileInput & {
   createdAt: number;
   updatedAt: number;
 };
+
+export const cafeResearchSearchSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  location: z.string().trim().min(1).max(120),
+});
+
+export const cafeResearchConfirmSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  location: z.string().trim().min(1).max(120),
+  placeName: z.string().trim().min(1).max(120),
+  placeAddress: z.string().trim().max(200).default(""),
+  placeUrl: z.string().trim().max(300).default(""),
+});
 
 // ---------------------------------------------------------------------------
 // Shared generation vocabulary

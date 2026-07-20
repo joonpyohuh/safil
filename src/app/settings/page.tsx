@@ -12,7 +12,8 @@ export default async function SettingsPage() {
         <p className="text-sm font-bold text-brand">내 카페</p>
         <h1 className="mt-1 text-2xl font-bold">카페 정보 등록</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          이름과 위치를 등록하면 홍보 문구가 더 잘 맞게 만들어져요.
+          카페를 찾아 조사한 뒤, 컨셉·분위기를 알려주시면 문구와 이미지가 우리 카페에 맞게
+          만들어져요.
         </p>
       </header>
       <ProfileForm initial={profile} />

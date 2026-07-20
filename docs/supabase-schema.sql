@@ -12,6 +12,11 @@ CREATE TABLE IF NOT EXISTS cafe_profile (
   customer_type TEXT NOT NULL DEFAULT '',
   logo_path TEXT,
   photo_paths JSONB NOT NULL DEFAULT '[]'::jsonb,
+  atmosphere TEXT NOT NULL DEFAULT '',
+  vibe_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+  research_summary TEXT NOT NULL DEFAULT '',
+  research_sources JSONB NOT NULL DEFAULT '[]'::jsonb,
+  place_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
   created_at BIGINT NOT NULL,
   updated_at BIGINT NOT NULL
 );

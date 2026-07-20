@@ -11,6 +11,11 @@ export type DbCafeProfile = {
   customer_type: string;
   logo_path: string | null;
   photo_paths: string[];
+  atmosphere?: string;
+  vibe_tags?: string[];
+  research_summary?: string;
+  research_sources?: string[];
+  place_confirmed?: boolean;
   created_at: number;
   updated_at: number;
 };
