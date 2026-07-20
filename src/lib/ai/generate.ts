@@ -288,9 +288,9 @@ export async function generateImage(
       subline: plan.options[0]?.subline?.slice(0, 18) ?? "",
       dateText: input.dateText,
       templateId: "bottom_band",
-      palette: "cream",
+      palette: "espresso",
       usedReferencePhotos: clean.usedReferencePhotos,
-      reason: `${photoNoteFor(clean.usedReferencePhotos)}밝고 깔끔한 분위기로 만들었어요. 글자는 아래에서 바로 고칠 수 있어요.`,
+      reason: `${photoNoteFor(clean.usedReferencePhotos)}인스타 피드에 맞는 깔끔한 스타일로 만들었어요. 글자는 아래에서 바로 고칠 수 있어요.`,
     },
     {
       imagePath: warm.storedName,
@@ -298,10 +298,10 @@ export async function generateImage(
       headline: headlineB.slice(0, 16),
       subline: plan.options[1]?.subline?.slice(0, 18) ?? "",
       dateText: input.dateText,
-      templateId: "bottom_band",
-      palette: "espresso",
+      templateId: "center_card",
+      palette: "cream",
       usedReferencePhotos: warm.usedReferencePhotos,
-      reason: `${photoNoteFor(warm.usedReferencePhotos)}따뜻하고 아늑한 분위기로 만들었어요. 글자는 아래에서 바로 고칠 수 있어요.`,
+      reason: `${photoNoteFor(warm.usedReferencePhotos)}부드러운 카드형으로 만들었어요. 글자는 아래에서 바로 고칠 수 있어요.`,
     },
   ];
 

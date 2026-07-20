@@ -5,22 +5,47 @@ import type { ImagePalette, ImageTemplate } from "@/lib/schemas";
 import { fetchWithTimeout } from "@/lib/client/fetch-with-timeout";
 
 const SIZE = 1024;
+/** 깔끔한 인스타 스타일 — 시스템/앱에 로드된 Noto Sans KR 우선 */
 const FONT_STACK =
-  '"Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif';
+  '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Pretendard, sans-serif';
 
 const PALETTES: Record<
   ImagePalette,
-  { band: string; text: string; accent: string; label: string }
+  { overlay: string; text: string; muted: string; accent: string; label: string }
 > = {
-  cream: { band: "rgba(252,248,242,0.94)", text: "#2a2320", accent: "#914321", label: "크림" },
-  espresso: { band: "rgba(38,26,20,0.90)", text: "#faf6f0", accent: "#e8c4a8", label: "진갈색" },
-  forest: { band: "rgba(22,40,30,0.90)", text: "#f2f7f2", accent: "#c8e0c8", label: "딥그린" },
-  berry: { band: "rgba(56,20,32,0.90)", text: "#fdf1f4", accent: "#f0c2d0", label: "버건디" },
+  cream: {
+    overlay: "rgba(250,246,240,0.92)",
+    text: "#1f1a17",
+    muted: "#5c524c",
+    accent: "#914321",
+    label: "크림",
+  },
+  espresso: {
+    overlay: "rgba(20,14,12,0.78)",
+    text: "#faf6f0",
+    muted: "rgba(250,246,240,0.78)",
+    accent: "#e8c4a8",
+    label: "진갈색",
+  },
+  forest: {
+    overlay: "rgba(12,28,20,0.78)",
+    text: "#f2f7f2",
+    muted: "rgba(242,247,242,0.78)",
+    accent: "#b8d8b8",
+    label: "딥그린",
+  },
+  berry: {
+    overlay: "rgba(40,14,24,0.78)",
+    text: "#fdf1f4",
+    muted: "rgba(253,241,244,0.78)",
+    accent: "#f0c2d0",
+    label: "버건디",
+  },
 };
 
 const TEMPLATES: Record<ImageTemplate, string> = {
-  bottom_band: "아래 띠",
-  top_band: "위 띠",
+  bottom_band: "아래 그라데이션",
+  top_band: "위쪽 라벨",
   center_card: "중앙 카드",
 };
 
@@ -43,22 +68,20 @@ function wrapLines(
   return lines;
 }
 
-/** 제목이 2줄 안에 들어가도록 글자 크기를 자동으로 줄인다 */
 function fitHeadline(
   ctx: CanvasRenderingContext2D,
   text: string,
   maxWidth: number,
 ): { size: number; lines: string[] } {
-  for (let size = 76; size >= 48; size -= 4) {
-    ctx.font = `700 ${size}px ${FONT_STACK}`;
+  for (let size = 88; size >= 52; size -= 4) {
+    ctx.font = `800 ${size}px ${FONT_STACK}`;
     const lines = wrapLines(ctx, text, maxWidth);
     if (lines.length <= 2) return { size, lines };
   }
-  ctx.font = `700 48px ${FONT_STACK}`;
-  return { size: 48, lines: wrapLines(ctx, text, maxWidth).slice(0, 2) };
+  ctx.font = `800 52px ${FONT_STACK}`;
+  return { size: 52, lines: wrapLines(ctx, text, maxWidth).slice(0, 2) };
 }
 
-/** 한 줄에 들어가도록 크기를 줄이고, 그래도 넘치면 말줄임 */
 function fitSingleLine(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -77,6 +100,28 @@ function fitSingleLine(
     cut = cut.slice(0, -1);
   }
   return { size, text: `${cut}…` };
+}
+
+function drawSoftGradient(
+  ctx: CanvasRenderingContext2D,
+  fromY: number,
+  toY: number,
+  color: string,
+) {
+  const g = ctx.createLinearGradient(0, fromY, 0, toY);
+  g.addColorStop(0, "rgba(0,0,0,0)");
+  // color is like rgba(r,g,b,a) — extract rgb for stop mid
+  const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (match) {
+    const [, r, gch, b] = match;
+    g.addColorStop(0.35, `rgba(${r},${gch},${b},0)`);
+    g.addColorStop(0.7, `rgba(${r},${gch},${b},0.55)`);
+    g.addColorStop(1, color);
+  } else {
+    g.addColorStop(1, color);
+  }
+  ctx.fillStyle = g;
+  ctx.fillRect(0, fromY, SIZE, toY - fromY);
 }
 
 type OverlaySpec = {
@@ -106,63 +151,146 @@ function drawOverlay(
   const colors = PALETTES[spec.palette];
   const hasSub = Boolean(spec.subline);
   const hasDate = Boolean(spec.dateText);
-  const textWidth = SIZE * 0.82;
+  const pad = 72;
+  const textWidth = SIZE - pad * 2;
 
-  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  const head = fitHeadline(ctx, spec.headline, textWidth);
-  const headLineHeight = Math.round(head.size * 1.22);
 
-  const contentHeight =
-    head.lines.length * headLineHeight + (hasSub ? 60 : 0) + (hasDate ? 54 : 0) + 100;
+  if (spec.templateId === "center_card") {
+    // 중앙 글래스 카드 — 깔끔한 인스타 피드형
+    const head = fitHeadline(ctx, spec.headline, textWidth * 0.88);
+    const headH = head.lines.length * Math.round(head.size * 1.15);
+    const cardH = headH + (hasSub ? 52 : 0) + (hasDate ? 48 : 0) + 96;
+    const cardW = SIZE * 0.86;
+    const cardX = (SIZE - cardW) / 2;
+    const cardY = (SIZE - cardH) / 2;
 
-  let top: number;
-  let bandX = 0;
-  let bandW = SIZE;
-  let radius = 0;
+    ctx.fillStyle = colors.overlay;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(cardX, cardY, cardW, cardH, 28);
+    } else {
+      ctx.rect(cardX, cardY, cardW, cardH);
+    }
+    ctx.fill();
+
+    // 상단 악센트 라인
+    ctx.fillStyle = colors.accent;
+    ctx.fillRect(cardX + cardW * 0.35, cardY + 28, cardW * 0.3, 4);
+
+    ctx.textAlign = "center";
+    let y = cardY + 64;
+    ctx.fillStyle = colors.text;
+    ctx.shadowColor = "rgba(0,0,0,0.08)";
+    ctx.shadowBlur = 8;
+    ctx.font = `800 ${head.size}px ${FONT_STACK}`;
+    for (const line of head.lines) {
+      y += Math.round(head.size * 1.15) / 2;
+      ctx.fillText(line, SIZE / 2, y);
+      y += Math.round(head.size * 1.15) / 2;
+    }
+    ctx.shadowBlur = 0;
+
+    if (hasSub) {
+      const sub = fitSingleLine(ctx, spec.subline, textWidth * 0.8, 36, 500);
+      ctx.fillStyle = colors.muted;
+      ctx.font = `500 ${sub.size}px ${FONT_STACK}`;
+      y += 36;
+      ctx.fillText(sub.text, SIZE / 2, y);
+    }
+    if (hasDate) {
+      const date = fitSingleLine(ctx, spec.dateText, textWidth * 0.7, 30, 600);
+      ctx.fillStyle = colors.accent;
+      ctx.font = `600 ${date.size}px ${FONT_STACK}`;
+      y += 42;
+      ctx.fillText(date.text, SIZE / 2, y);
+    }
+    return;
+  }
 
   if (spec.templateId === "top_band") {
-    top = 0;
-  } else if (spec.templateId === "center_card") {
-    bandW = SIZE * 0.84;
-    bandX = (SIZE - bandW) / 2;
-    top = (SIZE - contentHeight) / 2;
-    radius = 32;
-  } else {
-    top = SIZE - contentHeight;
-  }
+    // 위쪽 라벨 + 하단 제목 (스토리형)
+    drawSoftGradient(ctx, 0, 280, colors.overlay);
+    drawSoftGradient(ctx, SIZE - 420, SIZE, colors.overlay);
 
-  ctx.fillStyle = colors.band;
-  ctx.beginPath();
-  if ("roundRect" in ctx && radius) {
-    ctx.roundRect(bandX, top, bandW, contentHeight, radius);
-  } else {
-    ctx.rect(bandX, top, bandW, contentHeight);
-  }
-  ctx.fill();
+    if (hasDate) {
+      const date = fitSingleLine(ctx, spec.dateText, textWidth * 0.6, 28, 600);
+      const chipW = Math.min(textWidth, ctx.measureText(date.text).width + 48);
+      ctx.fillStyle = colors.accent;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(pad, 64, chipW, 48, 24);
+      } else {
+        ctx.rect(pad, 64, chipW, 48);
+      }
+      ctx.fill();
+      ctx.fillStyle = "#1f1a17";
+      ctx.textAlign = "left";
+      ctx.font = `600 ${date.size}px ${FONT_STACK}`;
+      ctx.fillText(date.text, pad + 24, 88);
+    }
 
-  let y = top + 50;
-  ctx.fillStyle = colors.text;
-  ctx.font = `700 ${head.size}px ${FONT_STACK}`;
-  for (const line of head.lines) {
-    y += headLineHeight / 2;
-    ctx.fillText(line, SIZE / 2, y);
-    y += headLineHeight / 2;
-  }
-  if (hasSub) {
-    const sub = fitSingleLine(ctx, spec.subline, textWidth, 40, 500);
+    ctx.textAlign = "left";
+    const head = fitHeadline(ctx, spec.headline, textWidth);
+    let y = SIZE - 140 - (hasSub ? 48 : 0);
     ctx.fillStyle = colors.text;
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 4;
+    ctx.font = `800 ${head.size}px ${FONT_STACK}`;
+    for (const line of head.lines) {
+      ctx.fillText(line, pad, y);
+      y += Math.round(head.size * 1.12);
+    }
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+    if (hasSub) {
+      const sub = fitSingleLine(ctx, spec.subline, textWidth, 34, 500);
+      ctx.fillStyle = colors.muted;
+      ctx.font = `500 ${sub.size}px ${FONT_STACK}`;
+      ctx.fillText(sub.text, pad, y + 8);
+    }
+    return;
+  }
+
+  // 기본: 하단 그라데이션 — 깔끔한 인스타 피드
+  drawSoftGradient(ctx, SIZE - 520, SIZE, colors.overlay);
+
+  // 좌측 악센트 바
+  ctx.fillStyle = colors.accent;
+  ctx.fillRect(pad, SIZE - 200, 6, hasSub || hasDate ? 120 : 80);
+
+  ctx.textAlign = "left";
+  const head = fitHeadline(ctx, spec.headline, textWidth - 24);
+  const headLineH = Math.round(head.size * 1.12);
+  let y = SIZE - 96 - (hasSub ? 44 : 0) - (hasDate ? 40 : 0) - head.lines.length * headLineH;
+
+  ctx.fillStyle = colors.text;
+  ctx.shadowColor = "rgba(0,0,0,0.28)";
+  ctx.shadowBlur = 16;
+  ctx.shadowOffsetY = 3;
+  ctx.font = `800 ${head.size}px ${FONT_STACK}`;
+  for (const line of head.lines) {
+    y += headLineH / 2;
+    ctx.fillText(line, pad + 24, y);
+    y += headLineH / 2;
+  }
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  if (hasSub) {
+    const sub = fitSingleLine(ctx, spec.subline, textWidth - 24, 34, 500);
+    ctx.fillStyle = colors.muted;
     ctx.font = `500 ${sub.size}px ${FONT_STACK}`;
-    y += 34;
-    ctx.fillText(sub.text, SIZE / 2, y);
-    y += 26;
+    y += 36;
+    ctx.fillText(sub.text, pad + 24, y);
   }
   if (hasDate) {
-    const date = fitSingleLine(ctx, spec.dateText, textWidth, 34, 600);
+    const date = fitSingleLine(ctx, spec.dateText, textWidth - 24, 28, 600);
     ctx.fillStyle = colors.accent;
     ctx.font = `600 ${date.size}px ${FONT_STACK}`;
-    y += 30;
-    ctx.fillText(date.text, SIZE / 2, y);
+    y += 36;
+    ctx.fillText(date.text, pad + 24, y);
   }
 }
 
@@ -176,10 +304,8 @@ type ImageResultCardProps = {
   initialPalette: ImagePalette;
   reason?: string;
   isSample?: boolean;
-  /** 참고 사진을 실제로 반영했는지 (배지 표시용). undefined면 배지 숨김 */
   usedReferencePhotos?: boolean;
   shareTitle: string;
-  /** 저장 시 downloaded PATCH할 히스토리 id (persisted 기록만) */
   persistId?: string;
   onSaved?: () => void;
 };
@@ -212,7 +338,7 @@ export function ImageResultCard({
   const [blobReady, setBlobReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [pending, setPending] = useState(false);
+  const [pending, setPending] = useState<"share" | "download" | null>(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
@@ -227,8 +353,6 @@ export function ImageResultCard({
       templateId,
       palette,
     });
-    // iOS 공유는 클릭과 share() 사이의 비동기 지연에 민감하므로
-    // 그릴 때마다 blob을 미리 만들어 클릭 시 바로 쓸 수 있게 한다.
     const seq = ++blobSeqRef.current;
     blobRef.current = null;
     setBlobReady(false);
@@ -265,7 +389,6 @@ export function ImageResultCard({
   useEffect(() => {
     if (!imageReady) return;
     redraw();
-    // 웹폰트가 늦게 로드되면 다시 그린다
     let active = true;
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(() => {
@@ -283,24 +406,55 @@ export function ImageResultCard({
     a.href = url;
     a.download = fileName;
     a.click();
-    // Safari에서 즉시 해제하면 다운로드가 실패할 수 있어 지연 해제
     window.setTimeout(() => URL.revokeObjectURL(url), 3000);
   }
 
-  async function saveOrShare() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  async function getBlob(): Promise<Blob> {
+    let blob = blobRef.current;
+    if (!blob) {
+      const canvas = canvasRef.current;
+      if (!canvas) throw new Error("EXPORT_FAILED");
+      blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/png"),
+      );
+    }
+    if (!blob) throw new Error("EXPORT_FAILED");
+    return blob;
+  }
+
+  async function markDownloaded() {
+    onSaved?.();
+    if (persistId) {
+      await fetchWithTimeout(`/api/history/${persistId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ downloaded: true }),
+      }).catch(() => null);
+    }
+  }
+
+  async function downloadOnly() {
     setError("");
     setStatus("");
-    setPending(true);
+    setPending("download");
     try {
-      let blob = blobRef.current;
-      if (!blob) {
-        blob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob(resolve, "image/png"),
-        );
-      }
-      if (!blob) throw new Error("EXPORT_FAILED");
+      const blob = await getBlob();
+      downloadBlob(blob, `${headline || "safil"}-홍보이미지.png`);
+      setStatus("이미지를 저장했어요.");
+      await markDownloaded();
+    } catch {
+      setError("저장하지 못했어요. 화면을 캡처해서 사용하셔도 돼요.");
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function shareOnly() {
+    setError("");
+    setStatus("");
+    setPending("share");
+    try {
+      const blob = await getBlob();
       const fileName = `${headline || "safil"}-홍보이미지.png`;
       const file = new File([blob], fileName, { type: "image/png" });
 
@@ -308,33 +462,26 @@ export function ImageResultCard({
         try {
           await navigator.share({ files: [file], title: shareTitle, text: shareTitle });
           setStatus("공유할 앱을 골라 인스타그램에 올려보세요.");
+          await markDownloaded();
         } catch (shareError) {
-          if (shareError instanceof Error && shareError.name === "AbortError") {
-            return; // 사용자가 공유 시트를 닫음
-          }
-          // 제스처 만료 등으로 공유가 막히면 다운로드로 자동 전환
+          if (shareError instanceof Error && shareError.name === "AbortError") return;
           downloadBlob(blob, fileName);
-          setStatus("이미지를 저장했어요.");
+          setStatus("공유가 안 되어 이미지로 저장했어요.");
+          await markDownloaded();
         }
       } else {
         downloadBlob(blob, fileName);
-        setStatus("이미지를 저장했어요.");
-      }
-      onSaved?.();
-
-      if (persistId) {
-        await fetchWithTimeout(`/api/history/${persistId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ downloaded: true }),
-        }).catch(() => null);
+        setStatus("이 기기에서는 공유가 안 되어 이미지로 저장했어요.");
+        await markDownloaded();
       }
     } catch {
-      setError("저장하지 못했어요. 화면을 캡처해서 사용하셔도 돼요.");
+      setError("공유하지 못했어요. 아래 다운로드를 이용해 주세요.");
     } finally {
-      setPending(false);
+      setPending(null);
     }
   }
+
+  const busy = pending !== null || !imageReady || !blobReady;
 
   return (
     <article className="card flex flex-col gap-3">
@@ -477,16 +624,26 @@ export function ImageResultCard({
         </p>
       )}
 
-      <button
-        type="button"
-        className="btn-primary"
-        onClick={saveOrShare}
-        disabled={pending || !imageReady || !blobReady}
-      >
-        {pending || (!blobReady && imageReady)
-          ? "준비 중…"
-          : "저장하거나 공유하기"}
-      </button>
+      <div className="grid grid-cols-1 gap-2">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={shareOnly}
+          disabled={busy}
+        >
+          {pending === "share" || (!blobReady && imageReady)
+            ? "준비 중…"
+            : "공유하기"}
+        </button>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={downloadOnly}
+          disabled={busy}
+        >
+          {pending === "download" ? "저장 중…" : "다운로드"}
+        </button>
+      </div>
     </article>
   );
 }

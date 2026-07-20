@@ -160,15 +160,19 @@ export function ImageGenerator({
       setPhotos(nextPhotos);
 
       if (failed.length > 0) {
-        setStatus(`사진 ${uploaded.length}장을 올렸어요. ${failed.length}장은 올리지 못했어요.`);
+        setStatus(`사진 ${uploaded.length}장을 올렸어요. ${failed.length}장은 올리지 못했어요. 준비가 되면 만들기를 눌러 주세요.`);
       } else if (all.length > picked.length) {
-        setStatus(`최대 ${MAX_IMAGE_REFERENCE_PHOTOS}장까지만 올릴 수 있어 ${picked.length}장만 담았어요.`);
+        setStatus(
+          `최대 ${MAX_IMAGE_REFERENCE_PHOTOS}장까지만 올릴 수 있어 ${picked.length}장만 담았어요. 아래 만들기를 눌러 주세요.`,
+        );
+      } else {
+        setStatus(
+          nextPhotos.length === 1
+            ? "사진을 올렸어요. 아래 만들기를 누르면 이미지를 만들어요."
+            : `사진 ${nextPhotos.length}장을 올렸어요. 아래 만들기를 눌러 주세요.`,
+        );
       }
-
-      // 원탭 플로우: 사진을 올리면 바로 만들기 시작 (제목은 AI가 제안)
-      if (failed.length === 0 && !loading) {
-        void runGenerate(title.trim(), dateText.trim(), message.trim(), nextPhotos);
-      }
+      setNoticeKind("ok");
     } catch (err) {
       setError(err instanceof Error ? err.message : "사진을 올리지 못했어요.");
     } finally {
@@ -296,8 +300,8 @@ export function ImageGenerator({
         <p className="text-sm font-bold text-brand">이미지</p>
         <h1 className="mt-1 text-2xl font-bold">홍보 이미지 만들기</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          메뉴·매장 사진만 올리면 바로 만들어드려요. 제목은 AI가 사진을 보고 제안하고, 한글 문구는
-          완성 후 바로 고칠 수 있어요.
+          사진을 올린 뒤 만들기를 누르면, 인스타에 올릴 이미지 2장을 만들어드려요. 제목은 AI가
+          제안하고, 완성 후 글자도 바로 고칠 수 있어요.
         </p>
       </header>
 
@@ -348,7 +352,7 @@ export function ImageGenerator({
           />
           <button
             type="button"
-            className="btn-primary !min-h-14"
+            className="btn-secondary !min-h-14"
             disabled={uploading || loading || !canAddMore}
             onClick={() => fileRef.current?.click()}
           >
@@ -357,7 +361,7 @@ export function ImageGenerator({
               : canAddMore
                 ? photos.length
                   ? "사진 더 올리기"
-                  : "사진 올리고 바로 만들기"
+                  : "사진 올리기"
                 : "최대 장수예요"}
           </button>
 
@@ -384,10 +388,17 @@ export function ImageGenerator({
             </ul>
           )}
           <p className="text-xs leading-5 text-ink-soft">
-            아이폰 사진(HEIC)도 알아서 변환돼요. 사진만 올리면 AI가 분위기를 읽고 바로
-            만들어드려요.
+            아이폰 사진(HEIC)도 알아서 변환돼요. 올린 뒤 아래 만들기를 눌러 주세요.
           </p>
         </div>
+
+        <button
+          type="submit"
+          className="btn-primary !min-h-14"
+          disabled={!canSubmit}
+        >
+          {loading ? "만드는 중…" : record ? "새 배경으로 다시 만들기" : "이미지 2장 만들기"}
+        </button>
 
         <button
           type="button"
@@ -489,9 +500,6 @@ export function ImageGenerator({
           </div>
         )}
 
-        <button type="submit" className="btn-primary hidden md:inline-flex" disabled={!canSubmit}>
-          {loading ? "만드는 중…" : "이미지 2장 만들기"}
-        </button>
       </form>
 
       <div className="sticky-action md:hidden">
@@ -523,13 +531,13 @@ export function ImageGenerator({
           {(record.options as ImageOption[]).map((option, index) => (
             <ImageResultCard
               key={`${record.id}-${index}-${option.imageUrl}`}
-              label={index === 0 ? "밝고 깔끔한 버전" : "따뜻한 분위기 버전"}
+              label={index === 0 ? "인스타 피드형" : "카드형"}
               imageUrl={option.imageUrl}
               initialHeadline={option.headline}
               initialSubline={option.subline ?? ""}
               initialDateText={option.dateText ?? dateText}
-              initialTemplate={option.templateId ?? "bottom_band"}
-              initialPalette={option.palette ?? (index === 0 ? "cream" : "espresso")}
+              initialTemplate={option.templateId ?? (index === 0 ? "bottom_band" : "center_card")}
+              initialPalette={option.palette ?? (index === 0 ? "espresso" : "cream")}
               reason={option.reason}
               isSample={record.isSample}
               usedReferencePhotos={
