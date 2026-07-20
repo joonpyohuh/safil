@@ -94,10 +94,10 @@ export function ImageGenerator({
     const id = window.setInterval(() => {
       const sec = Math.floor((Date.now() - started) / 1000);
       setElapsedSec(sec);
-      if (photosRef.current.length && sec < 8) {
-        setLoadingStep(`올린 사진 ${photosRef.current.length}장의 분위기를 읽는 중…`);
-      } else if (sec < 30) {
-        setLoadingStep("배경 이미지 2장을 그리는 중… 보통 40초 안에 끝나요.");
+      if (photosRef.current.length && sec < 10) {
+        setLoadingStep(`사진에서 카페의 포인트(메뉴·분위기)를 찾는 중…`);
+      } else if (sec < 35) {
+        setLoadingStep("서로 다른 구도 2장으로 그리는 중… 보통 40초 안에 끝나요.");
       } else {
         setLoadingStep("조금만 더 기다려 주세요. 거의 다 됐어요.");
       }
@@ -211,8 +211,8 @@ export function ImageGenerator({
     setElapsedSec(0);
     setLoadingStep(
       usePhotos.length
-        ? `올린 사진 ${usePhotos.length}장의 분위기를 읽는 중…`
-        : "배경 이미지 2장을 그리는 중… 보통 40초 안에 끝나요.",
+        ? "사진에서 카페의 포인트를 찾는 중…"
+        : "서로 다른 구도 2장으로 그리는 중… 보통 40초 안에 끝나요.",
     );
     setError("");
     setStatus("");
@@ -300,8 +300,8 @@ export function ImageGenerator({
         <p className="text-sm font-bold text-brand">이미지</p>
         <h1 className="mt-1 text-2xl font-bold">홍보 이미지 만들기</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          사진을 올린 뒤 만들기를 누르면, 인스타에 올릴 이미지 2장을 만들어드려요. 제목은 AI가
-          제안하고, 완성 후 글자도 바로 고칠 수 있어요.
+          사진을 올린 뒤 만들기를 누르면, AI가 사진 속 카페 포인트(메뉴·분위기)를 찾아 서로 다른
+          구도 2장으로 만들어드려요.
         </p>
       </header>
 
