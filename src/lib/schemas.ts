@@ -85,51 +85,51 @@ export const copyGenerationOutputSchema = z.object({
 export type CopyGenerationOutput = z.infer<typeof copyGenerationOutputSchema>;
 
 // ---------------------------------------------------------------------------
-// 2. Promotional image (gpt-image-1)
+// 2. Promotional image
+// AI는 글자 없는 배경 이미지만 만들고, 한글 문구는 클라이언트 캔버스로
+// 또렷하게 얹는다 (AI 한글 렌더링 깨짐 방지 + 즉시 수정 가능).
 // ---------------------------------------------------------------------------
 
 export const imagePaletteValues = ["cream", "espresso", "forest", "berry"] as const;
+export type ImagePalette = (typeof imagePaletteValues)[number];
+
+export const imageTemplateValues = ["bottom_band", "top_band", "center_card"] as const;
+export type ImageTemplate = (typeof imageTemplateValues)[number];
 
 export const MAX_IMAGE_REFERENCE_PHOTOS = 6;
 
 export const imageGenerationInputSchema = z
   .object({
-    purpose: z.enum(purposeValues),
-    /** 참고 사진들(선택). 있으면 edit, 없으면 텍스트로 생성 */
+    purpose: z.enum(purposeValues).default("daily"),
+    /** 참고 사진들(선택). 있으면 사진 기반, 없으면 제목 기반 생성 */
     photoPaths: z
-      .array(z.string().trim().min(1).max(120))
+      .array(z.string().trim().min(1).max(160))
       .max(MAX_IMAGE_REFERENCE_PHOTOS, mobileMsg.image.tooManyPhotos)
       .default([]),
-    /** @deprecated use photoPaths */
-    photoPath: z.string().trim().max(120).nullable().optional(),
-    title: z.string().trim().min(1, mobileMsg.image.titleRequired).max(60),
+    /** 제목(선택). 비우면 사진을 보고 AI가 제안 */
+    title: z.string().trim().max(60).default(""),
     dateText: z.string().trim().max(40).default(""),
-    /** 사진과 함께 참고할 한 줄 설명(선택) */
     message: z.string().trim().max(120).default(""),
   })
-  .transform((value) => {
-    const paths = [...value.photoPaths];
-    if (value.photoPath && !paths.includes(value.photoPath)) {
-      paths.unshift(value.photoPath);
-    }
-    return {
-      purpose: value.purpose,
-      title: value.title,
-      dateText: value.dateText,
-      message: value.message,
-      photoPaths: paths.slice(0, MAX_IMAGE_REFERENCE_PHOTOS),
-    };
+  .refine((value) => value.title.length > 0 || value.photoPaths.length > 0, {
+    message: mobileMsg.image.photoOrTitleRequired,
   });
 
 export type ImageGenerationInput = z.infer<typeof imageGenerationInputSchema>;
 
 export const imageOptionSchema = z.object({
-  imagePath: z.string().describe("저장된 파일명"),
-  imageUrl: z.string().describe("다운로드/표시용 URL"),
-  headline: z.string().describe("이미지에 들어간 짧은 제목"),
-  reason: z.string().describe("이 이미지를 제안한 짧은 이유"),
+  imagePath: z.string().describe("저장된 배경 파일명 (글자 없음)"),
+  imageUrl: z.string().describe("배경 이미지 URL"),
+  headline: z.string().describe("이미지에 얹을 한글 제목"),
+  subline: z.string().describe("보조 문구, 없으면 빈 문자열"),
+  dateText: z.string().describe("날짜/기간, 없으면 빈 문자열"),
+  templateId: z.enum(imageTemplateValues).describe("문구 배치 템플릿"),
+  palette: z.enum(imagePaletteValues).describe("문구 배경 색"),
+  reason: z.string().describe("이 구성을 제안한 짧은 이유"),
   usedReferencePhotos: z.boolean().describe("참고 사진을 실제로 반영했는지"),
 });
+
+export type ImageOption = z.infer<typeof imageOptionSchema>;
 
 export const imageGenerationOutputSchema = z.object({
   options: z.array(imageOptionSchema).length(2),

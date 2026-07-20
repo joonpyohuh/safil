@@ -41,54 +41,62 @@ export function buildCopyUserPrompt(input: CopyGenerationInput): string {
 내용:"${input.message}"`;
 }
 
-export function buildImagePrompt(
+const NO_TEXT_RULE =
+  "CRITICAL: The image must contain absolutely NO text, NO letters, NO numbers, NO words, NO logos, NO typography of any kind. A caption will be added separately.";
+
+/** 글자 없는 배경 이미지 프롬프트 (한글 깨짐 방지: 텍스트는 캔버스로 얹음) */
+export function buildImageBackgroundPrompt(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
+  scene: string,
   variant: "clean" | "warm",
 ): string {
-  const cafe = profile?.name ? `"${profile.name}"` : "동네 카페";
-  const location = profile?.location ? `, ${profile.location}` : "";
-  const concept = profile?.concept ? `, ${profile.concept} 분위기` : "";
-  const dateLine = input.dateText ? ` Include the date text "${input.dateText}" clearly.` : "";
+  const concept = profile?.concept ? ` The cafe concept: ${profile.concept}.` : "";
   const style =
     variant === "clean"
-      ? "Clean modern cafe poster, soft natural light, generous negative space, elegant Korean typography."
-      : "Warm cozy cafe poster, soft cream and espresso tones, inviting atmosphere, clear Korean typography.";
-
-  const photoCount = input.photoPaths.length;
+      ? "Bright, clean, airy composition with soft natural daylight and generous negative space in the lower third."
+      : "Warm, cozy composition with golden-hour tones, gentle shadows, and calm negative space in the lower third.";
   const photoHint =
-    photoCount > 0
-      ? `Use the ${photoCount} provided cafe reference photo(s) as the visual base. Keep menu/food/store appearance recognizable and honest. Blend composition naturally; do not invent a different dish.`
-      : "No reference photo provided; create an original realistic cafe promotional scene.";
-  const messageHint = input.message
-    ? `Owner note to reflect: "${input.message}".`
-    : "";
+    input.photoPaths.length > 0
+      ? "Enhance the provided cafe photo(s) into a polished promotional shot: better lighting, composition, and color. Keep the actual menu/food/space fully recognizable and honest. Do not replace the subject with a different item."
+      : `Create an original photorealistic cafe scene: ${scene || purposeLabels[input.purpose]}.`;
 
   return [
-    `Create a mobile SNS promotional image for a Korean cafe ${cafe}${location}${concept}.`,
-    `Purpose: ${purposeLabels[input.purpose]}.`,
-    `Main headline text on the image (exact Korean): "${input.title}".`,
-    dateLine,
-    messageHint,
+    `Professional Instagram promotional background photo for a Korean neighborhood cafe.`,
     photoHint,
+    scene && input.photoPaths.length > 0 ? `Scene mood: ${scene}.` : "",
+    concept,
     style,
-    "Square Instagram-friendly composition, readable Korean text, no misleading food claims, no fake awards or rankings.",
-    "Do not invent prices. Photorealistic cafe aesthetic, high readability.",
+    "Square 1:1 composition, high-end food/cafe photography aesthetic.",
+    NO_TEXT_RULE,
   ]
     .filter(Boolean)
     .join(" ");
 }
 
-export function buildImageSystemPrompt(profile: CafeProfile | null): string {
-  return `카페 홍보 이미지 문구 도우미.
+/** 사진을 보고 분위기와 문구를 계획하는 비전 프롬프트 */
+export function buildImagePlanSystemPrompt(profile: CafeProfile | null): string {
+  return `너는 카페 사진을 보고 홍보 이미지를 기획하는 한국어 디자이너다.
 ${profileContext(profile)}
-${COMMON_RULES}`;
+${COMMON_RULES}
+- scene: 사진(또는 요청)의 피사체·분위기를 영어 한 문장으로 (이미지 생성 프롬프트용)
+- suggestedTitle: 사진에 어울리는 12자 이내 한글 제목
+- options: 서로 다른 두 안. headline 12자 이내, subline 18자 이내(없으면 빈 문자열)
+- 사진에 없는 메뉴·가격·혜택을 지어내지 않는다`;
 }
 
-export function buildImageUserPrompt(input: ImageGenerationInput): string {
-  return `목적: ${purposeLabels[input.purpose]}
-제목: "${input.title}"
-날짜: "${input.dateText || ""}"`;
+export function buildImagePlanUserPrompt(input: ImageGenerationInput): string {
+  return [
+    `목적: ${purposeLabels[input.purpose]}`,
+    input.title ? `사장님이 정한 제목: "${input.title}"` : "제목은 사진을 보고 제안해줘.",
+    input.message ? `한 줄 설명: "${input.message}"` : "",
+    input.dateText ? `날짜/기간: "${input.dateText}"` : "",
+    input.photoPaths.length
+      ? `첨부한 사진 ${input.photoPaths.length}장을 보고 분위기를 파악해.`
+      : "사진 없이 제목과 목적만으로 기획해.",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function buildNoticeSystemPrompt(profile: CafeProfile | null): string {

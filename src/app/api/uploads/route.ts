@@ -5,7 +5,7 @@ import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
-const MAX_SIZE = 8 * 1024 * 1024;
+const MAX_SIZE = 12 * 1024 * 1024;
 const ALLOWED_MIME: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",

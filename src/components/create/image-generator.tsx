@@ -6,20 +6,15 @@ import type {
   CafeProfile,
   GenerationRecord,
   ImageGenerationInput,
+  ImageOption,
   Purpose,
 } from "@/lib/schemas";
 import { MAX_IMAGE_REFERENCE_PHOTOS, purposeLabels } from "@/lib/schemas";
 import { fetchWithTimeout } from "@/lib/client/fetch-with-timeout";
+import { compressImageFile } from "@/lib/client/compress-image";
+import { ImageResultCard } from "@/components/create/image-result-card";
 
 const purposes: Purpose[] = ["new_menu", "event", "daily", "notice"];
-
-type ImageOption = {
-  imagePath: string;
-  imageUrl: string;
-  headline: string;
-  reason: string;
-  usedReferencePhotos?: boolean;
-};
 
 type ImageGenerationRecord = GenerationRecord & {
   persisted?: boolean;
@@ -52,6 +47,9 @@ export function ImageGenerator({
   const [title, setTitle] = useState(initial?.title ?? "");
   const [dateText, setDateText] = useState(initial?.dateText ?? "");
   const [message, setMessage] = useState(initial?.message ?? "");
+  const [detailsOpen, setDetailsOpen] = useState(
+    Boolean(initial?.title || initial?.dateText || initial?.message),
+  );
   const [photos, setPhotos] = useState<PhotoItem[]>(
     (initial?.photoPaths ?? []).map((path) => ({
       path,
@@ -59,26 +57,36 @@ export function ImageGenerator({
     })),
   );
   const [uploading, setUploading] = useState(false);
+  const [uploadNote, setUploadNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [elapsedSec, setElapsedSec] = useState(0);
   const [error, setError] = useState("");
   const [status, setStatus] = useState(
     profileUnavailable
-      ? "카페 정보를 잠시 불러오지 못했어요. 입력한 내용으로 이미지를 만들 수 있어요."
+      ? "카페 정보를 잠시 불러오지 못했어요. 지금 입력한 내용으로 이미지를 만들 수 있어요."
       : initial?.title
-        ? "이전 내용을 불러왔어요. 사진이나 글자를 고친 뒤 다시 만들 수 있어요."
+        ? "이전 내용을 불러왔어요. 사진이나 글자를 바꾼 뒤 다시 만들 수 있어요."
         : "",
   );
   const [noticeKind, setNoticeKind] = useState<"ok" | "sample" | "no-photo" | "">("");
   const [record, setRecord] = useState<ImageGenerationRecord | null>(null);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [actionPending, setActionPending] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState(initial?.title ?? "");
-  const [editDateText, setEditDateText] = useState(initial?.dateText ?? "");
-  const [editMessage, setEditMessage] = useState(initial?.message ?? "");
   const resultsRef = useRef<HTMLElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
+
+  // 페이지 이탈 시 미리보기 blob URL 해제 (메모리 누수 방지)
+  useEffect(() => {
+    return () => {
+      for (const photo of photosRef.current) {
+        if (photo.previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(photo.previewUrl);
+        }
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading) return;
@@ -86,26 +94,37 @@ export function ImageGenerator({
     const id = window.setInterval(() => {
       const sec = Math.floor((Date.now() - started) / 1000);
       setElapsedSec(sec);
-      if (photos.length && sec < 8) {
-        setLoadingStep(`올린 사진 ${photos.length}장을 살펴보는 중…`);
-      } else if (sec < 25) {
-        setLoadingStep("이미지 1·2장을 그리는 중… 보통 40초 안에 끝나요.");
+      if (photosRef.current.length && sec < 8) {
+        setLoadingStep(`올린 사진 ${photosRef.current.length}장의 분위기를 읽는 중…`);
+      } else if (sec < 30) {
+        setLoadingStep("배경 이미지 2장을 그리는 중… 보통 40초 안에 끝나요.");
       } else {
         setLoadingStep("조금만 더 기다려 주세요. 거의 다 됐어요.");
       }
     }, 1000);
     return () => window.clearInterval(id);
-  }, [loading, photos.length]);
+  }, [loading]);
 
   async function uploadOne(file: File): Promise<PhotoItem> {
+    let ready: File;
+    try {
+      ready = await compressImageFile(file);
+    } catch {
+      // 변환 실패: JPG/PNG/WEBP 원본이면 그대로 시도, 아니면 명확히 안내
+      const compatible = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+      if (!compatible) {
+        throw new Error("사진 형식을 변환하지 못했어요. 다른 사진을 골라 주세요.");
+      }
+      ready = file;
+    }
     const body = new FormData();
-    body.append("file", file);
-    const res = await fetchWithTimeout("/api/uploads", { method: "POST", body }, 30_000);
+    body.append("file", ready);
+    const res = await fetchWithTimeout("/api/uploads", { method: "POST", body }, 45_000);
     const json = await res.json().catch(() => null);
     if (!json?.ok) throw new Error(json?.error || "사진을 올리지 못했어요.");
     return {
       path: json.data.storedName as string,
-      previewUrl: URL.createObjectURL(file),
+      previewUrl: URL.createObjectURL(ready),
     };
   }
 
@@ -121,22 +140,40 @@ export function ImageGenerator({
     const all = Array.from(fileList);
     const picked = all.slice(0, remaining);
     setUploading(true);
+    setUploadNote(
+      picked.length === 1 ? "사진 1장을 준비하는 중…" : `사진 ${picked.length}장을 준비하는 중…`,
+    );
     try {
-      const uploaded = await Promise.all(picked.map((file) => uploadOne(file)));
-      setPhotos((prev) => [...prev, ...uploaded]);
-      const total = photos.length + uploaded.length;
-      const truncated = all.length > picked.length;
-      setStatus(
-        truncated
-          ? `최대 ${MAX_IMAGE_REFERENCE_PHOTOS}장까지만 올릴 수 있어 ${picked.length}장만 담았어요.`
-          : total === 1
-            ? "참고 사진 1장을 올렸어요. 더 올리면 분위기를 더 잘 살릴 수 있어요."
-            : `참고 사진 ${total}장을 올렸어요.`,
-      );
+      const uploaded: PhotoItem[] = [];
+      const failed: string[] = [];
+      const results = await Promise.allSettled(picked.map((file) => uploadOne(file)));
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") uploaded.push(result.value);
+        else failed.push(picked[index]?.name ?? `사진 ${index + 1}`);
+      });
+
+      if (uploaded.length === 0) {
+        throw new Error("사진을 올리지 못했어요. 잠시 후 다시 시도해 주세요.");
+      }
+
+      const nextPhotos = [...photos, ...uploaded];
+      setPhotos(nextPhotos);
+
+      if (failed.length > 0) {
+        setStatus(`사진 ${uploaded.length}장을 올렸어요. ${failed.length}장은 올리지 못했어요.`);
+      } else if (all.length > picked.length) {
+        setStatus(`최대 ${MAX_IMAGE_REFERENCE_PHOTOS}장까지만 올릴 수 있어 ${picked.length}장만 담았어요.`);
+      }
+
+      // 원탭 플로우: 사진을 올리면 바로 만들기 시작 (제목은 AI가 제안)
+      if (failed.length === 0 && !loading) {
+        void runGenerate(title.trim(), dateText.trim(), message.trim(), nextPhotos);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "사진을 올리지 못했어요.");
     } finally {
       setUploading(false);
+      setUploadNote("");
       if (fileRef.current) fileRef.current.value = "";
     }
   }
@@ -144,36 +181,49 @@ export function ImageGenerator({
   function removePhoto(path: string) {
     setPhotos((prev) => {
       const target = prev.find((item) => item.path === path);
-      if (target) URL.revokeObjectURL(target.previewUrl);
+      if (target && target.previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
       return prev.filter((item) => item.path !== path);
     });
-    setStatus("사진을 빼었어요.");
+  }
+
+  function cancelGenerate() {
+    abortRef.current?.abort();
   }
 
   async function runGenerate(
     nextTitle: string,
     nextDate: string,
     nextMessage: string,
+    withPhotos?: PhotoItem[],
   ) {
+    const usePhotos = withPhotos ?? photos;
+    if (!nextTitle && usePhotos.length === 0) {
+      setError("사진을 올리거나 제목을 적어 주세요.");
+      return;
+    }
     setLoading(true);
     setElapsedSec(0);
     setLoadingStep(
-      photos.length
-        ? `올린 사진 ${photos.length}장을 살펴보는 중…`
-        : "이미지 1·2장을 그리는 중… 보통 40초 안에 끝나요.",
+      usePhotos.length
+        ? `올린 사진 ${usePhotos.length}장의 분위기를 읽는 중…`
+        : "배경 이미지 2장을 그리는 중… 보통 40초 안에 끝나요.",
     );
     setError("");
     setStatus("");
     setNoticeKind("");
+    // 서버 maxDuration(90초)보다 길게 잡아 "클라이언트만 실패" 상황을 방지
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 70_000);
+    abortRef.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 100_000);
     try {
       const body: ImageGenerationInput = {
         purpose,
         title: nextTitle,
         dateText: nextDate,
         message: nextMessage,
-        photoPaths: photos.map((photo) => photo.path),
+        photoPaths: usePhotos.map((photo) => photo.path),
       };
       const res = await fetch("/api/generate/image", {
         method: "POST",
@@ -183,30 +233,30 @@ export function ImageGenerator({
       });
       const json = await res.json().catch(() => null);
       if (!json) throw new Error("응답을 읽지 못했어요. 다시 시도해 주세요.");
-      if (!json.ok) throw new Error(json.error);
+      if (!json.ok) {
+        throw new Error(json.error || "만들지 못했어요. 다시 시도해 주세요.");
+      }
       setRecord(json.data);
-      setSelected(null);
-      setEditTitle(nextTitle);
-      setEditDateText(nextDate);
-      setEditMessage(nextMessage);
-      setTitle(nextTitle);
-      setDateText(nextDate);
-      setMessage(nextMessage);
 
       const options = (json.data.options ?? []) as ImageOption[];
-      const usedPhotos = options.some((option) => option.usedReferencePhotos);
+      const reflected = options.filter((option) => option.usedReferencePhotos).length;
       if (json.data.isSample) {
         setNoticeKind("sample");
         setStatus("지금은 체험용 이미지예요. 아래 버튼으로 한 번 더 만들어 주세요.");
-      } else if (photos.length > 0 && !usedPhotos) {
+      } else if (usePhotos.length > 0 && reflected === 0) {
         setNoticeKind("no-photo");
-        setStatus("사진을 반영하기 어려워 제목 중심으로 새로 그렸어요.");
+        setStatus("사진을 반영하기 어려워 분위기만 살려 새로 그렸어요.");
+      } else if (usePhotos.length > 0 && reflected < options.length) {
+        setNoticeKind("ok");
+        setStatus(
+          `이미지 2장 중 ${reflected}장에 사진을 반영했어요. 각 이미지의 표시를 확인해 주세요.`,
+        );
       } else {
         setNoticeKind("ok");
         setStatus(
           json.data.persisted
-            ? "홍보 이미지 2장을 만들었어요."
-            : "이미지를 만들었어요. 기록 저장은 잠시 안 되지만 바로 받을 수 있어요.",
+            ? "이미지 2장이 완성됐어요. 글자는 아래에서 바로 고칠 수 있어요."
+            : "이미지가 완성됐어요. 기록 저장은 잠시 안 되지만 바로 받을 수 있어요.",
         );
       }
       window.setTimeout(() => {
@@ -215,12 +265,13 @@ export function ImageGenerator({
       }, 50);
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
-        setError("만드는 시간이 오래 걸리고 있어요. 아래 버튼으로 다시 시도해 주세요.");
+        setError("만들기를 멈췄거나 시간이 너무 오래 걸렸어요. 아래 버튼으로 다시 시도해 주세요.");
       } else {
         setError(err instanceof Error ? err.message : "만들지 못했어요. 다시 시도해 주세요.");
       }
     } finally {
       window.clearTimeout(timeout);
+      abortRef.current = null;
       setLoading(false);
       setLoadingStep("");
       setElapsedSec(0);
@@ -232,60 +283,8 @@ export function ImageGenerator({
     await runGenerate(title.trim(), dateText.trim(), message.trim());
   }
 
-  async function regenerateWithEdits() {
-    const nextTitle = editTitle.trim();
-    if (!nextTitle) {
-      setError("이미지에 넣을 제목을 적어 주세요.");
-      return;
-    }
-    await runGenerate(nextTitle, editDateText.trim(), editMessage.trim());
-  }
-
-  async function downloadOption(option: ImageOption, index: number) {
-    setError("");
-    setActionPending(index);
-    try {
-      const response = await fetch(option.imageUrl);
-      if (!response.ok) throw new Error("이미지를 받지 못했어요.");
-      const blob = await response.blob();
-      const fileName = `${option.headline || "safil-image"}-${index + 1}.png`;
-      const file = new File([blob], fileName, { type: blob.type || "image/png" });
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: option.headline,
-          text: `${profile.name} 홍보 이미지`,
-        });
-        setSelected(index);
-        setStatus("공유할 앱을 선택했어요. 인스타그램에 올려보세요.");
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(url);
-        setSelected(index);
-        setStatus("이미지를 저장했어요. 안 되면 이미지를 길게 눌러 저장해 주세요.");
-      }
-
-      if (record?.persisted) {
-        await fetchWithTimeout(`/api/history/${record.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ downloaded: true, selectedIndex: index }),
-        }).catch(() => null);
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      setError("저장하지 못했어요. 이미지를 길게 눌러 저장해 주세요.");
-    } finally {
-      setActionPending(null);
-    }
-  }
-
   const canAddMore = photos.length < MAX_IMAGE_REFERENCE_PHOTOS;
+  const canSubmit = !loading && !uploading && (photos.length > 0 || title.trim().length > 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -297,7 +296,8 @@ export function ImageGenerator({
         <p className="text-sm font-bold text-brand">이미지</p>
         <h1 className="mt-1 text-2xl font-bold">홍보 이미지 만들기</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          메뉴·매장 사진을 여러 장 올리고 제목만 적으면, 인스타에 올릴 이미지 2장을 만들어드려요.
+          메뉴·매장 사진만 올리면 바로 만들어드려요. 제목은 AI가 사진을 보고 제안하고, 한글 문구는
+          완성 후 바로 고칠 수 있어요.
         </p>
       </header>
 
@@ -331,26 +331,9 @@ export function ImageGenerator({
       )}
 
       <form id="image-form" onSubmit={submit} className="card flex flex-col gap-5" aria-busy={loading}>
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-sm font-semibold">어떤 소식인가요?</legend>
-          <div className="grid grid-cols-2 gap-2">
-            {purposes.map((p) => (
-              <button
-                key={p}
-                type="button"
-                className={`chip ${purpose === p ? "chip-active" : ""}`}
-                onClick={() => setPurpose(p)}
-                aria-pressed={purpose === p}
-              >
-                {purposeLabels[p]}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-semibold">참고 사진 (선택)</span>
+            <span className="text-sm font-semibold">1. 사진 올리기</span>
             <span className="text-xs font-semibold text-ink-soft">
               {photos.length}/{MAX_IMAGE_REFERENCE_PHOTOS}
             </span>
@@ -358,23 +341,23 @@ export function ImageGenerator({
           <input
             ref={fileRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/*"
             multiple
             className="sr-only"
             onChange={(e) => onPickPhotos(e.target.files)}
           />
           <button
             type="button"
-            className="btn-secondary"
+            className="btn-primary !min-h-14"
             disabled={uploading || loading || !canAddMore}
             onClick={() => fileRef.current?.click()}
           >
             {uploading
-              ? "올리는 중…"
+              ? uploadNote || "올리는 중…"
               : canAddMore
                 ? photos.length
                   ? "사진 더 올리기"
-                  : "사진 여러 장 올리기"
+                  : "사진 올리고 바로 만들기"
                 : "최대 장수예요"}
           </button>
 
@@ -401,45 +384,78 @@ export function ImageGenerator({
             </ul>
           )}
           <p className="text-xs leading-5 text-ink-soft">
-            한 번에 여러 장을 고를 수 있어요. 최대 {MAX_IMAGE_REFERENCE_PHOTOS}장. 없어도 제목만으로
-            만들 수 있어요.
+            아이폰 사진(HEIC)도 알아서 변환돼요. 사진만 올리면 AI가 분위기를 읽고 바로
+            만들어드려요.
           </p>
         </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold">이미지 제목 *</span>
-          <input
-            className="field"
-            required
-            maxLength={60}
-            placeholder="예: 딸기라떼 신메뉴"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            enterKeyHint="done"
-          />
-        </label>
+        <button
+          type="button"
+          className="flex min-h-11 items-center justify-between text-left text-sm font-semibold"
+          onClick={() => setDetailsOpen((v) => !v)}
+          aria-expanded={detailsOpen}
+        >
+          <span>2. 직접 정하고 싶다면 (선택)</span>
+          <span aria-hidden className="text-ink-soft">
+            {detailsOpen ? "접기 ▲" : "펼치기 ▼"}
+          </span>
+        </button>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold">한 줄 설명 (선택)</span>
-          <input
-            className="field"
-            maxLength={120}
-            placeholder="예: 제철 딸기로 만든 라떼예요"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-        </label>
+        {detailsOpen && (
+          <div className="flex flex-col gap-4">
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 text-sm font-semibold">어떤 소식인가요?</legend>
+              <div className="grid grid-cols-2 gap-2">
+                {purposes.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    className={`chip ${purpose === p ? "chip-active" : ""}`}
+                    onClick={() => setPurpose(p)}
+                    aria-pressed={purpose === p}
+                  >
+                    {purposeLabels[p]}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-semibold">날짜/기간 (선택)</span>
-          <input
-            className="field"
-            maxLength={40}
-            placeholder="예: 이번 주말까지"
-            value={dateText}
-            onChange={(e) => setDateText(e.target.value)}
-          />
-        </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-semibold">이미지 제목 (비우면 AI가 제안)</span>
+              <input
+                className="field"
+                maxLength={16}
+                placeholder="예: 딸기라떼 신메뉴"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                enterKeyHint="done"
+              />
+              <span className="text-xs text-ink-soft">이미지에는 16자까지 또렷하게 들어가요</span>
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-semibold">한 줄 설명 (선택)</span>
+              <input
+                className="field"
+                maxLength={120}
+                placeholder="예: 제철 딸기로 만든 라떼예요"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-semibold">날짜/기간 (선택)</span>
+              <input
+                className="field"
+                maxLength={40}
+                placeholder="예: 이번 주말까지"
+                value={dateText}
+                onChange={(e) => setDateText(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
 
         {error && (
           <div role="alert" className="alert-error flex flex-col gap-3">
@@ -447,7 +463,7 @@ export function ImageGenerator({
             <button
               type="button"
               className="btn-secondary"
-              disabled={loading || uploading || !title.trim()}
+              disabled={loading || uploading || (photos.length === 0 && !title.trim())}
               onClick={() => runGenerate(title.trim(), dateText.trim(), message.trim())}
             >
               다시 시도하기
@@ -467,10 +483,13 @@ export function ImageGenerator({
                 style={{ width: `${Math.min(95, 12 + elapsedSec * 2)}%` }}
               />
             </div>
+            <button type="button" className="btn-secondary" onClick={cancelGenerate}>
+              멈추기
+            </button>
           </div>
         )}
 
-        <button type="submit" className="btn-primary hidden md:inline-flex" disabled={loading || uploading}>
+        <button type="submit" className="btn-primary hidden md:inline-flex" disabled={!canSubmit}>
           {loading ? "만드는 중…" : "이미지 2장 만들기"}
         </button>
       </form>
@@ -480,9 +499,9 @@ export function ImageGenerator({
           type="submit"
           form="image-form"
           className="btn-primary"
-          disabled={loading || uploading}
+          disabled={!canSubmit}
         >
-          {loading ? "만드는 중…" : record ? "처음부터 다시 만들기" : "이미지 2장 만들기"}
+          {loading ? "만드는 중…" : record ? "새 배경으로 다시 만들기" : "이미지 2장 만들기"}
         </button>
       </div>
 
@@ -497,100 +516,34 @@ export function ImageGenerator({
             <p className="text-sm font-bold text-brand">완성</p>
             <h2 className="text-xl font-bold">마음에 드는 이미지를 저장하세요</h2>
             <p className="mt-1 text-sm text-ink-soft">
-              글자가 아쉬우면 아래에서 고친 뒤 다시 그릴 수 있어요.
+              한글 문구는 각 이미지에서 바로 고칠 수 있어요. 다시 만들 필요 없어요.
             </p>
-          </div>
-
-          <div className="card flex flex-col gap-3">
-            <p className="text-sm font-semibold">글자 수정 후 다시 그리기</p>
-            <p className="text-xs leading-5 text-ink-soft">
-              글자를 바꾸면 이미지를 새로 그려요. 참고 사진은 그대로 쓰입니다.
-            </p>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold text-ink-soft">제목</span>
-              <input
-                className="field"
-                maxLength={60}
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold text-ink-soft">한 줄 설명</span>
-              <input
-                className="field"
-                maxLength={120}
-                value={editMessage}
-                onChange={(e) => setEditMessage(e.target.value)}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-semibold text-ink-soft">날짜/기간</span>
-              <input
-                className="field"
-                maxLength={40}
-                value={editDateText}
-                onChange={(e) => setEditDateText(e.target.value)}
-              />
-            </label>
-            <button
-              type="button"
-              className="btn-secondary"
-              disabled={loading || uploading}
-              onClick={regenerateWithEdits}
-            >
-              이 글자로 다시 그리기
-            </button>
           </div>
 
           {(record.options as ImageOption[]).map((option, index) => (
-            <article
+            <ImageResultCard
               key={`${record.id}-${index}-${option.imageUrl}`}
-              className={`card flex flex-col gap-3 ${
-                selected === index ? "ring-2 ring-brand ring-offset-2" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-brand">
-                  {index === 0 ? "깔끔한 버전" : "따뜻한 버전"}
-                </span>
-                {record.isSample && (
-                  <span className="rounded-full bg-cream px-2 py-1 text-[0.6875rem] text-ink-soft">
-                    체험용
-                  </span>
-                )}
-              </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={option.imageUrl}
-                alt={option.headline}
-                className="aspect-square w-full rounded-2xl bg-cream object-cover"
-              />
-              <p className="text-xs leading-5 text-ink-soft">
-                저장이 안 되면 이미지를 길게 눌러 저장해 주세요.
-              </p>
-              <p className="text-sm font-semibold">{option.headline}</p>
-              <details className="rounded-xl bg-cream px-3 py-2">
-                <summary className="cursor-pointer text-xs font-bold text-ink-soft">
-                  이 이미지를 제안한 이유
-                </summary>
-                <p className="mt-2 text-xs leading-5 text-ink-soft">{option.reason}</p>
-              </details>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => downloadOption(option, index)}
-                disabled={actionPending === index}
-              >
-                {actionPending === index ? "준비 중…" : "저장하거나 공유하기"}
-              </button>
-            </article>
+              label={index === 0 ? "밝고 깔끔한 버전" : "따뜻한 분위기 버전"}
+              imageUrl={option.imageUrl}
+              initialHeadline={option.headline}
+              initialSubline={option.subline ?? ""}
+              initialDateText={option.dateText ?? dateText}
+              initialTemplate={option.templateId ?? "bottom_band"}
+              initialPalette={option.palette ?? (index === 0 ? "cream" : "espresso")}
+              reason={option.reason}
+              isSample={record.isSample}
+              usedReferencePhotos={
+                photos.length > 0 ? Boolean(option.usedReferencePhotos) : undefined
+              }
+              shareTitle={`${profile.name} 홍보 이미지`}
+              persistId={record.persisted ? record.id : undefined}
+            />
           ))}
 
           <div className="card flex flex-col gap-2 text-center">
             <p className="font-bold">이미지를 쓰셨나요?</p>
             <p className="text-sm leading-6 text-ink-soft">
-              저장한 이미지는 홈의 최근 기록과 히스토리에서 다시 볼 수 있어요.
+              만든 이미지는 히스토리에서 다시 보고 글자도 고칠 수 있어요.
             </p>
             <div className="mt-1 grid grid-cols-2 gap-2">
               <Link href="/" className="btn-secondary">

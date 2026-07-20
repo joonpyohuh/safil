@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { CopyHistoryActions } from "@/components/history/copy-history-actions";
-import { ImageHistoryActions } from "@/components/history/image-history-actions";
+import { ImageResultCard } from "@/components/create/image-result-card";
 import { listGenerations } from "@/lib/history";
-import type { Channel, Purpose } from "@/lib/schemas";
+import type { Channel, ImagePalette, ImageTemplate, Purpose } from "@/lib/schemas";
 
 type CopyOption = {
   text?: string;
@@ -13,6 +13,10 @@ type CopyOption = {
 type ImageOption = {
   imageUrl?: string;
   headline?: string;
+  subline?: string;
+  dateText?: string;
+  templateId?: ImageTemplate;
+  palette?: ImagePalette;
   reason?: string;
 };
 
@@ -78,15 +82,10 @@ export default async function HistoryPage() {
               }
 
               return (
-                <li key={record.id} className="card flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-3">
+                <li key={record.id} className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-3 px-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-brand">홍보 이미지</span>
-                      {record.isSample && (
-                        <span className="rounded-full bg-cream px-2 py-1 text-[0.6875rem] text-ink-soft">
-                          체험용
-                        </span>
-                      )}
                       {record.downloaded && (
                         <span className="rounded-full bg-brand-soft px-2 py-1 text-[0.6875rem] font-semibold text-brand">
                           저장함
@@ -102,26 +101,29 @@ export default async function HistoryPage() {
                     </time>
                   </div>
                   {option.imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={option.imageUrl}
-                      alt={headline}
-                      className="aspect-square w-full rounded-2xl object-cover"
-                    />
-                  ) : null}
-                  <p className="text-sm font-semibold">{headline}</p>
-                  {option.imageUrl ? (
-                    <ImageHistoryActions
-                      id={record.id}
+                    <ImageResultCard
+                      label={headline}
                       imageUrl={option.imageUrl}
-                      headline={headline}
-                      reuseHref={`/create/image?${reuse.toString()}`}
+                      initialHeadline={headline}
+                      initialSubline={option.subline ?? ""}
+                      initialDateText={option.dateText ?? input.dateText ?? ""}
+                      initialTemplate={option.templateId ?? "bottom_band"}
+                      initialPalette={option.palette ?? "cream"}
+                      isSample={record.isSample}
+                      shareTitle="카페 홍보 이미지"
+                      persistId={record.id}
                     />
                   ) : (
                     <Link href="/create/image" className="btn-primary">
                       비슷하게 만들기
                     </Link>
                   )}
+                  <Link
+                    href={`/create/image?${reuse.toString()}`}
+                    className="btn-secondary"
+                  >
+                    비슷하게 다시 만들기
+                  </Link>
                 </li>
               );
             }

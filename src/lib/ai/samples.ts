@@ -80,49 +80,58 @@ export function sampleCopy(
   };
 }
 
-function sampleImageDataUrl(headline: string, subtitle: string, tone: "clean" | "warm"): string {
-  const bg = tone === "clean" ? "#f7f1e8" : "#3d2a22";
-  const fg = tone === "clean" ? "#2a2320" : "#faf6f0";
-  const accent = tone === "clean" ? "#914321" : "#e8c4a8";
+/** 글자 없는 체험용 배경 (문구는 캔버스가 얹음) */
+function sampleBackgroundDataUrl(tone: "clean" | "warm"): string {
+  const stops =
+    tone === "clean"
+      ? ["#fdf9f3", "#f3e7d8", "#e7d4be"]
+      : ["#4a332a", "#3a2620", "#2a1a15"];
+  const accent = tone === "clean" ? "#d8bfa4" : "#6b4a3a";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" fill="${bg}"/>
-  <rect x="72" y="72" width="880" height="880" rx="36" fill="none" stroke="${accent}" stroke-width="4"/>
-  <text x="512" y="430" text-anchor="middle" font-family="sans-serif" font-size="64" font-weight="700" fill="${fg}">${escapeXml(headline)}</text>
-  <text x="512" y="520" text-anchor="middle" font-family="sans-serif" font-size="36" fill="${accent}">${escapeXml(subtitle)}</text>
-  <text x="512" y="900" text-anchor="middle" font-family="sans-serif" font-size="28" fill="${accent}">체험용 이미지</text>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${stops[0]}"/>
+      <stop offset="0.6" stop-color="${stops[1]}"/>
+      <stop offset="1" stop-color="${stops[2]}"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#g)"/>
+  <circle cx="780" cy="240" r="180" fill="${accent}" opacity="0.35"/>
+  <circle cx="220" cy="520" r="120" fill="${accent}" opacity="0.25"/>
+  <circle cx="620" cy="700" r="220" fill="${accent}" opacity="0.18"/>
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-}
-
-function escapeXml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }
 
 export function sampleImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
 ): ImageGenerationOutput {
-  const headline = input.title || "새로운 소식";
-  const subtitle = [profile?.name, input.dateText].filter(Boolean).join(" · ") || "우리 카페";
+  const headline = (input.title || "오늘의 카페 소식").slice(0, 14);
+  const subline = (input.message || profile?.name || "").slice(0, 20);
   return {
     options: [
       {
         imagePath: "",
-        imageUrl: sampleImageDataUrl(headline, subtitle, "clean"),
+        imageUrl: sampleBackgroundDataUrl("clean"),
         headline,
+        subline,
+        dateText: input.dateText,
+        templateId: "bottom_band",
+        palette: "cream",
         usedReferencePhotos: false,
-        reason: "체험용으로 만든 깔끔한 버전이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
+        reason: "체험용 배경이에요. 글자는 지금도 자유롭게 고칠 수 있어요.",
       },
       {
         imagePath: "",
-        imageUrl: sampleImageDataUrl(headline, subtitle, "warm"),
+        imageUrl: sampleBackgroundDataUrl("warm"),
         headline,
+        subline,
+        dateText: input.dateText,
+        templateId: "bottom_band",
+        palette: "espresso",
         usedReferencePhotos: false,
-        reason: "체험용으로 만든 따뜻한 버전이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
+        reason: "체험용 배경이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
       },
     ],
   };

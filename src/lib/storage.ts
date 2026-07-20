@@ -3,6 +3,13 @@ import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/server";
 
 const BUCKET = "uploads";
 
+/** Supabase 공개 URL — 캔버스 CORS와 외부 접근에 사용 */
+export function publicUploadUrl(storedName: string): string {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!base) return `/api/files/${storedName}`;
+  return `${base}/storage/v1/object/public/${BUCKET}/${storedName}`;
+}
+
 export async function uploadImageBuffer(
   buffer: Buffer,
   contentType: "image/png" | "image/jpeg" | "image/webp" = "image/png",
