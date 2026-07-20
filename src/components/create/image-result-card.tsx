@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ImagePalette, ImageTemplate } from "@/lib/schemas";
 import {
+  EDITABLE_IMAGE_TEMPLATES,
   IMAGE_TEMPLATE_LABELS,
   imagePaletteValues,
-  imageTemplateValues,
   normalizeImageTemplate,
 } from "@/lib/schemas";
 import { fetchWithTimeout } from "@/lib/client/fetch-with-timeout";
@@ -18,21 +18,20 @@ import { posterToBlob } from "@/lib/client/export-poster";
 import { PromoPoster, POSTER_SIZE } from "@/components/create/promo-poster";
 import { MarkPostedButton } from "@/components/history/mark-posted-button";
 
-const EDIT_TEMPLATES = imageTemplateValues.filter(
-  (t) => !["bottom_band", "top_band", "center_card"].includes(t),
-) as ImageTemplate[];
-
 const EDIT_PALETTES = imagePaletteValues;
 
 type ImageResultCardProps = {
   label: string;
   imageUrl: string;
   initialHeadline: string;
-  initialSubline: string;
+  initialBodyText?: string;
+  initialSubline?: string;
   initialDateText: string;
+  initialBrandCue?: string;
   initialTemplate: ImageTemplate;
   initialPalette: ImagePalette;
   cafeName?: string;
+  cafeLocation?: string;
   reason?: string;
   isSample?: boolean;
   usedReferencePhotos?: boolean;
@@ -45,11 +44,14 @@ export function ImageResultCard({
   label,
   imageUrl,
   initialHeadline,
+  initialBodyText,
   initialSubline,
   initialDateText,
+  initialBrandCue,
   initialTemplate,
   initialPalette,
   cafeName,
+  cafeLocation,
   reason,
   isSample,
   usedReferencePhotos,
@@ -57,14 +59,14 @@ export function ImageResultCard({
   persistId,
   onSaved,
 }: ImageResultCardProps) {
-  /** 내보내기 전용 1080 노드 (화면 밖) */
   const exportRef = useRef<HTMLDivElement>(null);
-  const blobRef = useRef<Blob | null>(null);
-  const blobSeqRef = useRef(0);
   const scaleWrapRef = useRef<HTMLDivElement>(null);
 
   const [headline, setHeadline] = useState(initialHeadline);
-  const [subline, setSubline] = useState(initialSubline);
+  const [bodyText, setBodyText] = useState(
+    initialBodyText || initialSubline || "",
+  );
+  const [brandCue, setBrandCue] = useState(initialBrandCue || "");
   const [dateText, setDateText] = useState(initialDateText);
   const [templateId, setTemplateId] = useState<ImageTemplate>(
     normalizeImageTemplate(initialTemplate),
@@ -76,12 +78,12 @@ export function ImageResultCard({
   );
   const [colors, setColors] = useState<PosterColors>(PRESET_COLORS.espresso);
   const [scale, setScale] = useState(0.35);
-  const [imageReady, setImageReady] = useState(false);
-  const [blobReady, setBlobReady] = useState(false);
+  const [readyUrl, setReadyUrl] = useState("");
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState<"share" | "download" | null>(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const imageReady = readyUrl === imageUrl;
 
   useEffect(() => {
     const el = scaleWrapRef.current;
@@ -98,7 +100,6 @@ export function ImageResultCard({
 
   useEffect(() => {
     let cancelled = false;
-    setImageReady(false);
     (async () => {
       if (palette === "auto") {
         const extracted = await extractPosterColors(imageUrl);
@@ -113,40 +114,23 @@ export function ImageResultCard({
         img.onerror = () => resolve();
         img.src = imageUrl;
       });
-      if (!cancelled) setImageReady(true);
+      if (!cancelled) setReadyUrl(imageUrl);
     })();
     return () => {
       cancelled = true;
     };
   }, [imageUrl, palette]);
 
-  const rebuildBlob = useCallback(async () => {
+  /** 저장/공유 시에만 1080 PNG 생성 (미리 렌더하지 않음) */
+  async function renderPngBlob(): Promise<Blob> {
     const node = exportRef.current;
-    if (!node || !imageReady) return;
-    const seq = ++blobSeqRef.current;
-    blobRef.current = null;
-    setBlobReady(false);
-    try {
-      // 레이아웃·이미지 페인트 한 프레임 대기
-      await new Promise((r) => requestAnimationFrame(() => r(undefined)));
-      const blob = await posterToBlob(node);
-      if (seq === blobSeqRef.current) {
-        blobRef.current = blob;
-        setBlobReady(true);
-      }
-    } catch (err) {
-      console.error("[safil poster export]", err);
-      if (seq === blobSeqRef.current) setBlobReady(false);
+    if (!node) throw new Error("EXPORT_FAILED");
+    await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+    if (typeof document !== "undefined" && "fonts" in document) {
+      await document.fonts.ready.catch(() => undefined);
     }
-  }, [imageReady, headline, subline, dateText, templateId, colors, cafeName]);
-
-  useEffect(() => {
-    if (!imageReady) return;
-    const t = window.setTimeout(() => {
-      void rebuildBlob();
-    }, 180);
-    return () => window.clearTimeout(t);
-  }, [imageReady, rebuildBlob]);
+    return posterToBlob(node);
+  }
 
   function downloadBlobFile(blob: Blob, fileName: string) {
     const url = URL.createObjectURL(blob);
@@ -155,16 +139,6 @@ export function ImageResultCard({
     a.download = fileName;
     a.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 3000);
-  }
-
-  async function getBlob(): Promise<Blob> {
-    if (blobRef.current) return blobRef.current;
-    const node = exportRef.current;
-    if (!node) throw new Error("EXPORT_FAILED");
-    const blob = await posterToBlob(node);
-    blobRef.current = blob;
-    setBlobReady(true);
-    return blob;
   }
 
   async function markDownloaded() {
@@ -183,22 +157,18 @@ export function ImageResultCard({
     return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
   }
 
-  /** 핸드폰: 공유 시트로 '이미지 저장' → 갤러리. PC: 파일 다운로드 */
   async function saveToGallery() {
     setError("");
     setStatus("");
     setPending("download");
     try {
-      const blob = await getBlob();
+      const blob = await renderPngBlob();
       const fileName = `${headline || "safil"}-홍보이미지.png`;
       const file = new File([blob], fileName, { type: "image/png" });
 
       if (isMobileDevice() && navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({
-            files: [file],
-            title: shareTitle,
-          });
+          await navigator.share({ files: [file], title: shareTitle });
           setStatus("공유 화면에서 '이미지 저장' 또는 '사진에 추가'를 누르면 갤러리에 들어가요.");
           await markDownloaded();
           return;
@@ -215,7 +185,7 @@ export function ImageResultCard({
       );
       await markDownloaded();
     } catch {
-      setError("저장하지 못했어요. 미리보기를 길게 눌러 저장해 주세요.");
+      setError("저장하지 못했어요. 잠시 후 다시 눌러 주세요.");
     } finally {
       setPending(null);
     }
@@ -226,7 +196,7 @@ export function ImageResultCard({
     setStatus("");
     setPending("share");
     try {
-      const blob = await getBlob();
+      const blob = await renderPngBlob();
       const fileName = `${headline || "safil"}-홍보이미지.png`;
       const file = new File([blob], fileName, { type: "image/png" });
 
@@ -249,20 +219,21 @@ export function ImageResultCard({
     }
   }
 
-  const busy = pending !== null || !imageReady || !blobReady;
+  const busy = pending !== null || !imageReady;
   const posterProps = {
     imageUrl,
     headline,
-    subline,
+    bodyText,
     dateText,
     cafeName,
+    cafeLocation,
+    brandCue,
     templateId,
     colors,
   };
 
   return (
     <article className="card flex flex-col gap-3">
-      {/* 내보내기 전용 1080px — 화면 밖 고정 */}
       <div
         aria-hidden
         style={{
@@ -289,7 +260,7 @@ export function ImageResultCard({
                   : "bg-cream text-ink-soft"
               }`}
             >
-              {usedReferencePhotos ? "사진 반영" : "새로 그림"}
+              {usedReferencePhotos ? "원본 사진" : "AI 배경"}
             </span>
           )}
           {isSample && (
@@ -318,65 +289,79 @@ export function ImageResultCard({
         onClick={() => setEditing((v) => !v)}
         aria-expanded={editing}
       >
-        {editing ? "꾸미기 닫기" : "글자·레이아웃·색 바꾸기"}
+        {editing ? "수정 닫기" : "글자·레이아웃 수정"}
       </button>
 
       {editing && (
-        <div className="flex flex-col gap-3 rounded-2xl bg-cream p-3">
-          <p className="text-xs leading-5 text-ink-soft">
-            바꾸는 즉시 미리보기에 반영돼요. 다시 만들 필요 없어요.
-          </p>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-ink-soft">제목 (16자까지)</span>
+        <div className="flex flex-col gap-3 rounded-2xl bg-cream px-3 py-3">
+          <label className="flex flex-col gap-1 text-xs font-bold text-ink-soft">
+            제목
             <input
-              className="field"
-              maxLength={16}
+              className="input text-sm font-semibold"
               value={headline}
+              maxLength={40}
               onChange={(e) => setHeadline(e.target.value)}
             />
           </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-ink-soft">보조 문구 (18자까지)</span>
-            <input
-              className="field"
-              maxLength={18}
-              value={subline}
-              onChange={(e) => setSubline(e.target.value)}
+          <label className="flex flex-col gap-1 text-xs font-bold text-ink-soft">
+            홍보 본문 (사실 그대로)
+            <textarea
+              className="input min-h-24 text-sm"
+              value={bodyText}
+              maxLength={240}
+              onChange={(e) => setBodyText(e.target.value)}
             />
           </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-ink-soft">날짜/기간 (16자까지)</span>
+          <label className="flex flex-col gap-1 text-xs font-bold text-ink-soft">
+            브랜드 한 줄
             <input
-              className="field"
-              maxLength={16}
+              className="input text-sm"
+              value={brandCue}
+              maxLength={40}
+              onChange={(e) => setBrandCue(e.target.value)}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-bold text-ink-soft">
+            날짜·기간
+            <input
+              className="input text-sm"
               value={dateText}
+              maxLength={40}
               onChange={(e) => setDateText(e.target.value)}
             />
           </label>
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className="text-xs font-semibold text-ink-soft">레이아웃</legend>
-            <div className="grid grid-cols-2 gap-2">
-              {EDIT_TEMPLATES.map((t) => (
+          <fieldset>
+            <legend className="text-xs font-bold text-ink-soft">레이아웃</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {EDITABLE_IMAGE_TEMPLATES.map((tpl) => (
                 <button
-                  key={t}
+                  key={tpl}
                   type="button"
-                  className={`chip !min-h-11 !text-xs ${templateId === t ? "chip-active" : ""}`}
-                  onClick={() => setTemplateId(t)}
-                  aria-pressed={templateId === t}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                    templateId === tpl
+                      ? "bg-brand text-white"
+                      : "bg-white text-ink-soft ring-1 ring-cream-deep"
+                  }`}
+                  onClick={() => setTemplateId(tpl)}
+                  aria-pressed={templateId === tpl}
                 >
-                  {IMAGE_TEMPLATE_LABELS[t]}
+                  {IMAGE_TEMPLATE_LABELS[tpl]}
                 </button>
               ))}
             </div>
           </fieldset>
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className="text-xs font-semibold text-ink-soft">색</legend>
-            <div className="grid grid-cols-3 gap-2">
+          <fieldset>
+            <legend className="text-xs font-bold text-ink-soft">색감</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
               {EDIT_PALETTES.map((p) => (
                 <button
                   key={p}
                   type="button"
-                  className={`chip !min-h-11 !text-xs ${palette === p ? "chip-active" : ""}`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                    palette === p
+                      ? "bg-brand text-white"
+                      : "bg-white text-ink-soft ring-1 ring-cream-deep"
+                  }`}
                   onClick={() => setPalette(p)}
                   aria-pressed={palette === p}
                 >
@@ -418,9 +403,7 @@ export function ImageResultCard({
 
       <div className="grid grid-cols-1 gap-2">
         <button type="button" className="btn-primary" onClick={saveToGallery} disabled={busy}>
-          {pending === "download" || (!blobReady && imageReady)
-            ? "준비 중…"
-            : "갤러리에 저장"}
+          {pending === "download" ? "저장 준비 중…" : "갤러리에 저장"}
         </button>
         <button type="button" className="btn-secondary" onClick={shareToApps} disabled={busy}>
           {pending === "share" ? "준비 중…" : "공유하기"}
@@ -428,8 +411,8 @@ export function ImageResultCard({
         {persistId && <MarkPostedButton id={persistId} />}
       </div>
       <p className="text-center text-xs leading-5 text-ink-soft">
-        아이폰·안드로이드에서는 &apos;갤러리에 저장&apos; → 공유 화면의 &apos;이미지 저장&apos;을
-        누르면 사진 앱으로 들어가요. SNS에 올린 뒤에는 &apos;실제로 올렸어요&apos;를 눌러 주세요.
+        저장·공유를 누를 때만 고화질 PNG를 만들어요. SNS에 올린 뒤에는 &apos;실제로 올렸어요&apos;를
+        눌러 주세요.
       </p>
     </article>
   );

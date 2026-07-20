@@ -32,6 +32,7 @@
 - [x] Connect `POST /api/generate/image` with `gpt-image-1`
 - [x] Multi reference photos (up to 6) + download/share
 - [x] Owner persona Human Judge loop ≥ 90 (30s cafe owner)
+- [x] Photo-first polished posters (8 layouts, Noto fonts, lazy PNG, gpt-image-2 fallback)
 
 ### Quality Eval
 - [x] Golden dataset 72 curated café posts (`evals/golden`)

@@ -1,29 +1,25 @@
 import { z } from "zod";
-import { toFile } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import {
   AI_IMAGE_TIMEOUT_MS,
   AI_TEXT_TIMEOUT_MS,
   getImageModel,
   getOpenAI,
+  getSearchModel,
   getTextModel,
   isAiConfigured,
 } from "./client";
 import {
   buildCopySystemPrompt,
   buildCopyUserPrompt,
-  buildImageBackgroundPrompt,
-  buildImagePlanSystemPrompt,
-  buildImagePlanUserPrompt,
   buildNoticeSystemPrompt,
   buildNoticeUserPrompt,
-  type ImageShotBrief,
 } from "./prompts";
 import { buildBrandVisualBrief } from "./brand-visual";
 import { buildCafeLearningContext } from "./cafe-context";
 import { sampleCopy, sampleImage, sampleNotice } from "./samples";
 import { mobileMsg } from "@/lib/mobile-messages";
-import { downloadUpload, publicUploadUrl, uploadImageBuffer } from "@/lib/storage";
+import { publicUploadUrl, uploadImageBuffer } from "@/lib/storage";
 import {
   copyOptionSchema,
   noticeOptionSchema,
@@ -111,268 +107,159 @@ export async function generateCopy(
 
 // ---------------------------------------------------------------------------
 // Promotional image
-// 1) 비전으로 사진 분위기·문구 기획 → 2) 글자 없는 배경 2장 병렬 생성
-// 한글 문구는 클라이언트 캔버스에서 얹으므로 AI 한글 깨짐이 없다.
+// - 사진 있음: 원본 사진 URL로 광고 디자인 2안 (이미지 API 호출 없음)
+// - 사진 없음: AI 배경 1장 생성 + 디자인 템플릿 2안
+// 한글·사실 문구는 클라이언트 포스터에 그대로 얹음
 // ---------------------------------------------------------------------------
 
-const PLAN_TEMPLATES = [
+const DESIGN_TEMPLATES = [
   "fade_bottom",
-  "story_chip",
+  "cream_panel",
   "glass_center",
   "frame_border",
   "side_rail",
-  "bottom_card",
+  "split_sheet",
   "bold_cover",
   "minimal_bar",
 ] as const;
 
-const PLAN_COMPOSITIONS = [
-  "hero_closeup",
-  "atmosphere_wide",
-  "detail_macro",
-  "tabletop_story",
-  "overhead_flatlay",
-  "offcenter_portrait",
-] as const;
+type DesignTemplate = (typeof DESIGN_TEMPLATES)[number];
 
-type PlanTemplate = (typeof PLAN_TEMPLATES)[number];
-type PlanComposition = (typeof PLAN_COMPOSITIONS)[number];
-
-type ImagePlanOption = {
-  headline: string;
-  subline: string;
-  templateId: PlanTemplate;
-  composition: PlanComposition;
-  heroSubject: string;
-  shotBrief: string;
-};
-
-type ImagePlan = {
-  cafeSymbol: string;
-  brandCue: string;
+type DesignPlan = {
   suggestedTitle: string;
-  options: ImagePlanOption[];
+  brandCue: string;
+  templates: [DesignTemplate, DesignTemplate];
 };
 
-const COMPOSITION_HINTS: Record<PlanComposition, string> = {
-  hero_closeup:
-    "Tight hero close-up, shallow depth of field, subject fills center-upper frame, soft bokeh background.",
-  atmosphere_wide:
-    "Wider atmospheric shot of the cafe space or table setting, inviting depth, window light, room to breathe.",
-  detail_macro:
-    "Macro detail focus (foam texture, beans, wood grain, pour), intimate and tactile, strong focal point.",
-  tabletop_story:
-    "Styled tabletop arrangement with the hero item and natural cafe props, storytelling angle ~45 degrees.",
-  overhead_flatlay:
-    "Clean overhead flat-lay, symmetric or rule-of-thirds, neat negative space for caption.",
-  offcenter_portrait:
-    "Subject placed off-center (rule of thirds), generous empty space on one side for caption overlay.",
-};
-
-const imagePlanSchema = z.object({
-  cafeSymbol: z
+const designPlanSchema = z.object({
+  suggestedTitle: z
     .string()
-    .describe("이 카페만의 상징/홍보 포인트 한 줄 한글"),
-  brandCue: z
-    .string()
-    .describe("브랜드를 한눈에 알려주는 짧은 한글 큐 (위치·컨셉·시그니처)"),
-  suggestedTitle: z.string().describe("12자 이내 한글 제목 제안"),
-  options: z
-    .array(
-      z.object({
-        headline: z.string().describe("12자 이내 한글 헤드라인"),
-        subline: z
-          .string()
-          .describe("18자 이내 보조 문구 — 컨셉·분위기·시그니처 힌트"),
-        templateId: z.enum(PLAN_TEMPLATES),
-        composition: z.enum(PLAN_COMPOSITIONS),
-        heroSubject: z.string().describe("영어, 브랜드 반영 피사체"),
-        shotBrief: z
-          .string()
-          .describe("영어 2~3문장 촬영 지시. 브랜드 분위기·평면 배경 금지"),
-      }),
-    )
-    .describe("서로 다른 구도·템플릿 두 안"),
+    .describe("12자 이내 한글 제목. 사용자 제목이 있으면 그걸 존중해 짧게"),
+  brandCue: z.string().describe("브랜드 한 줄 큐 18자 이내"),
+  templateA: z.enum(DESIGN_TEMPLATES),
+  templateB: z.enum(DESIGN_TEMPLATES),
 });
 
-function fallbackPlan(
+const TEMPLATE_PAIRS: Array<[DesignTemplate, DesignTemplate]> = [
+  ["fade_bottom", "cream_panel"],
+  ["glass_center", "split_sheet"],
+  ["side_rail", "bold_cover"],
+  ["frame_border", "minimal_bar"],
+  ["cream_panel", "fade_bottom"],
+];
+
+function pickTemplatePair(seed: string): [DesignTemplate, DesignTemplate] {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h + seed.charCodeAt(i) * (i + 1)) % 997;
+  return TEMPLATE_PAIRS[h % TEMPLATE_PAIRS.length]!;
+}
+
+function fallbackDesignPlan(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
-): ImagePlan {
+): DesignPlan {
   const brand = buildBrandVisualBrief(profile);
-  const title = input.title || purposeLabels[input.purpose];
-  const menu = brand?.menus[0];
-  const subject =
-    menu ||
-    input.message ||
-    brand?.concept ||
-    title ||
-    "signature cafe drink";
-  const sub =
-    brand?.defaultSubline ||
-    input.message.slice(0, 18) ||
-    brand?.location.slice(0, 18) ||
-    "";
-  const brandLook = brand?.englishLook || "independent Korean neighborhood cafe";
+  const title =
+    input.title.trim() ||
+    input.message.split(/[\n,·|]/)[0]?.trim().slice(0, 12) ||
+    purposeLabels[input.purpose];
   return {
-    cafeSymbol:
-      brand?.concept ||
-      input.message ||
-      (menu ? `시그니처 ${menu}` : "카페의 시그니처 분위기"),
-    brandCue:
-      [brand?.location.split(" ").pop(), brand?.concept || menu]
-        .filter(Boolean)
-        .join(" ")
-        .slice(0, 18) || brand?.cafeName || "",
-    suggestedTitle: title,
-    options: [
-      {
-        headline: title,
-        subline: sub,
-        templateId: "fade_bottom",
-        composition: "hero_closeup",
-        heroSubject: subject,
-        shotBrief: `Recompose as a hero close-up for this brand. ${brandLook} Do not use the reference as a flat background. Emphasize the signature item with shallow depth of field.`,
-      },
-      {
-        headline: title,
-        subline: brand?.atmosphere.slice(0, 18) || sub,
-        templateId: "glass_center",
-        composition: "atmosphere_wide",
-        heroSubject: subject,
-        shotBrief: `Wider atmospheric scene that reads as this specific cafe brand. ${brandLook} Different angle from product close-up. Soft natural light matching brand mood.`,
-      },
-    ],
+    suggestedTitle: title.slice(0, 12),
+    brandCue: (brand?.defaultSubline || brand?.concept || brand?.location || "").slice(
+      0,
+      18,
+    ),
+    templates: pickTemplatePair(`${input.purpose}:${input.message}`),
   };
 }
 
-function toShotBrief(plan: ImagePlan, index: 0 | 1): ImageShotBrief {
-  const option = plan.options[index] ?? plan.options[0]!;
-  const composition = option.composition ?? (index === 0 ? "hero_closeup" : "atmosphere_wide");
-  return {
-    cafeSymbol: plan.cafeSymbol,
-    heroSubject: option.heroSubject || plan.cafeSymbol,
-    composition: `${composition}. ${COMPOSITION_HINTS[composition]}`,
-    shotBrief: option.shotBrief || COMPOSITION_HINTS[composition],
-  };
-}
-
-async function planImage(
+async function planDesignOnly(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
   learning: string,
-): Promise<ImagePlan> {
+): Promise<DesignPlan> {
+  if (!isAiConfigured()) return fallbackDesignPlan(input, profile);
+  const brand = buildBrandVisualBrief(profile);
   const openai = getOpenAI();
-  type ContentPart =
-    | { type: "text"; text: string }
-    | { type: "image_url"; image_url: { url: string; detail: "low" | "high" } };
-  const content: ContentPart[] = [
-    { type: "text", text: buildImagePlanUserPrompt(input, profile) },
-  ];
-  // 첫 장은 high로 상징 요소를 더 잘 보고, 나머지는 low (비용 균형)
-  input.photoPaths.slice(0, 3).forEach((path, index) => {
-    content.push({
-      type: "image_url",
-      image_url: {
-        url: publicUploadUrl(path),
-        detail: index === 0 ? "high" : "low",
-      },
-    });
-  });
-
   const completion = await openai.chat.completions.parse(
     {
-      model: getTextModel(),
+      model: getSearchModel(),
       messages: [
-        { role: "system", content: buildImagePlanSystemPrompt(profile, learning) },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        { role: "user", content: content as any },
+        {
+          role: "system",
+          content: [
+            "카페 인스타 광고 아트디렉터. 한국어.",
+            "사용자 '꼭 알릴 내용'은 절대 요약·각색·가격·기간 추가 금지.",
+            "제목만 짧게 제안하고, 서로 다른 고급 템플릿 2개를 고른다.",
+            brand ? `브랜드: ${brand.koreanIdentity}` : "",
+            learning ? `학습:\n${learning.slice(0, 500)}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        },
+        {
+          role: "user",
+          content: [
+            `목적: ${purposeLabels[input.purpose]}`,
+            input.title ? `사장님 제목(존중): ${input.title}` : "제목 없음 — 본문 첫 줄로 짧게",
+            `꼭 알릴 내용(본문에 그대로 쓸 예정, 바꾸지 말 것):\n${input.message}`,
+            input.dateText ? `기간/날짜: ${input.dateText}` : "",
+            `사진 ${input.photoPaths.length}장 ${input.photoPaths.length ? "(원본 사진 사용)" : "(AI 배경)"}`,
+            "templateA/B는 서로 다르게.",
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        },
       ],
-      response_format: zodResponseFormat(imagePlanSchema, "image_plan"),
-      max_completion_tokens: 700,
-      reasoning_effort: "minimal",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
-    { timeout: 22_000 },
+      response_format: zodResponseFormat(designPlanSchema, "poster_design"),
+      max_completion_tokens: 400,
+    },
+    { timeout: 14_000 },
   );
-  const parsed = completion.choices[0]?.message.parsed as ImagePlan | null;
-  if (!parsed || parsed.options.length < 2) throw new Error("PLAN_FAILED");
-  // 구도가 같으면 두 번째를 강제 분기
-  if (parsed.options[0]?.composition === parsed.options[1]?.composition) {
-    parsed.options[1]!.composition =
-      parsed.options[0]!.composition === "hero_closeup"
-        ? "atmosphere_wide"
-        : "hero_closeup";
-  }
-  return parsed;
+  const parsed = completion.choices[0]?.message.parsed;
+  if (!parsed) return fallbackDesignPlan(input, profile);
+  const a = parsed.templateA;
+  const b = parsed.templateB === a
+    ? (DESIGN_TEMPLATES.find((t) => t !== a) ?? "cream_panel")
+    : parsed.templateB;
+  return {
+    suggestedTitle: (input.title.trim() || parsed.suggestedTitle).slice(0, 12),
+    brandCue: (parsed.brandCue || brand?.defaultSubline || "").slice(0, 18),
+    templates: [a, b],
+  };
 }
 
-type ReferenceFile = Awaited<ReturnType<typeof toFile>>;
-
-async function loadReferenceFiles(photoPaths: string[]): Promise<ReferenceFile[]> {
-  const files: ReferenceFile[] = [];
-  for (const path of photoPaths) {
-    const { buffer, contentType } = await downloadUpload(path);
-    files.push(await toFile(buffer, path, { type: contentType }));
-  }
-  return files;
-}
-
-async function generateBackground(
+/** 사진 없을 때만 — 글자 없는 배경 1장 (WebP) */
+async function generateAiBackgroundOnce(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
-  shot: ImageShotBrief,
-  variant: "clean" | "warm",
-  referenceFiles: ReferenceFile[],
-): Promise<{ storedName: string; url: string; usedReferencePhotos: boolean }> {
+): Promise<{ storedName: string; url: string }> {
   const openai = getOpenAI();
-  const prompt = buildImageBackgroundPrompt(input, profile, shot, variant);
-  const model = getImageModel();
-  let b64: string | undefined;
-  let usedReferencePhotos = false;
+  const brand = buildBrandVisualBrief(profile);
+  const prompt = [
+    "Professional Instagram square (1:1) photorealistic cafe background for advertising design.",
+    "NO text, letters, numbers, logos, watermarks, or UI.",
+    brand?.englishLook ?? "Independent Korean neighborhood cafe atmosphere.",
+    `Mood for purpose "${purposeLabels[input.purpose]}". Soft negative space for typography overlay.`,
+    "High-end food/interior photography. Not a generic franchise chain look.",
+  ].join(" ");
 
-  // 구도 다양성: 참고 사진은 최대 2장만 전달 (너무 많으면 edit이 평면 합성으로  degenerates)
-  const editFiles = referenceFiles.slice(0, 2);
-
-  if (editFiles.length > 0) {
-    try {
-      const edited = await openai.images.edit(
-        {
-          model,
-          image: editFiles.length === 1 ? editFiles[0]! : editFiles,
-          prompt,
-          size: "1024x1024",
-          quality: "medium",
-        },
-        { timeout: AI_IMAGE_TIMEOUT_MS },
-      );
-      b64 = edited.data?.[0]?.b64_json ?? undefined;
-      usedReferencePhotos = Boolean(b64);
-    } catch (error) {
-      console.error("[safil image edit fallback]", error);
-    }
-  }
-
-  if (!b64) {
-    const generated = await openai.images.generate(
-      {
-        model,
-        prompt,
-        size: "1024x1024",
-        quality: "medium",
-        output_format: "png",
-      },
-      { timeout: AI_IMAGE_TIMEOUT_MS },
-    );
-    b64 = generated.data?.[0]?.b64_json ?? undefined;
-  }
-
+  const generated = await openai.images.generate(
+    {
+      model: getImageModel(),
+      prompt,
+      size: "1024x1024",
+      quality: "medium",
+      output_format: "webp",
+    },
+    { timeout: AI_IMAGE_TIMEOUT_MS },
+  );
+  const b64 = generated.data?.[0]?.b64_json;
   if (!b64) throw new Error(mobileMsg.image.generateFailed);
-  const uploaded = await uploadImageBuffer(Buffer.from(b64, "base64"), "image/png");
+  const uploaded = await uploadImageBuffer(Buffer.from(b64, "base64"), "image/webp");
   return {
     storedName: uploaded.storedName,
     url: publicUploadUrl(uploaded.storedName),
-    usedReferencePhotos,
   };
 }
 
@@ -380,106 +267,103 @@ export async function generateImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
 ): Promise<GenerationResult<ImageGenerationOutput>> {
-  if (!isAiConfigured()) {
+  if (!isAiConfigured() && input.photoPaths.length === 0) {
     return { output: sampleImage(input, profile), isSample: true };
-  }
-  // 런타임 실패는 체험용으로 숨기지 않고 그대로 에러를 올린다 (정직한 안내)
-  const learning = await buildCafeLearningContext(profile);
-  let plan: ImagePlan;
-  try {
-    plan = await planImage(input, profile, learning);
-  } catch (planError) {
-    console.error("[safil image plan fallback]", planError);
-    plan = fallbackPlan(input, profile);
   }
 
   const brand = buildBrandVisualBrief(profile);
-  const referenceFiles =
-    input.photoPaths.length > 0 ? await loadReferenceFiles(input.photoPaths) : [];
+  const learning = await buildCafeLearningContext(profile).catch(() => "");
+  let plan: DesignPlan;
+  try {
+    plan = await planDesignOnly(input, profile, learning);
+  } catch (error) {
+    console.error("[safil design plan fallback]", error);
+    plan = fallbackDesignPlan(input, profile);
+  }
 
-  const shotA = toShotBrief(plan, 0);
-  const shotB = toShotBrief(plan, 1);
-
-  // 안마다 다른 구도 브리프로 병렬 생성 (같은 사진을 평면 배경으로 쓰지 않음)
-  const [clean, warm] = await Promise.all([
-    generateBackground(input, profile, shotA, "clean", referenceFiles),
-    generateBackground(input, profile, shotB, "warm", referenceFiles),
-  ]);
-
-  const headlineA = input.title || plan.options[0]?.headline || plan.suggestedTitle;
-  const headlineB = input.title || plan.options[1]?.headline || plan.suggestedTitle;
-  const symbol = plan.cafeSymbol?.trim();
-  const brandCue = (plan.brandCue || brand?.defaultSubline || "").trim().slice(0, 18);
-  const pickSubline = (raw?: string) => {
-    const s = (raw || "").trim();
-    if (s) return s.slice(0, 18);
-    return brandCue || brand?.defaultSubline || "";
-  };
-  const photoNoteFor = (used: boolean) => {
-    if (used && symbol) return `"${symbol}"을(를) 살려 `;
-    if (used) return "올려주신 사진의 포인트를 살려 ";
-    if (input.photoPaths.length > 0) return "사진 반영이 어려워 새로 그렸고, ";
-    return "";
-  };
-  const brandNote = brand
-    ? `${brand.cafeName} 브랜드 톤에 맞춰 `
-    : "";
-
-  const templateA = plan.options[0]?.templateId ?? "fade_bottom";
-  const templateB =
-    plan.options[1]?.templateId && plan.options[1].templateId !== templateA
-      ? plan.options[1].templateId
-      : templateA === "glass_center"
-        ? "bold_cover"
-        : "glass_center";
-
-  const compLabel = (c?: PlanComposition) =>
-    c === "hero_closeup"
-      ? "클로즈업"
-      : c === "atmosphere_wide"
-        ? "분위기 와이드"
-        : c === "detail_macro"
-          ? "디테일"
-          : c === "tabletop_story"
-            ? "테이블 연출"
-            : c === "overhead_flatlay"
-              ? "탑뷰"
-              : c === "offcenter_portrait"
-                ? "여백 구도"
-                : "다른 구도";
-
+  const bodyText = input.message.trim();
+  const headline = (input.title.trim() || plan.suggestedTitle).slice(0, 16);
+  const brandCue = (
+    plan.brandCue ||
+    brand?.defaultSubline ||
+    brand?.concept ||
+    ""
+  ).slice(0, 18);
   const cafeName = brand?.cafeName || profile?.name || "";
+  const cafeLocation = brand?.location || profile?.location || "";
+  const hasPhotos = input.photoPaths.length > 0;
 
+  let bgA: { storedName: string; url: string; usedReferencePhotos: boolean };
+  let bgB: { storedName: string; url: string; usedReferencePhotos: boolean };
+
+  if (hasPhotos) {
+    // 원본 사진 그대로 — 이미지 생성 API 없음
+    const pathA = input.photoPaths[0]!;
+    const pathB = input.photoPaths[1] ?? pathA;
+    bgA = {
+      storedName: pathA,
+      url: publicUploadUrl(pathA),
+      usedReferencePhotos: true,
+    };
+    bgB = {
+      storedName: pathB,
+      url: publicUploadUrl(pathB),
+      usedReferencePhotos: true,
+    };
+  } else {
+    if (!isAiConfigured()) {
+      return { output: sampleImage(input, profile), isSample: true };
+    }
+    const aiBg = await generateAiBackgroundOnce(input, profile);
+    bgA = { ...aiBg, usedReferencePhotos: false };
+    bgB = { ...aiBg, usedReferencePhotos: false };
+  }
+
+  const [tA, tB] = plan.templates;
   const options: ImageOption[] = [
     {
-      imagePath: clean.storedName,
-      imageUrl: clean.url,
-      headline: headlineA.slice(0, 16),
-      subline: pickSubline(plan.options[0]?.subline),
+      imagePath: bgA.storedName,
+      imageUrl: bgA.url,
+      headline,
+      subline: brandCue,
+      bodyText,
       dateText: input.dateText,
-      templateId: templateA,
+      templateId: tA,
       palette: "auto",
-      usedReferencePhotos: clean.usedReferencePhotos,
+      usedReferencePhotos: bgA.usedReferencePhotos,
       cafeName,
+      cafeLocation,
       brandCue,
-      reason: `${brandNote}${photoNoteFor(clean.usedReferencePhotos)}${compLabel(plan.options[0]?.composition)} 구도로 만들었어요.`,
+      reason: hasPhotos
+        ? "올려주신 사진을 그대로 쓰고, 광고 레이아웃만 다르게 입혔어요."
+        : "사진이 없어 AI 배경 위에 광고 레이아웃 2안을 만들었어요.",
     },
     {
-      imagePath: warm.storedName,
-      imageUrl: warm.url,
-      headline: headlineB.slice(0, 16),
-      subline: pickSubline(plan.options[1]?.subline),
+      imagePath: bgB.storedName,
+      imageUrl: bgB.url,
+      headline,
+      subline: brandCue,
+      bodyText,
       dateText: input.dateText,
-      templateId: templateB,
+      templateId: tB,
       palette: "auto",
-      usedReferencePhotos: warm.usedReferencePhotos,
+      usedReferencePhotos: bgB.usedReferencePhotos,
       cafeName,
+      cafeLocation,
       brandCue,
-      reason: `${brandNote}${photoNoteFor(warm.usedReferencePhotos)}${compLabel(plan.options[1]?.composition)} 구도로 만들었어요.`,
+      reason: hasPhotos
+        ? pathLabel(input.photoPaths.length > 1)
+        : "같은 배경에 다른 레이아웃으로 보이게 했어요.",
     },
   ];
 
   return { output: { options }, isSample: false };
+}
+
+function pathLabel(multi: boolean): string {
+  return multi
+    ? "다른 사진으로 두 번째 레이아웃을 만들었어요."
+    : "같은 사진에 다른 레이아웃을 입혔어요.";
 }
 
 export async function generateNotice(

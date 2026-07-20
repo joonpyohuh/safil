@@ -138,16 +138,19 @@ export const imagePaletteValues = ["cream", "espresso", "forest", "berry", "auto
 export type ImagePalette = (typeof imagePaletteValues)[number];
 
 /** HTML 포스터 레이아웃 — 서로 다른 인스타 광고 구도 */
+/** 광고형 포스터 템플릿 (8종 + 하위 호환) */
 export const imageTemplateValues = [
   "fade_bottom",
-  "story_chip",
+  "cream_panel",
   "glass_center",
   "frame_border",
   "side_rail",
-  "bottom_card",
+  "split_sheet",
   "bold_cover",
   "minimal_bar",
-  // 하위 호환 (이전 기록)
+  // 하위 호환
+  "story_chip",
+  "bottom_card",
   "bottom_band",
   "top_band",
   "center_card",
@@ -155,24 +158,42 @@ export const imageTemplateValues = [
 export type ImageTemplate = (typeof imageTemplateValues)[number];
 
 export const IMAGE_TEMPLATE_LABELS: Record<ImageTemplate, string> = {
-  fade_bottom: "하단 페이드",
-  story_chip: "스토리형",
-  glass_center: "글래스 카드",
-  frame_border: "프레임",
-  side_rail: "사이드 레일",
-  bottom_card: "하단 카드",
+  fade_bottom: "에디토리얼 하단",
+  cream_panel: "크림 사이드",
+  glass_center: "유리 카드",
+  frame_border: "얇은 프레임",
+  side_rail: "다크 레일",
+  split_sheet: "사진·종이 분할",
   bold_cover: "빅 타이틀",
-  minimal_bar: "미니멀",
-  bottom_band: "하단 페이드",
-  top_band: "스토리형",
-  center_card: "글래스 카드",
+  minimal_bar: "미니멀 마스트",
+  story_chip: "크림 사이드",
+  bottom_card: "사진·종이 분할",
+  bottom_band: "에디토리얼 하단",
+  top_band: "크림 사이드",
+  center_card: "유리 카드",
 };
+
+/** 편집 UI에 노출하는 8종 */
+export const EDITABLE_IMAGE_TEMPLATES = [
+  "fade_bottom",
+  "cream_panel",
+  "glass_center",
+  "frame_border",
+  "side_rail",
+  "split_sheet",
+  "bold_cover",
+  "minimal_bar",
+] as const satisfies readonly ImageTemplate[];
 
 /** 구 템플릿 ID → 신규 */
 export function normalizeImageTemplate(id: string | undefined): ImageTemplate {
-  if (id === "bottom_band") return "fade_bottom";
-  if (id === "top_band") return "story_chip";
+  if (id === "bottom_band" || id === "fade_bottom") return "fade_bottom";
+  if (id === "top_band" || id === "story_chip") return "cream_panel";
   if (id === "center_card") return "glass_center";
+  if (id === "bottom_card") return "split_sheet";
+  if ((EDITABLE_IMAGE_TEMPLATES as readonly string[]).includes(id ?? "")) {
+    return id as ImageTemplate;
+  }
   if ((imageTemplateValues as readonly string[]).includes(id ?? "")) {
     return id as ImageTemplate;
   }
@@ -181,38 +202,41 @@ export function normalizeImageTemplate(id: string | undefined): ImageTemplate {
 
 export const MAX_IMAGE_REFERENCE_PHOTOS = 6;
 
-export const imageGenerationInputSchema = z
-  .object({
-    purpose: z.enum(purposeValues).default("daily"),
-    /** 참고 사진들(선택). 있으면 사진 기반, 없으면 제목 기반 생성 */
-    photoPaths: z
-      .array(z.string().trim().min(1).max(160))
-      .max(MAX_IMAGE_REFERENCE_PHOTOS, mobileMsg.image.tooManyPhotos)
-      .default([]),
-    /** 제목(선택). 비우면 사진을 보고 AI가 제안 */
-    title: z.string().trim().max(60).default(""),
-    dateText: z.string().trim().max(40).default(""),
-    message: z.string().trim().max(120).default(""),
-  })
-  .refine((value) => value.title.length > 0 || value.photoPaths.length > 0, {
-    message: mobileMsg.image.photoOrTitleRequired,
-  });
+export const imageGenerationInputSchema = z.object({
+  purpose: z.enum(purposeValues).default("daily"),
+  /** 참고 사진(선택). 있으면 원본 사진으로 디자인만, 없으면 AI 배경 1장 */
+  photoPaths: z
+    .array(z.string().trim().min(1).max(160))
+    .max(MAX_IMAGE_REFERENCE_PHOTOS, mobileMsg.image.tooManyPhotos)
+    .default([]),
+  /** 짧은 제목(선택). 비우면 목적·본문에서 짧게 제안 */
+  title: z.string().trim().max(40).default(""),
+  dateText: z.string().trim().max(40).default(""),
+  /** 이번에 꼭 알릴 내용 — 포스터 본문에 사실 그대로 */
+  message: z
+    .string()
+    .trim()
+    .min(1, mobileMsg.image.announceRequired)
+    .max(240),
+});
 
 export type ImageGenerationInput = z.infer<typeof imageGenerationInputSchema>;
 
 export const imageOptionSchema = z.object({
-  imagePath: z.string().describe("저장된 배경 파일명 (글자 없음)"),
+  imagePath: z.string().describe("배경 파일명"),
   imageUrl: z.string().describe("배경 이미지 URL"),
-  headline: z.string().describe("이미지에 얹을 한글 제목"),
-  subline: z.string().describe("보조 문구, 없으면 빈 문자열"),
-  dateText: z.string().describe("날짜/기간, 없으면 빈 문자열"),
-  templateId: z.enum(imageTemplateValues).describe("문구 배치 템플릿"),
-  palette: z.enum(imagePaletteValues).describe("문구 배경 색"),
-  reason: z.string().describe("이 구성을 제안한 짧은 이유"),
-  usedReferencePhotos: z.boolean().describe("참고 사진을 실제로 반영했는지"),
-  /** 포스터에 찍을 카페명 (히스토리 재표시용) */
+  headline: z.string().describe("제목"),
+  /** @deprecated brandCue 사용 — 하위 호환 */
+  subline: z.string().default(""),
+  /** 홍보 본문(사실 그대로) */
+  bodyText: z.string().default(""),
+  dateText: z.string().describe("날짜/기간"),
+  templateId: z.enum(imageTemplateValues),
+  palette: z.enum(imagePaletteValues),
+  reason: z.string(),
+  usedReferencePhotos: z.boolean(),
   cafeName: z.string().default(""),
-  /** 브랜드 한 줄 큐 */
+  cafeLocation: z.string().default(""),
   brandCue: z.string().default(""),
 });
 

@@ -47,9 +47,7 @@ export function ImageGenerator({
   const [title, setTitle] = useState(initial?.title ?? "");
   const [dateText, setDateText] = useState(initial?.dateText ?? "");
   const [message, setMessage] = useState(initial?.message ?? "");
-  const [detailsOpen, setDetailsOpen] = useState(
-    Boolean(initial?.title || initial?.dateText || initial?.message),
-  );
+  const [detailsOpen, setDetailsOpen] = useState(true);
   const [photos, setPhotos] = useState<PhotoItem[]>(
     (initial?.photoPaths ?? []).map((path) => ({
       path,
@@ -75,7 +73,10 @@ export function ImageGenerator({
   const fileRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const photosRef = useRef(photos);
-  photosRef.current = photos;
+
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   // 페이지 이탈 시 미리보기 blob URL 해제 (메모리 누수 방지)
   useEffect(() => {
@@ -94,10 +95,14 @@ export function ImageGenerator({
     const id = window.setInterval(() => {
       const sec = Math.floor((Date.now() - started) / 1000);
       setElapsedSec(sec);
-      if (photosRef.current.length && sec < 10) {
-        setLoadingStep(`사진에서 카페의 포인트(메뉴·분위기)를 찾는 중…`);
-      } else if (sec < 35) {
-        setLoadingStep("서로 다른 구도 2장으로 그리는 중… 보통 40초 안에 끝나요.");
+      if (photosRef.current.length) {
+        setLoadingStep(
+          sec < 8
+            ? "사진으로 광고 레이아웃 2안을 입히는 중…"
+            : "거의 다 됐어요. 원본 사진을 그대로 쓰고 있어요.",
+        );
+      } else if (sec < 25) {
+        setLoadingStep("사진이 없어 AI 배경을 그리는 중… 보통 30초 안이에요.");
       } else {
         setLoadingStep("조금만 더 기다려 주세요. 거의 다 됐어요.");
       }
@@ -203,24 +208,26 @@ export function ImageGenerator({
     withPhotos?: PhotoItem[],
   ) {
     const usePhotos = withPhotos ?? photos;
-    if (!nextTitle && usePhotos.length === 0) {
-      setError("사진을 올리거나 제목을 적어 주세요.");
+    if (!nextMessage.trim()) {
+      setError("이번에 꼭 알릴 내용을 적어 주세요. (메뉴·맛·가격·기간 등)");
       return;
     }
     setLoading(true);
     setElapsedSec(0);
     setLoadingStep(
       usePhotos.length
-        ? "사진에서 카페의 포인트를 찾는 중…"
-        : "서로 다른 구도 2장으로 그리는 중… 보통 40초 안에 끝나요.",
+        ? "사진으로 광고 레이아웃 2안을 입히는 중…"
+        : "사진이 없어 AI 배경을 그리는 중…",
     );
     setError("");
     setStatus("");
     setNoticeKind("");
-    // 서버 maxDuration(90초)보다 길게 잡아 "클라이언트만 실패" 상황을 방지
     const controller = new AbortController();
     abortRef.current = controller;
-    const timeout = window.setTimeout(() => controller.abort(), 100_000);
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      usePhotos.length ? 35_000 : 90_000,
+    );
     try {
       const body: ImageGenerationInput = {
         purpose,
@@ -242,18 +249,13 @@ export function ImageGenerator({
       }
       setRecord(json.data);
 
-      const options = (json.data.options ?? []) as ImageOption[];
-      const reflected = options.filter((option) => option.usedReferencePhotos).length;
       if (json.data.isSample) {
         setNoticeKind("sample");
         setStatus("지금은 체험용 이미지예요. 아래 버튼으로 한 번 더 만들어 주세요.");
-      } else if (usePhotos.length > 0 && reflected === 0) {
-        setNoticeKind("no-photo");
-        setStatus("사진을 반영하기 어려워 분위기만 살려 새로 그렸어요.");
-      } else if (usePhotos.length > 0 && reflected < options.length) {
+      } else if (usePhotos.length > 0) {
         setNoticeKind("ok");
         setStatus(
-          `이미지 2장 중 ${reflected}장에 사진을 반영했어요. 각 이미지의 표시를 확인해 주세요.`,
+          "올려주신 사진으로 레이아웃 2안을 만들었어요. 본문은 적어 주신 내용 그대로예요.",
         );
       } else {
         setNoticeKind("ok");
@@ -288,7 +290,7 @@ export function ImageGenerator({
   }
 
   const canAddMore = photos.length < MAX_IMAGE_REFERENCE_PHOTOS;
-  const canSubmit = !loading && !uploading && (photos.length > 0 || title.trim().length > 0);
+  const canSubmit = !loading && !uploading && message.trim().length > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -300,8 +302,8 @@ export function ImageGenerator({
         <p className="text-sm font-bold text-brand">이미지</p>
         <h1 className="mt-1 text-2xl font-bold">홍보 이미지 만들기</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          사진을 올린 뒤 만들기를 누르면, AI가 사진 속 카페 포인트(메뉴·분위기)를 찾아 서로 다른
-          구도 2장으로 만들어드려요.
+          꼭 알릴 내용(메뉴·가격·기간 등)을 적고 사진을 올리면, 원본 사진에 세련된 광고
+          레이아웃 2안을 입혀드려요. 사진이 없을 때만 AI가 배경을 그려요.
         </p>
       </header>
 
@@ -335,9 +337,24 @@ export function ImageGenerator({
       )}
 
       <form id="image-form" onSubmit={submit} className="card flex flex-col gap-5" aria-busy={loading}>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-semibold">1. 이번에 꼭 알릴 내용 (필수)</span>
+          <textarea
+            className="field min-h-28"
+            maxLength={240}
+            required
+            placeholder={"예:\n딸기라떼 6,500원\n제철 딸기 · 이번 주만"}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <span className="text-xs leading-5 text-ink-soft">
+            메뉴명·맛·가격·기간·행사 등 사실을 적으면 포스터에 그대로 넣어요. AI가 바꾸지 않아요.
+          </span>
+        </label>
+
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-semibold">1. 사진 올리기</span>
+            <span className="text-sm font-semibold">2. 사진 올리기 (권장)</span>
             <span className="text-xs font-semibold text-ink-soft">
               {photos.length}/{MAX_IMAGE_REFERENCE_PHOTOS}
             </span>
@@ -388,16 +405,18 @@ export function ImageGenerator({
             </ul>
           )}
           <p className="text-xs leading-5 text-ink-soft">
-            아이폰 사진(HEIC)도 알아서 변환돼요. 올린 뒤 아래 만들기를 눌러 주세요.
+            사진을 올리면 AI가 음식을 새로 그리지 않고, 원본으로 광고 디자인만 입혀요.
           </p>
         </div>
 
-        <button
-          type="submit"
-          className="btn-primary !min-h-14"
-          disabled={!canSubmit}
-        >
-          {loading ? "만드는 중…" : record ? "새 배경으로 다시 만들기" : "이미지 2장 만들기"}
+        <button type="submit" className="btn-primary !min-h-14" disabled={!canSubmit}>
+          {loading
+            ? "만드는 중…"
+            : record
+              ? "다시 만들기"
+              : photos.length
+                ? "사진으로 광고 2안 만들기"
+                : "이미지 2장 만들기"}
         </button>
 
         <button
@@ -406,7 +425,7 @@ export function ImageGenerator({
           onClick={() => setDetailsOpen((v) => !v)}
           aria-expanded={detailsOpen}
         >
-          <span>2. 직접 정하고 싶다면 (선택)</span>
+          <span>3. 제목·날짜·소식 종류 (선택)</span>
           <span aria-hidden className="text-ink-soft">
             {detailsOpen ? "접기 ▲" : "펼치기 ▼"}
           </span>
@@ -432,26 +451,14 @@ export function ImageGenerator({
             </fieldset>
 
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold">이미지 제목 (비우면 AI가 제안)</span>
+              <span className="text-sm font-semibold">짧은 제목 (비우면 자동)</span>
               <input
                 className="field"
                 maxLength={16}
-                placeholder="예: 딸기라떼 신메뉴"
+                placeholder="예: 딸기라떼"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 enterKeyHint="done"
-              />
-              <span className="text-xs text-ink-soft">이미지에는 16자까지 또렷하게 들어가요</span>
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold">한 줄 설명 (선택)</span>
-              <input
-                className="field"
-                maxLength={120}
-                placeholder="예: 제철 딸기로 만든 라떼예요"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
               />
             </label>
 
@@ -474,7 +481,7 @@ export function ImageGenerator({
             <button
               type="button"
               className="btn-secondary"
-              disabled={loading || uploading || (photos.length === 0 && !title.trim())}
+              disabled={loading || uploading || !message.trim()}
               onClick={() => runGenerate(title.trim(), dateText.trim(), message.trim())}
             >
               다시 시도하기
@@ -491,7 +498,7 @@ export function ImageGenerator({
             <div className="h-2 overflow-hidden rounded-full bg-cream">
               <div
                 className="h-full rounded-full bg-brand transition-all"
-                style={{ width: `${Math.min(95, 12 + elapsedSec * 2)}%` }}
+                style={{ width: `${Math.min(95, 12 + elapsedSec * (photos.length ? 6 : 2))}%` }}
               />
             </div>
             <button type="button" className="btn-secondary" onClick={cancelGenerate}>
@@ -499,7 +506,6 @@ export function ImageGenerator({
             </button>
           </div>
         )}
-
       </form>
 
       <div className="sticky-action md:hidden">
@@ -509,7 +515,13 @@ export function ImageGenerator({
           className="btn-primary"
           disabled={!canSubmit}
         >
-          {loading ? "만드는 중…" : record ? "새 배경으로 다시 만들기" : "이미지 2장 만들기"}
+          {loading
+            ? "만드는 중…"
+            : record
+              ? "다시 만들기"
+              : photos.length
+                ? "사진으로 광고 2안 만들기"
+                : "이미지 2장 만들기"}
         </button>
       </div>
 
@@ -524,23 +536,23 @@ export function ImageGenerator({
             <p className="text-sm font-bold text-brand">완성</p>
             <h2 className="text-xl font-bold">마음에 드는 이미지를 저장하세요</h2>
             <p className="mt-1 text-sm text-ink-soft">
-              한글 문구는 각 이미지에서 바로 고칠 수 있어요. 다시 만들 필요 없어요.
+              제목·본문·브랜드 한 줄·날짜는 각 카드에서 바로 고칠 수 있어요.
             </p>
           </div>
 
           {(record.options as ImageOption[]).map((option, index) => (
             <ImageResultCard
-              key={`${record.id}-${index}-${option.imageUrl}`}
+              key={`${record.id}-${index}-${option.imageUrl}-${option.templateId}`}
               label={index === 0 ? "안 A" : "안 B"}
               imageUrl={option.imageUrl}
               initialHeadline={option.headline}
-              initialSubline={
-                option.subline || option.brandCue || profile.concept.slice(0, 18) || ""
-              }
+              initialBodyText={option.bodyText || option.subline || message}
+              initialBrandCue={option.brandCue || profile.concept.slice(0, 18)}
               initialDateText={option.dateText ?? dateText}
-              initialTemplate={option.templateId ?? (index === 0 ? "fade_bottom" : "glass_center")}
+              initialTemplate={option.templateId ?? (index === 0 ? "fade_bottom" : "cream_panel")}
               initialPalette={option.palette ?? "auto"}
               cafeName={option.cafeName || profile.name}
+              cafeLocation={option.cafeLocation || profile.location}
               reason={option.reason}
               isSample={record.isSample}
               usedReferencePhotos={

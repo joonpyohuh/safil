@@ -16,8 +16,9 @@ export function getSearchModel(): string {
   return process.env.OPENAI_SEARCH_MODEL?.trim() || "gpt-4o-mini";
 }
 
+/** 이미지 모델 — 사진 없을 때만 사용. env 우선 */
 export function getImageModel(): string {
-  return process.env.OPENAI_IMAGE_MODEL?.trim() || "gpt-image-1";
+  return process.env.OPENAI_IMAGE_MODEL?.trim() || "gpt-image-2";
 }
 
 /** @deprecated use getTextModel */

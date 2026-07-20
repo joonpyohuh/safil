@@ -21,6 +21,7 @@
   --color-brand: var(--color-brand);
   --color-brand-soft: var(--color-brand-soft);
   --font-sans: var(--font-noto-sans-kr);
+  --font-serif: var(--font-noto-serif-kr);
 }
 
 html {

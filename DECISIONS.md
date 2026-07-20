@@ -31,9 +31,13 @@
 - **Status**: Confirmed (updated 2026-07-20)
 
 ### AI Models
-- **Decision**: Text `gpt-5-mini` (`OPENAI_TEXT_MODEL`), image `gpt-image-1` (`OPENAI_IMAGE_MODEL`, quality `medium`)
+- **Decision**: Text `gpt-5-mini` (`OPENAI_TEXT_MODEL`), image default `gpt-image-2` (`OPENAI_IMAGE_MODEL`, quality `medium`, WebP). Env override respected.
 - **Status**: Confirmed (updated 2026-07-20)
 - **Reason**: Owner asked for these models; medium quality for usable SNS output
+
+### Photo-first promo images
+- **Decision**: When owner uploads photos, use original photos as poster backgrounds (no image API). AI image generation only when no photos. Design plan (templates + title) via fast text model. Facts in `message` render verbatim on poster. PNG export only on save/share.
+- **Status**: Confirmed (2026-07-20)
 
 ### Café Place Search
 - **Decision**: Place lookup uses Kakao/Naver Local APIs when keys exist; otherwise OpenAI Responses `web_search` with `gpt-4o-mini` (`OPENAI_SEARCH_MODEL`). Do **not** use `gpt-5-mini` for web_search (slow / asks clarifying questions).

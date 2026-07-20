@@ -150,7 +150,6 @@ async function parseStructured<T>(
       ],
       response_format: zodResponseFormat(schema, name),
       max_completion_tokens: 1200,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       reasoning_effort: "minimal",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,

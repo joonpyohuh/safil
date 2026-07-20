@@ -11,22 +11,30 @@ export type PromoPosterProps = {
   posterRef?: Ref<HTMLDivElement>;
   imageUrl: string;
   headline: string;
-  subline: string;
+  /** 홍보 본문 (사실 그대로) */
+  bodyText?: string;
+  /** @deprecated bodyText 우선 */
+  subline?: string;
   dateText: string;
   cafeName?: string;
+  cafeLocation?: string;
+  brandCue?: string;
   templateId: ImageTemplate;
   colors: PosterColors;
-  /** 미리보기용 스케일 (1 = 1080px). export 시에는 1로 캡처 */
   scale?: number;
 };
+
+const SANS =
+  'var(--font-noto-sans-kr), "Noto Sans KR", "Apple SD Gothic Neo", sans-serif';
+const SERIF =
+  'var(--font-noto-serif-kr), "Noto Serif KR", "Apple SD Gothic Neo", serif';
 
 const rootBase: CSSProperties = {
   width: POSTER_SIZE,
   height: POSTER_SIZE,
   position: "relative",
   overflow: "hidden",
-  fontFamily:
-    '"Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
+  fontFamily: SANS,
   background: "#1a1410",
   color: "#faf6f0",
   WebkitFontSmoothing: "antialiased",
@@ -50,30 +58,70 @@ function Bg({ src }: { src: string }) {
   );
 }
 
-function FadeBottom({ colors }: { colors: PosterColors }) {
+function BrandLockup({
+  cafe,
+  location,
+  color,
+  align = "left",
+}: {
+  cafe: string;
+  location: string;
+  color: string;
+  align?: "left" | "center" | "right";
+}) {
+  if (!cafe && !location) return null;
   return (
     <div
       style={{
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: "58%",
-        background: `linear-gradient(180deg, transparent 0%, ${colors.ink}99 45%, ${colors.ink}ee 100%)`,
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        alignItems:
+          align === "center" ? "center" : align === "right" ? "flex-end" : "flex-start",
+        textAlign: align,
       }}
-    />
+    >
+      {cafe ? (
+        <p
+          style={{
+            margin: 0,
+            fontFamily: SERIF,
+            fontSize: 30,
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+            color,
+            lineHeight: 1.2,
+          }}
+        >
+          {cafe}
+        </p>
+      ) : null}
+      {location ? (
+        <p
+          style={{
+            margin: 0,
+            fontSize: 22,
+            fontWeight: 500,
+            letterSpacing: "0.08em",
+            color,
+            opacity: 0.82,
+          }}
+        >
+          {location}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
-function Vignette() {
+function AccentRule({ color, width = 56 }: { color: string; width?: number }) {
   return (
     <div
       style={{
-        position: "absolute",
-        inset: 0,
-        background:
-          "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 100%)",
-        pointerEvents: "none",
+        width,
+        height: 5,
+        borderRadius: 3,
+        background: color,
       }}
     />
   );
@@ -83,18 +131,23 @@ export function PromoPoster({
   posterRef,
   imageUrl,
   headline,
+  bodyText,
   subline,
   dateText,
   cafeName,
+  cafeLocation,
+  brandCue,
   templateId,
   colors,
   scale = 1,
 }: PromoPosterProps) {
   const t = normalizeImageTemplate(templateId);
   const title = headline.trim() || " ";
-  const sub = subline.trim();
+  const body = (bodyText ?? subline ?? "").trim();
   const date = dateText.trim();
   const cafe = cafeName?.trim() || "";
+  const loc = cafeLocation?.trim() || "";
+  const cue = (brandCue || "").trim();
 
   const wrap: CSSProperties =
     scale === 1
@@ -114,256 +167,93 @@ export function PromoPoster({
           transformOrigin: "top left",
         };
 
+  const titleSize = title.length > 14 ? 64 : title.length > 10 ? 76 : 92;
+
   return (
     <div style={wrap}>
       <div ref={posterRef} data-safil-poster style={scaled}>
         <Bg src={imageUrl} />
-        <Vignette />
 
+        {/* 1. 에디토리얼 하단 타이포 */}
         {t === "fade_bottom" && (
-          <>
-            <FadeBottom colors={colors} />
-            <div
-              style={{
-                position: "absolute",
-                left: 72,
-                right: 72,
-                bottom: 88,
-                display: "flex",
-                flexDirection: "column",
-                gap: 18,
-              }}
-            >
-              <div
-                style={{
-                  width: 48,
-                  height: 6,
-                  borderRadius: 3,
-                  background: colors.accent,
-                }}
-              />
-              {cafe ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 28,
-                    fontWeight: 600,
-                    letterSpacing: "0.12em",
-                    color: colors.accent,
-                  }}
-                >
-                  {cafe}
-                </p>
-              ) : null}
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: title.length > 10 ? 72 : 88,
-                  fontWeight: 900,
-                  lineHeight: 1.15,
-                  color: colors.paper,
-                  letterSpacing: "-0.02em",
-                  textShadow: "0 4px 28px rgba(0,0,0,0.35)",
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "keep-all",
-                }}
-              >
-                {title}
-              </h2>
-              {sub ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 34,
-                    fontWeight: 500,
-                    color: colors.muted,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {sub}
-                </p>
-              ) : null}
-              {date ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 28,
-                    fontWeight: 700,
-                    color: colors.accent,
-                  }}
-                >
-                  {date}
-                </p>
-              ) : null}
-            </div>
-          </>
-        )}
-
-        {t === "story_chip" && (
           <>
             <div
               style={{
                 position: "absolute",
                 inset: 0,
                 background:
-                  "linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 28%, transparent 55%, rgba(0,0,0,0.72) 100%)",
+                  "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, transparent 32%, transparent 48%, rgba(20,14,10,0.92) 100%)",
               }}
             />
-            {(date || cafe) && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 72,
-                  left: 72,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: 12,
-                }}
-              >
-                {cafe ? (
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 26,
-                      fontWeight: 700,
-                      letterSpacing: "0.1em",
-                      color: colors.paper,
-                      textShadow: "0 2px 12px rgba(0,0,0,0.45)",
-                    }}
-                  >
-                    {cafe}
-                  </p>
-                ) : null}
-                {date ? (
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 12,
-                      padding: "14px 28px",
-                      borderRadius: 999,
-                      background: colors.accent,
-                      color: colors.ink,
-                      fontSize: 26,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {date}
-                  </div>
-                ) : null}
-              </div>
-            )}
             <div
               style={{
                 position: "absolute",
-                left: 72,
-                right: 72,
-                bottom: 96,
+                top: 64,
+                left: 64,
+                right: 64,
               }}
             >
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: title.length > 10 ? 70 : 84,
-                  fontWeight: 900,
-                  lineHeight: 1.18,
-                  color: colors.paper,
-                  textShadow: "0 6px 32px rgba(0,0,0,0.45)",
-                  wordBreak: "keep-all",
-                }}
-              >
-                {title}
-              </h2>
-              {sub ? (
-                <p
-                  style={{
-                    margin: "20px 0 0",
-                    fontSize: 32,
-                    fontWeight: 500,
-                    color: colors.muted,
-                  }}
-                >
-                  {sub}
-                </p>
-              ) : null}
+              <BrandLockup cafe={cafe} location={loc} color={colors.paper} />
             </div>
-          </>
-        )}
-
-        {t === "glass_center" && (
-          <>
             <div
               style={{
                 position: "absolute",
-                inset: 0,
-                background: "rgba(0,0,0,0.22)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: "7%",
-                right: "7%",
-                top: "50%",
-                transform: "translateY(-50%)",
-                padding: "64px 56px",
-                borderRadius: 36,
-                background: `${colors.paper}f2`,
-                boxShadow: "0 24px 80px rgba(0,0,0,0.28)",
-                textAlign: "center",
+                left: 64,
+                right: 64,
+                bottom: 72,
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
               }}
             >
-              <div
-                style={{
-                  width: 64,
-                  height: 5,
-                  margin: "0 auto 36px",
-                  borderRadius: 3,
-                  background: colors.accent,
-                }}
-              />
-              {cafe ? (
+              <AccentRule color={colors.accent} />
+              {cue ? (
                 <p
                   style={{
-                    margin: "0 0 20px",
-                    fontSize: 26,
+                    margin: 0,
+                    fontSize: 24,
                     fontWeight: 600,
-                    letterSpacing: "0.14em",
                     color: colors.accent,
+                    letterSpacing: "0.06em",
                   }}
                 >
-                  {cafe}
+                  {cue}
                 </p>
               ) : null}
               <h2
                 style={{
                   margin: 0,
-                  fontSize: title.length > 10 ? 64 : 76,
-                  fontWeight: 900,
+                  fontFamily: SERIF,
+                  fontSize: titleSize,
+                  fontWeight: 700,
                   lineHeight: 1.2,
-                  color: colors.ink,
+                  color: colors.paper,
+                  letterSpacing: "-0.02em",
+                  whiteSpace: "pre-wrap",
                   wordBreak: "keep-all",
                 }}
               >
                 {title}
               </h2>
-              {sub ? (
+              {body ? (
                 <p
                   style={{
-                    margin: "24px 0 0",
+                    margin: 0,
                     fontSize: 30,
                     fontWeight: 500,
-                    color: "rgba(42,35,32,0.62)",
+                    lineHeight: 1.45,
+                    color: "rgba(250,246,240,0.92)",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
                   }}
                 >
-                  {sub}
+                  {body}
                 </p>
               ) : null}
               {date ? (
                 <p
                   style={{
-                    margin: "28px 0 0",
+                    margin: 0,
                     fontSize: 26,
                     fontWeight: 700,
                     color: colors.accent,
@@ -376,17 +266,313 @@ export function PromoPoster({
           </>
         )}
 
+        {/* 2. 크림 컬러 사이드 패널 */}
+        {t === "cream_panel" && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: "46%",
+                background: colors.paper,
+                boxShadow: "-24px 0 48px rgba(0,0,0,0.22)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: 56,
+                left: 48,
+                maxWidth: "46%",
+              }}
+            >
+              <BrandLockup cafe={cafe} location={loc} color={colors.paper} />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 72,
+                right: 48,
+                bottom: 72,
+                width: "calc(46% - 72px)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                gap: 20,
+                color: colors.ink,
+              }}
+            >
+              <AccentRule color={colors.accent} width={40} />
+              {cue ? (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: colors.accent,
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {cue}
+                </p>
+              ) : null}
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: SERIF,
+                  fontSize: title.length > 10 ? 52 : 64,
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  letterSpacing: "-0.02em",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "keep-all",
+                }}
+              >
+                {title}
+              </h2>
+              {body ? (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 26,
+                    fontWeight: 500,
+                    lineHeight: 1.5,
+                    opacity: 0.9,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {body}
+                </p>
+              ) : null}
+              {date ? (
+                <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: colors.accent }}>
+                  {date}
+                </p>
+              ) : null}
+            </div>
+          </>
+        )}
+
+        {/* 3. 유리 카드 */}
+        {t === "glass_center" && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(18,12,8,0.28)",
+              }}
+            />
+            <div style={{ position: "absolute", top: 56, left: 0, right: 0 }}>
+              <BrandLockup cafe={cafe} location={loc} color={colors.paper} align="center" />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: 72,
+                right: 72,
+                top: "50%",
+                transform: "translateY(-46%)",
+                padding: "48px 44px",
+                borderRadius: 28,
+                background: "rgba(250,246,240,0.88)",
+                backdropFilter: "blur(18px)",
+                WebkitBackdropFilter: "blur(18px)",
+                border: `1px solid ${colors.accent}55`,
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+                color: colors.ink,
+                textAlign: "center",
+                alignItems: "center",
+              }}
+            >
+              {cue ? (
+                <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: colors.accent }}>
+                  {cue}
+                </p>
+              ) : null}
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: SERIF,
+                  fontSize: title.length > 10 ? 56 : 68,
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "keep-all",
+                }}
+              >
+                {title}
+              </h2>
+              {body ? (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 28,
+                    lineHeight: 1.45,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {body}
+                </p>
+              ) : null}
+              {date ? (
+                <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: colors.accent }}>
+                  {date}
+                </p>
+              ) : null}
+            </div>
+          </>
+        )}
+
+        {/* 4. 얇은 프레임 */}
         {t === "frame_border" && (
           <>
             <div
               style={{
                 position: "absolute",
-                inset: 48,
-                border: `3px solid ${colors.paper}cc`,
-                borderRadius: 8,
+                inset: 36,
+                border: `2px solid ${colors.paper}`,
                 pointerEvents: "none",
               }}
             />
+            <div
+              style={{
+                position: "absolute",
+                inset: 48,
+                border: `1px solid ${colors.accent}99`,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: 72,
+                right: 72,
+                bottom: 80,
+                padding: "36px 32px",
+                background: "rgba(18,12,8,0.78)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
+              <BrandLockup cafe={cafe} location={loc} color={colors.accent} />
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: SERIF,
+                  fontSize: title.length > 10 ? 58 : 70,
+                  fontWeight: 700,
+                  lineHeight: 1.2,
+                  color: colors.paper,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "keep-all",
+                }}
+              >
+                {title}
+              </h2>
+              {body ? (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 28,
+                    lineHeight: 1.4,
+                    color: "rgba(250,246,240,0.9)",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {body}
+                </p>
+              ) : null}
+              {(cue || date) && (
+                <p style={{ margin: 0, fontSize: 24, fontWeight: 600, color: colors.accent }}>
+                  {[cue, date].filter(Boolean).join(" · ")}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* 5. 다크 사이드 레일 */}
+        {t === "side_rail" && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: "38%",
+                background: colors.ink,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: 64,
+                left: 40,
+                bottom: 64,
+                width: "calc(38% - 64px)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                color: colors.paper,
+              }}
+            >
+              <BrandLockup cafe={cafe} location={loc} color={colors.accent} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {cue ? (
+                  <p style={{ margin: 0, fontSize: 22, fontWeight: 600, color: colors.accent }}>
+                    {cue}
+                  </p>
+                ) : null}
+                <h2
+                  style={{
+                    margin: 0,
+                    fontFamily: SERIF,
+                    fontSize: title.length > 10 ? 44 : 52,
+                    fontWeight: 700,
+                    lineHeight: 1.25,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
+                  }}
+                >
+                  {title}
+                </h2>
+                {body ? (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 24,
+                      lineHeight: 1.45,
+                      opacity: 0.92,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "keep-all",
+                    }}
+                  >
+                    {body}
+                  </p>
+                ) : null}
+                {date ? (
+                  <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: colors.accent }}>
+                    {date}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* 6. 사진 / 종이 분할 */}
+        {t === "split_sheet" && (
+          <>
             <div
               style={{
                 position: "absolute",
@@ -394,140 +580,60 @@ export function PromoPoster({
                 right: 0,
                 bottom: 0,
                 height: "42%",
-                background: `linear-gradient(180deg, transparent, ${colors.ink}dd)`,
+                background: colors.paper,
               }}
             />
-            {cafe ? (
-              <p
-                style={{
-                  position: "absolute",
-                  top: 72,
-                  left: 0,
-                  right: 0,
-                  textAlign: "center",
-                  margin: 0,
-                  fontSize: 24,
-                  fontWeight: 600,
-                  letterSpacing: "0.28em",
-                  color: colors.paper,
-                  textShadow: "0 2px 12px rgba(0,0,0,0.4)",
-                }}
-              >
-                {cafe}
-              </p>
-            ) : null}
-            <div
-              style={{
-                position: "absolute",
-                left: 88,
-                right: 88,
-                bottom: 100,
-                textAlign: "center",
-              }}
-            >
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: title.length > 10 ? 68 : 80,
-                  fontWeight: 900,
-                  lineHeight: 1.2,
-                  color: colors.paper,
-                  wordBreak: "keep-all",
-                }}
-              >
-                {title}
-              </h2>
-              {sub ? (
-                <p
-                  style={{
-                    margin: "18px 0 0",
-                    fontSize: 30,
-                    color: colors.muted,
-                  }}
-                >
-                  {sub}
-                </p>
-              ) : null}
-              {date ? (
-                <p
-                  style={{
-                    margin: "20px 0 0",
-                    fontSize: 26,
-                    fontWeight: 700,
-                    color: colors.accent,
-                  }}
-                >
-                  {date}
-                </p>
-              ) : null}
+            <div style={{ position: "absolute", top: 48, left: 56, right: 56 }}>
+              <BrandLockup cafe={cafe} location={loc} color={colors.paper} />
             </div>
-          </>
-        )}
-
-        {t === "side_rail" && (
-          <>
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: "38%",
-                background: `linear-gradient(90deg, ${colors.ink}f2 70%, transparent)`,
-              }}
-            />
             <div
               style={{
                 position: "absolute",
                 left: 56,
-                top: 100,
-                bottom: 100,
-                width: "30%",
+                right: 56,
+                bottom: 56,
+                height: "calc(42% - 80px)",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "flex-end",
-                gap: 20,
+                justifyContent: "center",
+                gap: 16,
+                color: colors.ink,
               }}
             >
-              {cafe ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 22,
-                    fontWeight: 600,
-                    letterSpacing: "0.16em",
-                    color: colors.accent,
-                  }}
-                >
-                  {cafe}
+              <AccentRule color={colors.accent} />
+              {cue ? (
+                <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: colors.accent }}>
+                  {cue}
                 </p>
               ) : null}
               <h2
                 style={{
                   margin: 0,
-                  fontSize: title.length > 8 ? 56 : 68,
-                  fontWeight: 900,
-                  lineHeight: 1.2,
-                  color: colors.paper,
+                  fontFamily: SERIF,
+                  fontSize: title.length > 12 ? 48 : 58,
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  whiteSpace: "pre-wrap",
                   wordBreak: "keep-all",
                 }}
               >
                 {title}
               </h2>
-              {sub ? (
-                <p style={{ margin: 0, fontSize: 26, color: colors.muted, lineHeight: 1.45 }}>
-                  {sub}
-                </p>
-              ) : null}
-              {date ? (
+              {body ? (
                 <p
                   style={{
                     margin: 0,
-                    fontSize: 24,
-                    fontWeight: 700,
-                    color: colors.accent,
+                    fontSize: 28,
+                    lineHeight: 1.45,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
                   }}
                 >
+                  {body}
+                </p>
+              ) : null}
+              {date ? (
+                <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: colors.accent }}>
                   {date}
                 </p>
               ) : null}
@@ -535,211 +641,132 @@ export function PromoPoster({
           </>
         )}
 
-        {t === "bottom_card" && (
-          <>
-            <div
-              style={{
-                position: "absolute",
-                left: 48,
-                right: 48,
-                bottom: 56,
-                padding: "44px 48px",
-                borderRadius: 32,
-                background: `${colors.paper}f5`,
-                boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
-                <div
-                  style={{
-                    width: 8,
-                    alignSelf: "stretch",
-                    minHeight: 80,
-                    borderRadius: 4,
-                    background: colors.accent,
-                    flexShrink: 0,
-                  }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {cafe ? (
-                    <p
-                      style={{
-                        margin: "0 0 12px",
-                        fontSize: 24,
-                        fontWeight: 600,
-                        color: colors.accent,
-                      }}
-                    >
-                      {cafe}
-                    </p>
-                  ) : null}
-                  <h2
-                    style={{
-                      margin: 0,
-                      fontSize: title.length > 10 ? 56 : 64,
-                      fontWeight: 900,
-                      lineHeight: 1.2,
-                      color: colors.ink,
-                      wordBreak: "keep-all",
-                    }}
-                  >
-                    {title}
-                  </h2>
-                  {(sub || date) && (
-                    <p
-                      style={{
-                        margin: "16px 0 0",
-                        fontSize: 28,
-                        fontWeight: 500,
-                        color: "rgba(42,35,32,0.62)",
-                      }}
-                    >
-                      {[sub, date].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
+        {/* 7. 빅 타이틀 커버 */}
         {t === "bold_cover" && (
           <>
             <div
               style={{
                 position: "absolute",
                 inset: 0,
-                background: `linear-gradient(160deg, ${colors.ink}66 0%, transparent 40%, ${colors.ink}cc 100%)`,
+                background:
+                  "linear-gradient(160deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.7) 100%)",
               }}
             />
             <div
               style={{
                 position: "absolute",
-                left: 64,
-                right: 64,
-                top: "42%",
-                transform: "translateY(-40%)",
+                inset: 64,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
             >
-              {date ? (
-                <p
+              <BrandLockup cafe={cafe} location={loc} color={colors.paper} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <h2
                   style={{
-                    margin: "0 0 28px",
-                    display: "inline-block",
-                    padding: "10px 22px",
-                    borderRadius: 8,
-                    background: colors.accent,
-                    color: colors.ink,
-                    fontSize: 24,
-                    fontWeight: 800,
+                    margin: 0,
+                    fontFamily: SERIF,
+                    fontSize: title.length > 8 ? 88 : 108,
+                    fontWeight: 700,
+                    lineHeight: 1.08,
+                    color: colors.paper,
+                    letterSpacing: "-0.03em",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
+                    textShadow: "0 8px 40px rgba(0,0,0,0.45)",
                   }}
                 >
-                  {date}
-                </p>
-              ) : null}
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: title.length > 8 ? 92 : 108,
-                  fontWeight: 900,
-                  lineHeight: 1.08,
-                  color: colors.paper,
-                  letterSpacing: "-0.03em",
-                  textShadow: "0 8px 40px rgba(0,0,0,0.45)",
-                  wordBreak: "keep-all",
-                }}
-              >
-                {title}
-              </h2>
-              {sub ? (
-                <p
-                  style={{
-                    margin: "28px 0 0",
-                    fontSize: 34,
-                    fontWeight: 500,
-                    color: colors.muted,
-                    maxWidth: "90%",
-                  }}
-                >
-                  {sub}
-                </p>
-              ) : null}
+                  {title}
+                </h2>
+                {(cue || body) && (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 30,
+                      fontWeight: 500,
+                      lineHeight: 1.4,
+                      color: "rgba(250,246,240,0.92)",
+                      maxWidth: "92%",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "keep-all",
+                    }}
+                  >
+                    {body || cue}
+                  </p>
+                )}
+                {date ? (
+                  <p style={{ margin: 0, fontSize: 28, fontWeight: 700, color: colors.accent }}>
+                    {date}
+                  </p>
+                ) : null}
+              </div>
             </div>
-            {cafe ? (
-              <p
-                style={{
-                  position: "absolute",
-                  left: 64,
-                  bottom: 72,
-                  margin: 0,
-                  fontSize: 26,
-                  fontWeight: 600,
-                  letterSpacing: "0.18em",
-                  color: colors.paper,
-                  opacity: 0.85,
-                }}
-              >
-                {cafe}
-              </p>
-            ) : null}
           </>
         )}
 
+        {/* 8. 미니멀 마스트헤드 */}
         {t === "minimal_bar" && (
           <>
             <div
               style={{
                 position: "absolute",
-                left: 40,
-                right: 40,
-                bottom: 40,
-                padding: "36px 40px",
-                borderRadius: 20,
-                background: `${colors.ink}e8`,
-                backdropFilter: "blur(8px)",
+                top: 0,
+                left: 0,
+                right: 0,
+                padding: "40px 56px 36px",
+                background: "rgba(250,246,240,0.94)",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 24,
+                flexDirection: "column",
+                gap: 14,
+                color: colors.ink,
+                borderBottom: `4px solid ${colors.accent}`,
               }}
             >
-              <div style={{ minWidth: 0 }}>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: title.length > 12 ? 40 : 48,
-                    fontWeight: 800,
-                    color: colors.paper,
-                    lineHeight: 1.25,
-                    wordBreak: "keep-all",
-                  }}
-                >
-                  {title}
-                </h2>
-                {(sub || date) && (
-                  <p
-                    style={{
-                      margin: "10px 0 0",
-                      fontSize: 24,
-                      color: colors.muted,
-                    }}
-                  >
-                    {[sub, date].filter(Boolean).join(" · ")}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 24,
+                }}
+              >
+                <BrandLockup cafe={cafe} location={loc} color={colors.ink} />
+                {date ? (
+                  <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: colors.accent }}>
+                    {date}
                   </p>
-                )}
+                ) : null}
               </div>
-              {cafe ? (
+              {cue ? (
+                <p style={{ margin: 0, fontSize: 22, fontWeight: 600, color: colors.accent }}>
+                  {cue}
+                </p>
+              ) : null}
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: SERIF,
+                  fontSize: title.length > 12 ? 44 : 52,
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "keep-all",
+                }}
+              >
+                {title}
+              </h2>
+              {body ? (
                 <p
                   style={{
                     margin: 0,
-                    flexShrink: 0,
-                    fontSize: 22,
-                    fontWeight: 700,
-                    color: colors.accent,
-                    letterSpacing: "0.06em",
+                    fontSize: 26,
+                    lineHeight: 1.45,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "keep-all",
                   }}
                 >
-                  {cafe}
+                  {body}
                 </p>
               ) : null}
             </div>

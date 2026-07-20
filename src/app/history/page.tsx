@@ -15,11 +15,13 @@ type ImageOption = {
   imageUrl?: string;
   headline?: string;
   subline?: string;
+  bodyText?: string;
   dateText?: string;
   templateId?: ImageTemplate;
   palette?: ImagePalette;
   reason?: string;
   cafeName?: string;
+  cafeLocation?: string;
   brandCue?: string;
 };
 
@@ -116,16 +118,19 @@ export default async function HistoryPage() {
                       label={headline}
                       imageUrl={option.imageUrl}
                       initialHeadline={headline}
-                      initialSubline={
+                      initialBodyText={
+                        option.bodyText ||
                         option.subline ||
                         option.brandCue ||
                         profile?.concept?.slice(0, 18) ||
                         ""
                       }
+                      initialBrandCue={option.brandCue || profile?.concept?.slice(0, 18) || ""}
                       initialDateText={option.dateText ?? input.dateText ?? ""}
                       initialTemplate={option.templateId ?? "fade_bottom"}
                       initialPalette={option.palette ?? "auto"}
                       cafeName={option.cafeName || profileName}
+                      cafeLocation={option.cafeLocation || profile?.location || ""}
                       isSample={record.isSample}
                       shareTitle={`${option.cafeName || profileName || "카페"} 홍보 이미지`}
                       persistId={record.id}
