@@ -3,7 +3,12 @@ import Link from "next/link";
 import { ImageGenerator } from "@/components/create/image-generator";
 import { getCafeProfile } from "@/lib/profile";
 import { isProfileReady } from "@/lib/profile-utils";
-import type { CafeProfile } from "@/lib/schemas";
+import {
+  MAX_IMAGE_REFERENCE_PHOTOS,
+  purposeValues,
+  type CafeProfile,
+  type Purpose,
+} from "@/lib/schemas";
 
 export const metadata: Metadata = { title: "홍보 이미지 만들기" };
 export const dynamic = "force-dynamic";
@@ -22,13 +27,28 @@ const fallbackProfile: CafeProfile = {
   updatedAt: 0,
 };
 
-export default async function CreateImagePage() {
-  const profileResult = await getCafeProfile()
-    .then((profile) => ({ profile, unavailable: false }))
-    .catch((error) => {
-      console.error("[safil image profile]", error);
-      return { profile: null, unavailable: true };
-    });
+const SAFE_PHOTO = /^[0-9a-f-]{36}\.(jpg|png|webp)$/;
+
+export default async function CreateImagePage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    purpose?: string;
+    title?: string;
+    dateText?: string;
+    message?: string;
+    photos?: string;
+  }>;
+}) {
+  const [profileResult, params] = await Promise.all([
+    getCafeProfile()
+      .then((profile) => ({ profile, unavailable: false }))
+      .catch((error) => {
+        console.error("[safil image profile]", error);
+        return { profile: null, unavailable: true };
+      }),
+    searchParams,
+  ]);
   const { profile, unavailable: profileUnavailable } = profileResult;
 
   if (!profileUnavailable && !isProfileReady(profile)) {
@@ -56,10 +76,26 @@ export default async function CreateImagePage() {
     );
   }
 
+  const purpose = (purposeValues as readonly string[]).includes(params.purpose ?? "")
+    ? (params.purpose as Purpose)
+    : undefined;
+  const photoPaths = (params.photos ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => SAFE_PHOTO.test(item))
+    .slice(0, MAX_IMAGE_REFERENCE_PHOTOS);
+
   return (
     <ImageGenerator
       profile={isProfileReady(profile) ? profile : fallbackProfile}
       profileUnavailable={profileUnavailable}
+      initial={{
+        purpose,
+        title: params.title?.slice(0, 60),
+        dateText: params.dateText?.slice(0, 40),
+        message: params.message?.slice(0, 120),
+        photoPaths,
+      }}
     />
   );
 }

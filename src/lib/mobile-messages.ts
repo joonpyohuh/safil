@@ -17,6 +17,7 @@ export const mobileMsg = {
     photoRequired: "사진을 선택해 주세요.",
     titleRequired: "이미지에 넣을 제목을 적어 주세요.",
     generateFailed: "이미지를 만들지 못했어요. 다시 시도해 주세요.",
+    tooManyPhotos: "참고 사진은 최대 6장까지예요.",
   },
   notice: {
     detailsRequired: "안내 내용을 적어 주세요.",

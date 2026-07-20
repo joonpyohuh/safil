@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CopyHistoryActions } from "@/components/history/copy-history-actions";
+import { ImageHistoryActions } from "@/components/history/image-history-actions";
 import { listGenerations } from "@/lib/history";
 import type { Channel, Purpose } from "@/lib/schemas";
 
@@ -9,37 +10,122 @@ type CopyOption = {
   hashtags?: string[];
 };
 
+type ImageOption = {
+  imageUrl?: string;
+  headline?: string;
+  reason?: string;
+};
+
 type CopyInput = {
   purpose?: Purpose;
   channel?: Channel;
   message?: string;
 };
 
+type ImageInput = {
+  purpose?: Purpose;
+  title?: string;
+  dateText?: string;
+  message?: string;
+  photoPaths?: string[];
+};
+
+export const dynamic = "force-dynamic";
+
 export default async function HistoryPage() {
-  const records = await listGenerations({ type: "copy", limit: 50 });
+  const records = await listGenerations({ limit: 50 });
+  const visible = records.filter((record) => record.type === "copy" || record.type === "image");
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold text-ink">히스토리</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          만들고 선택한 홍보 문구를 다시 사용할 수 있어요
+          만들고 저장한 홍보 문구·이미지를 다시 볼 수 있어요
         </p>
       </div>
 
-      {records.length === 0 ? (
+      {visible.length === 0 ? (
         <section className="card flex flex-col items-center gap-3 py-10 text-center">
-          <p className="font-bold">아직 만든 문구가 없어요</p>
+          <p className="font-bold">아직 만든 결과물이 없어요</p>
           <p className="text-sm leading-6 text-ink-soft">
-            첫 홍보 문구를 만들면 여기에 자동으로 저장돼요.
+            첫 문구나 이미지를 만들면 여기에 자동으로 저장돼요.
           </p>
-          <Link href="/create/copy" className="btn-primary mt-1 max-w-xs">
-            첫 문구 만들기
-          </Link>
+          <div className="mt-1 grid w-full max-w-xs grid-cols-2 gap-2">
+            <Link href="/create/copy" className="btn-secondary">
+              문구
+            </Link>
+            <Link href="/create/image" className="btn-primary !w-auto">
+              이미지
+            </Link>
+          </div>
         </section>
       ) : (
         <ul className="flex flex-col gap-3">
-          {records.map((record) => {
+          {visible.map((record) => {
+            if (record.type === "image") {
+              const input = record.input as ImageInput;
+              const optionIndex = record.selectedIndex ?? 0;
+              const option = (record.options[optionIndex] ?? {}) as ImageOption;
+              const headline = option.headline ?? input.title ?? "홍보 이미지";
+              const reuse = new URLSearchParams();
+              if (input.purpose) reuse.set("purpose", input.purpose);
+              if (input.title) reuse.set("title", input.title);
+              if (input.dateText) reuse.set("dateText", input.dateText);
+              if (input.message) reuse.set("message", input.message);
+              if (Array.isArray(input.photoPaths) && input.photoPaths.length) {
+                reuse.set("photos", input.photoPaths.join(","));
+              }
+
+              return (
+                <li key={record.id} className="card flex flex-col gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-brand">홍보 이미지</span>
+                      {record.isSample && (
+                        <span className="rounded-full bg-cream px-2 py-1 text-[0.6875rem] text-ink-soft">
+                          체험용
+                        </span>
+                      )}
+                      {record.downloaded && (
+                        <span className="rounded-full bg-brand-soft px-2 py-1 text-[0.6875rem] font-semibold text-brand">
+                          저장함
+                        </span>
+                      )}
+                    </div>
+                    <time className="shrink-0 text-xs text-ink-soft">
+                      {new Intl.DateTimeFormat("ko-KR", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      }).format(record.createdAt)}
+                    </time>
+                  </div>
+                  {option.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={option.imageUrl}
+                      alt={headline}
+                      className="aspect-square w-full rounded-2xl object-cover"
+                    />
+                  ) : null}
+                  <p className="text-sm font-semibold">{headline}</p>
+                  {option.imageUrl ? (
+                    <ImageHistoryActions
+                      id={record.id}
+                      imageUrl={option.imageUrl}
+                      headline={headline}
+                      reuseHref={`/create/image?${reuse.toString()}`}
+                    />
+                  ) : (
+                    <Link href="/create/image" className="btn-primary">
+                      비슷하게 만들기
+                    </Link>
+                  )}
+                </li>
+              );
+            }
+
             const input = record.input as CopyInput;
             const optionIndex = record.selectedIndex ?? 0;
             const option = (record.options[optionIndex] ?? {}) as CopyOption;
@@ -55,7 +141,7 @@ export default async function HistoryPage() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-brand">
-                      {record.selectedIndex !== null ? "내가 고른 문구" : "첫 번째 제안"}
+                      {record.selectedIndex !== null ? "내가 고른 문구" : "홍보 문구"}
                     </span>
                     {record.isSample && (
                       <span className="rounded-full bg-cream px-2 py-1 text-[0.6875rem] text-ink-soft">

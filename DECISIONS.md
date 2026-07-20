@@ -31,9 +31,13 @@
 - **Status**: Confirmed (updated 2026-07-20)
 
 ### AI Models
-- **Decision**: Text `gpt-5-mini` (`OPENAI_TEXT_MODEL`), image `gpt-image-1` (`OPENAI_IMAGE_MODEL`, quality `low` for speed)
+- **Decision**: Text `gpt-5-mini` (`OPENAI_TEXT_MODEL`), image `gpt-image-1` (`OPENAI_IMAGE_MODEL`, quality `medium`)
+- **Status**: Confirmed (updated 2026-07-20)
+- **Reason**: Owner asked for these models; medium quality for usable SNS output
+
+### Image References
+- **Decision**: Up to 6 reference photos via `photoPaths`; edit API when present, generate fallback with honest UX copy
 - **Status**: Confirmed
-- **Reason**: Owner asked for these models; low quality keeps image generation within Vercel 60s
 
 ### Documentation Layout
 - **Decision**: Product docs at repo root; `docs/` for architecture/research; `CLAUDE.md` + `AGENTS.md` at root

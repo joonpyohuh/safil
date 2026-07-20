@@ -55,13 +55,24 @@ export function buildImagePrompt(
       ? "Clean modern cafe poster, soft natural light, generous negative space, elegant Korean typography."
       : "Warm cozy cafe poster, soft cream and espresso tones, inviting atmosphere, clear Korean typography.";
 
+  const photoCount = input.photoPaths.length;
+  const photoHint =
+    photoCount > 0
+      ? `Use the ${photoCount} provided cafe reference photo(s) as the visual base. Keep menu/food/store appearance recognizable and honest. Blend composition naturally; do not invent a different dish.`
+      : "No reference photo provided; create an original realistic cafe promotional scene.";
+  const messageHint = input.message
+    ? `Owner note to reflect: "${input.message}".`
+    : "";
+
   return [
     `Create a mobile SNS promotional image for a Korean cafe ${cafe}${location}${concept}.`,
     `Purpose: ${purposeLabels[input.purpose]}.`,
     `Main headline text on the image (exact Korean): "${input.title}".`,
     dateLine,
+    messageHint,
+    photoHint,
     style,
-    "Square Instagram-friendly composition, readable text, no misleading food claims, no fake awards or rankings.",
+    "Square Instagram-friendly composition, readable Korean text, no misleading food claims, no fake awards or rankings.",
     "Do not invent prices. Photorealistic cafe aesthetic, high readability.",
   ]
     .filter(Boolean)

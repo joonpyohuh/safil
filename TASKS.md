@@ -30,7 +30,8 @@
 ### Promotional Image
 - [x] Build image creation UI (`ImageGenerator`)
 - [x] Connect `POST /api/generate/image` with `gpt-image-1`
-- [x] Upload optional reference photo + download results
+- [x] Multi reference photos (up to 6) + download/share
+- [x] Owner persona Human Judge loop ≥ 90 (30s cafe owner)
 
 ### In-store Notice (frontend)
 - [ ] Build notice creation UI

@@ -3,9 +3,10 @@
 ## Current Status (2026-07-20)
 **홍보 문구 + 홍보 이미지 루프가 `main`에 구현됨.**
 
-- Supabase + Vercel 연결 완료
-- Copy: `gpt-5-mini` (reasoning minimal, 짧은 프롬프트)
-- Image: `gpt-image-1` (quality low, 1024x1024, 2장 병렬)
+- Supabase + Vercel 연결 완료 (`safil` / `safil-uo56` env 모두 설정)
+- Copy: `gpt-5-mini`
+- Image: `gpt-image-1` (quality medium, 참고사진 최대 6장, 2장 병렬)
+- 30대 사장님 Human Judge: **90/100 PASS**
 - Notice frontend는 placeholder
 
 ## Active Task

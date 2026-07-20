@@ -114,13 +114,15 @@ export function sampleImage(
         imagePath: "",
         imageUrl: sampleImageDataUrl(headline, subtitle, "clean"),
         headline,
-        reason: "체험용으로 만든 깔끔한 버전이에요. API 키를 연결하면 실제 이미지가 만들어져요.",
+        usedReferencePhotos: false,
+        reason: "체험용으로 만든 깔끔한 버전이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
       },
       {
         imagePath: "",
         imageUrl: sampleImageDataUrl(headline, subtitle, "warm"),
         headline,
-        reason: "체험용으로 만든 따뜻한 버전이에요. API 키를 연결하면 실제 이미지가 만들어져요.",
+        usedReferencePhotos: false,
+        reason: "체험용으로 만든 따뜻한 버전이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
       },
     ],
   };

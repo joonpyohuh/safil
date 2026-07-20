@@ -3,7 +3,16 @@ import { ActionCard } from "@/components/dashboard/action-card";
 import { RecentHistoryEmpty } from "@/components/dashboard/recent-history-empty";
 import { listGenerations } from "@/lib/history";
 import { getCafeProfile } from "@/lib/profile";
-import { isProfileReady, previewCopyInput, previewCopyResult } from "@/lib/profile-utils";
+import {
+  isProfileReady,
+  previewCopyInput,
+  previewCopyResult,
+  previewImageInput,
+  previewImageResult,
+  previewImageUrl,
+} from "@/lib/profile-utils";
+
+export const dynamic = "force-dynamic";
 
 const ICON_PROPS = {
   width: 20,
@@ -19,7 +28,7 @@ const ICON_PROPS = {
 export default async function Home() {
   const [profileResult, recentResult] = await Promise.allSettled([
     getCafeProfile(),
-    listGenerations({ type: "copy", limit: 3 }),
+    listGenerations({ limit: 5 }),
   ]);
   const profile = profileResult.status === "fulfilled" ? profileResult.value : null;
   const recent = recentResult.status === "fulfilled" ? recentResult.value : [];
@@ -37,7 +46,7 @@ export default async function Home() {
       <div>
         <h1 className="text-2xl font-bold text-ink">오늘 무엇을 만들어볼까요?</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          한 줄만 입력하면 바로 게시할 수 있는 홍보 문구를 만들어드려요
+          문구와 이미지를 만들어 바로 인스타그램에 올려보세요
         </p>
       </div>
 
@@ -105,27 +114,50 @@ export default async function Home() {
           <RecentHistoryEmpty />
         ) : (
           <ul className="flex flex-col gap-2">
-            {recent.map((item) => (
-              <li key={item.id}>
-                <Link href="/history" className="card block active:scale-[0.99]">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-brand">홍보 문구</span>
-                  <time className="text-xs text-ink-soft">
-                    {new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric" }).format(
-                      item.createdAt,
-                    )}
-                  </time>
-                </div>
-                <p className="mt-2 line-clamp-2 text-sm leading-6">
-                  {previewCopyResult(item) || previewCopyInput(item.input) || "홍보 문구"}
-                </p>
-                {item.copied && (
-                  <span className="mt-2 inline-block text-xs font-semibold text-brand">복사함</span>
-                )}
-                <span className="float-right mt-2 text-xs font-bold text-brand">다시 보기 →</span>
-                </Link>
-              </li>
-            ))}
+            {recent
+              .filter((item) => item.type === "copy" || item.type === "image")
+              .slice(0, 4)
+              .map((item) => {
+                const isImage = item.type === "image";
+                const preview = isImage
+                  ? previewImageResult(item) || previewImageInput(item.input) || "홍보 이미지"
+                  : previewCopyResult(item) || previewCopyInput(item.input) || "홍보 문구";
+                const thumb = isImage ? previewImageUrl(item) : "";
+                return (
+                  <li key={item.id}>
+                    <Link href="/history" className="card block active:scale-[0.99]">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-brand">
+                          {isImage ? "홍보 이미지" : "홍보 문구"}
+                        </span>
+                        <time className="text-xs text-ink-soft">
+                          {new Intl.DateTimeFormat("ko-KR", {
+                            month: "short",
+                            day: "numeric",
+                          }).format(item.createdAt)}
+                        </time>
+                      </div>
+                      {thumb ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={thumb}
+                          alt=""
+                          className="mt-2 aspect-[16/9] w-full rounded-xl object-cover"
+                        />
+                      ) : null}
+                      <p className="mt-2 line-clamp-2 text-sm leading-6">{preview}</p>
+                      {(item.copied || item.downloaded) && (
+                        <span className="mt-2 inline-block text-xs font-semibold text-brand">
+                          {item.downloaded ? "저장함" : "복사함"}
+                        </span>
+                      )}
+                      <span className="float-right mt-2 text-xs font-bold text-brand">
+                        다시 보기 →
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
           </ul>
         )}
       </div>

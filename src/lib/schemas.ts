@@ -90,13 +90,36 @@ export type CopyGenerationOutput = z.infer<typeof copyGenerationOutputSchema>;
 
 export const imagePaletteValues = ["cream", "espresso", "forest", "berry"] as const;
 
-export const imageGenerationInputSchema = z.object({
-  purpose: z.enum(purposeValues),
-  /** 참고 사진(선택). 있으면 edit, 없으면 텍스트로 생성 */
-  photoPath: z.string().trim().max(120).nullable().default(null),
-  title: z.string().trim().min(1, mobileMsg.image.titleRequired).max(60),
-  dateText: z.string().trim().max(40).default(""),
-});
+export const MAX_IMAGE_REFERENCE_PHOTOS = 6;
+
+export const imageGenerationInputSchema = z
+  .object({
+    purpose: z.enum(purposeValues),
+    /** 참고 사진들(선택). 있으면 edit, 없으면 텍스트로 생성 */
+    photoPaths: z
+      .array(z.string().trim().min(1).max(120))
+      .max(MAX_IMAGE_REFERENCE_PHOTOS, mobileMsg.image.tooManyPhotos)
+      .default([]),
+    /** @deprecated use photoPaths */
+    photoPath: z.string().trim().max(120).nullable().optional(),
+    title: z.string().trim().min(1, mobileMsg.image.titleRequired).max(60),
+    dateText: z.string().trim().max(40).default(""),
+    /** 사진과 함께 참고할 한 줄 설명(선택) */
+    message: z.string().trim().max(120).default(""),
+  })
+  .transform((value) => {
+    const paths = [...value.photoPaths];
+    if (value.photoPath && !paths.includes(value.photoPath)) {
+      paths.unshift(value.photoPath);
+    }
+    return {
+      purpose: value.purpose,
+      title: value.title,
+      dateText: value.dateText,
+      message: value.message,
+      photoPaths: paths.slice(0, MAX_IMAGE_REFERENCE_PHOTOS),
+    };
+  });
 
 export type ImageGenerationInput = z.infer<typeof imageGenerationInputSchema>;
 
@@ -105,6 +128,7 @@ export const imageOptionSchema = z.object({
   imageUrl: z.string().describe("다운로드/표시용 URL"),
   headline: z.string().describe("이미지에 들어간 짧은 제목"),
   reason: z.string().describe("이 이미지를 제안한 짧은 이유"),
+  usedReferencePhotos: z.boolean().describe("참고 사진을 실제로 반영했는지"),
 });
 
 export const imageGenerationOutputSchema = z.object({

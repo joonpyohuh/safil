@@ -101,6 +101,15 @@ export async function generateCopy(
   }
 }
 
+async function loadReferenceFiles(photoPaths: string[]) {
+  const files = [];
+  for (const path of photoPaths) {
+    const { buffer, contentType } = await downloadUpload(path);
+    files.push(await toFile(buffer, path, { type: contentType }));
+  }
+  return files;
+}
+
 async function generateOneImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
@@ -110,22 +119,24 @@ async function generateOneImage(
   const prompt = buildImagePrompt(input, profile, variant);
   const model = getImageModel();
   let b64: string | undefined;
+  let usedReferencePhotos = false;
+  const photoCount = input.photoPaths.length;
 
-  if (input.photoPath) {
+  if (photoCount > 0) {
     try {
-      const { buffer, contentType } = await downloadUpload(input.photoPath);
-      const file = await toFile(buffer, input.photoPath, { type: contentType });
+      const files = await loadReferenceFiles(input.photoPaths);
       const edited = await openai.images.edit(
         {
           model,
-          image: file,
-          prompt: `${prompt} Keep the original cafe/menu photo recognizable. Add clear promotional text overlay only. Do not invent fake food appearance.`,
+          image: files.length === 1 ? files[0]! : files,
+          prompt: `${prompt} Keep the provided cafe/menu photos recognizable. Add clear promotional text. Do not invent fake food appearance.`,
           size: "1024x1024",
-          quality: "low",
+          quality: "medium",
         },
         { timeout: AI_IMAGE_TIMEOUT_MS },
       );
       b64 = edited.data?.[0]?.b64_json ?? undefined;
+      usedReferencePhotos = Boolean(b64);
     } catch (error) {
       console.error("[safil image edit fallback]", error);
     }
@@ -137,7 +148,7 @@ async function generateOneImage(
         model,
         prompt,
         size: "1024x1024",
-        quality: "low",
+        quality: "medium",
         output_format: "png",
       },
       { timeout: AI_IMAGE_TIMEOUT_MS },
@@ -148,14 +159,22 @@ async function generateOneImage(
   if (!b64) throw new Error(mobileMsg.image.generateFailed);
 
   const uploaded = await uploadImageBuffer(Buffer.from(b64, "base64"), "image/png");
+  const photoReason = usedReferencePhotos
+    ? photoCount > 1
+      ? `올려주신 사진 ${photoCount}장을 참고해 `
+      : "올려주신 사진을 참고해 "
+    : photoCount > 0
+      ? "사진 반영이 어려워 제목 중심으로 새로 그렸고, "
+      : "";
   return {
     imagePath: uploaded.storedName,
     imageUrl: uploaded.url,
     headline: input.title,
+    usedReferencePhotos,
     reason:
       variant === "clean"
-        ? "글씨가 잘 보이도록 깔끔하게 정리한 버전이에요."
-        : "카페 분위기가 따뜻하게 느껴지도록 만든 버전이에요.",
+        ? `${photoReason}글씨가 잘 보이도록 깔끔하게 정리한 버전이에요.`
+        : `${photoReason}카페 분위기가 따뜻하게 느껴지도록 만든 버전이에요.`,
   };
 }
 
