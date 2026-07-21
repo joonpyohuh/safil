@@ -140,8 +140,8 @@ export function sampleImage(
         useCase: "메뉴·원두 소개 피드",
         photoTreatment: "warm_film",
         reason: cafeName
-          ? `${cafeName} · 메뉴 클로즈업 체험용이에요. 글자는 바로 고칠 수 있어요.`
-          : "메뉴 클로즈업 체험용이에요. 글자·레이아웃은 바로 고칠 수 있어요.",
+          ? `${cafeName} · 메뉴 클로즈업으로 새로 그린 체험용이에요.`
+          : "메뉴 클로즈업으로 새로 그린 체험용이에요.",
       },
       {
         imagePath: "",
@@ -160,7 +160,7 @@ export function sampleImage(
         moodLabel: IMAGE_MOOD_LABELS.space_story,
         useCase: "매장 분위기·방문 유도",
         photoTreatment: "moody_editorial",
-        reason: "공간·분위기 체험용이에요. 감성 피드에 맞춰 보세요.",
+        reason: "공간·분위기로 새로 그린 체험용이에요.",
       },
       {
         imagePath: "",
@@ -179,7 +179,7 @@ export function sampleImage(
         moodLabel: IMAGE_MOOD_LABELS.promo_clear,
         useCase: "가격·기간·행사 안내",
         photoTreatment: "clean_bright",
-        reason: "소식·안내 체험용이에요. 다시 만들면 실제 이미지로 시도해요.",
+        reason: "소식·안내로 새로 그린 체험용이에요. 다시 만들면 실제 AI 이미지로 시도해요.",
       },
     ],
   };

@@ -36,9 +36,12 @@
 - **Reason**: Owner asked for these models; medium quality for usable SNS output
 
 ### Photo-first promo images
-- **Decision**: When owner uploads photos, use original photos as poster backgrounds (no image API). AI image generation only when no photos. Always return **3 mood variations** (`menu_hero` / `space_story` / `promo_clear`) with different template + `photoTreatment` (crop/filter), inspired by specialty café Instagram feeds (나무사이로·커피리브르). Facts in `message` render verbatim. PNG export only on save/share.
-- **Status**: Confirmed (updated 2026-07-21)
-- **Reason**: Two near-identical layout overlays felt weak; owners need distinct mood/use cases for feed vs promo
+- **Decision (superseded 2026-07-21)**: Was photo-as-background; **replaced** by AI-generated promotional stills.
+
+### AI-generated promo images (Instagram research)
+- **Decision**: Always generate **3 new** AI promotional stills (`menu_hero` / `space_story` / `promo_clear`). Before drawing: web-search the cafe’s Instagram/review visual mood (`researchCafeVisualMood`). Owner photos are **references** (vision describe + optional `images.edit`), not flat backgrounds. Korean facts stay on the HTML poster layer. PNG only on save/share.
+- **Status**: Confirmed (2026-07-21)
+- **Reason**: Owners want newly composed ads matching the cafe’s real feed mood, not text pasted on snapshots
 
 ### Cafe research UX
 - **Decision**: Place search prefers Kakao/Naver Local APIs; deep research is single-pass Responses+web_search JSON (no double LLM). UI shows stepped progress for search vs analyze.

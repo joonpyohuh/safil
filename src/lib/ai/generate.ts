@@ -1,10 +1,12 @@
 import { z } from "zod";
+import { toFile } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import {
   AI_IMAGE_TIMEOUT_MS,
   AI_TEXT_TIMEOUT_MS,
   getImageModel,
   getOpenAI,
+  getSearchModel,
   getTextModel,
   isAiConfigured,
 } from "./client";
@@ -16,9 +18,14 @@ import {
 } from "./prompts";
 import { buildBrandVisualBrief } from "./brand-visual";
 import { buildCafeLearningContext } from "./cafe-context";
+import { researchCafeVisualMood } from "./cafe-visual-research";
 import { sampleCopy, sampleImage, sampleNotice } from "./samples";
 import { mobileMsg } from "@/lib/mobile-messages";
-import { publicUploadUrl, uploadImageBuffer } from "@/lib/storage";
+import {
+  downloadUpload,
+  publicUploadUrl,
+  uploadImageBuffer,
+} from "@/lib/storage";
 import {
   copyOptionSchema,
   IMAGE_MOOD_LABELS,
@@ -108,8 +115,9 @@ export async function generateCopy(
 }
 
 // ---------------------------------------------------------------------------
-// Promotional image — Instagram specialty-cafe style (나무사이로·커피리브르 참고)
-// 3안: 메뉴 클로즈업 / 공간·분위기 / 소식·안내 — 무드·용도·사진 처리가 다름
+// Promotional image — AI가 새로 그리는 홍보 이미지 3안
+// 카페 인스타·리뷰 비주얼 리서치 + (있으면) 사장님 사진 참고
+// 한글 문구는 포스터 레이어에 그대로 얹음 (이미지 속 글자 금지)
 // ---------------------------------------------------------------------------
 
 type DesignTemplate =
@@ -129,9 +137,10 @@ type VariationSpec = {
   treatment: PhotoTreatment;
   palette: "auto" | "cream" | "espresso" | "forest" | "berry";
   reason: string;
+  /** 영어 — 구도·피사체 지시 */
+  shotEnglish: string;
 };
 
-/** 레퍼런스 기반 고정 3안 — 방향성이 확실히 갈림 */
 const IG_VARIATIONS: VariationSpec[] = [
   {
     mood: "menu_hero",
@@ -140,7 +149,9 @@ const IG_VARIATIONS: VariationSpec[] = [
     treatment: "warm_film",
     palette: "auto",
     reason:
-      "메뉴를 크게 보여주는 에디토리얼 톤이에요. 인스타 피드에서 멈추게 하는 용도예요.",
+      "인스타·매장 분위기를 보고 메뉴가 돋보이게 새로 그린 안이에요.",
+    shotEnglish:
+      "Hero close-up of signature drink or pastry on ceramic, shallow depth of field, soft window light, warm film tones, generous lower negative space for typography. Specialty Korean cafe product still.",
   },
   {
     mood: "space_story",
@@ -149,7 +160,9 @@ const IG_VARIATIONS: VariationSpec[] = [
     treatment: "moody_editorial",
     palette: "espresso",
     reason:
-      "공간과 브랜드 감성을 살린 안이에요. ‘이런 곳에서 쉬고 싶다’는 느낌을 줘요.",
+      "공간 감성을 살린 새로 그린 안이에요. ‘이런 곳에서 쉬고 싶다’는 느낌이에요.",
+    shotEnglish:
+      "Atmospheric wide interior of an independent Korean cafe: seating, materials, daylight, calm negative space on one side for typography. Editorial Instagram space story, lived-in but refined.",
   },
   {
     mood: "promo_clear",
@@ -158,7 +171,9 @@ const IG_VARIATIONS: VariationSpec[] = [
     treatment: "clean_bright",
     palette: "cream",
     reason:
-      "소식·행사를 또렷하게 전하는 안이에요. 저장해 두고 바로 올리기 좋아요.",
+      "소식을 또렷히 전하도록 밝고 깔끔하게 새로 그린 안이에요.",
+    shotEnglish:
+      "Clean bright tabletop or counter still life with coffee tools or simple plating, high key light, clear center subject, soft background blur, open space for bold promo typography. Not cluttered.",
   },
 ];
 
@@ -174,33 +189,120 @@ function pickHeadline(
   return (first || purposeLabels[input.purpose]).slice(0, 16);
 }
 
-/** 사진 없을 때만 — 글자 없는 배경 1장 (WebP) */
-async function generateAiBackgroundOnce(
-  input: ImageGenerationInput,
-  profile: CafeProfile | null,
-): Promise<{ storedName: string; url: string }> {
-  const openai = getOpenAI();
-  const brand = buildBrandVisualBrief(profile);
-  const prompt = [
-    "Professional Instagram square (1:1) photorealistic Korean specialty cafe scene.",
-    "Inspired by refined independent cafes (soft natural light, honest materials, calm negative space).",
-    "NO text, letters, numbers, logos, watermarks, or UI.",
-    brand?.englishLook ?? "Independent Korean neighborhood specialty cafe.",
-    `Purpose mood: ${purposeLabels[input.purpose]}.`,
-    "High-end food/interior photography. Not franchise stock look.",
-  ].join(" ");
+function buildMoodPrompt(params: {
+  spec: VariationSpec;
+  brandEnglish: string;
+  visualEnglish: string;
+  photoEnglish: string;
+  purpose: string;
+}): string {
+  return [
+    "Create a NEW photorealistic Instagram square (1:1) promotional still for a Korean specialty cafe.",
+    "This must be a freshly composed advertising photograph — NOT a flat reuse of an uploaded snapshot.",
+    "NO text, letters, numbers, logos, watermarks, UI, or captions in the image.",
+    params.spec.shotEnglish,
+    `Cafe visual research (Instagram/reviews): ${params.visualEnglish}`,
+    params.brandEnglish ? `Brand identity: ${params.brandEnglish}` : "",
+    params.photoEnglish
+      ? `Owner photo reference (match materials/food look, but reinvent framing and lighting): ${params.photoEnglish}`
+      : "",
+    `Campaign purpose mood: ${params.purpose}.`,
+    "High-end cafe photography. Not franchise stock. Distinct independent Korean cafe aesthetic.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
 
-  const generated = await openai.images.generate(
-    {
-      model: getImageModel(),
-      prompt,
-      size: "1024x1024",
-      quality: "medium",
-      output_format: "webp",
-    },
-    { timeout: AI_IMAGE_TIMEOUT_MS },
-  );
-  const b64 = generated.data?.[0]?.b64_json;
+/** 사장님 사진 1장을 보고 영어 시각 단서 추출 */
+async function describeOwnerPhoto(path: string): Promise<string> {
+  try {
+    const { buffer, contentType } = await downloadUpload(path);
+    const mime = contentType.startsWith("image/") ? contentType : "image/jpeg";
+    const openai = getOpenAI();
+    const completion = await openai.chat.completions.create(
+      {
+        model: getSearchModel(),
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: [
+                  "Describe this Korean cafe photo for remaking a NEW promotional ad still.",
+                  "Focus on subject, materials, colors, lighting, plating, interior cues.",
+                  "English, max 5 sentences. No invented brand claims. Do not mention text in the photo.",
+                ].join(" "),
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mime};base64,${buffer.toString("base64")}`,
+                },
+              },
+            ],
+          },
+        ],
+        max_completion_tokens: 280,
+      },
+      { timeout: 14_000 },
+    );
+    return completion.choices[0]?.message?.content?.trim() ?? "";
+  } catch (error) {
+    console.error("[safil photo describe]", error);
+    return "";
+  }
+}
+
+async function generateAiStill(params: {
+  prompt: string;
+  referencePath?: string;
+}): Promise<{ storedName: string; url: string }> {
+  const openai = getOpenAI();
+  let b64: string | undefined;
+
+  if (params.referencePath) {
+    try {
+      const { buffer, contentType } = await downloadUpload(params.referencePath);
+      const ext = contentType.includes("png")
+        ? "png"
+        : contentType.includes("webp")
+          ? "webp"
+          : "jpg";
+      const file = await toFile(buffer, `ref.${ext}`, {
+        type: contentType.startsWith("image/") ? contentType : "image/jpeg",
+      });
+      const edited = await openai.images.edit(
+        {
+          model: getImageModel(),
+          image: file,
+          prompt: params.prompt,
+          size: "1024x1024",
+          quality: "medium",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+        { timeout: AI_IMAGE_TIMEOUT_MS },
+      );
+      b64 = edited.data?.[0]?.b64_json;
+    } catch (error) {
+      console.error("[safil image edit fallback to generate]", error);
+    }
+  }
+
+  if (!b64) {
+    const generated = await openai.images.generate(
+      {
+        model: getImageModel(),
+        prompt: params.prompt,
+        size: "1024x1024",
+        quality: "medium",
+        output_format: "webp",
+      },
+      { timeout: AI_IMAGE_TIMEOUT_MS },
+    );
+    b64 = generated.data?.[0]?.b64_json;
+  }
+
   if (!b64) throw new Error(mobileMsg.image.generateFailed);
   const uploaded = await uploadImageBuffer(Buffer.from(b64, "base64"), "image/webp");
   return {
@@ -213,7 +315,7 @@ export async function generateImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
 ): Promise<GenerationResult<ImageGenerationOutput>> {
-  if (!isAiConfigured() && input.photoPaths.length === 0) {
+  if (!isAiConfigured()) {
     return { output: sampleImage(input, profile), isSample: true };
   }
 
@@ -228,39 +330,40 @@ export async function generateImage(
   const cafeName = brand?.cafeName || profile?.name || "";
   const cafeLocation = brand?.location || profile?.location || "";
   const hasPhotos = input.photoPaths.length > 0;
+  const referencePath = hasPhotos ? input.photoPaths[0] : undefined;
 
-  let sharedBg: { storedName: string; url: string; usedReferencePhotos: boolean };
+  const [visualMood, photoEnglish] = await Promise.all([
+    researchCafeVisualMood(profile),
+    referencePath ? describeOwnerPhoto(referencePath) : Promise.resolve(""),
+  ]);
 
-  if (hasPhotos) {
-    const path = input.photoPaths[0]!;
-    sharedBg = {
-      storedName: path,
-      url: publicUploadUrl(path),
-      usedReferencePhotos: true,
-    };
-  } else {
-    if (!isAiConfigured()) {
-      return { output: sampleImage(input, profile), isSample: true };
-    }
-    const aiBg = await generateAiBackgroundOnce(input, profile);
-    sharedBg = { ...aiBg, usedReferencePhotos: false };
-  }
+  const brandEnglish = brand?.englishLook ?? "";
+  const purpose = purposeLabels[input.purpose];
 
-  // 사진이 2장 이상이면 안마다 다른 원본을 섞어 variation 강화
-  const photoPaths = hasPhotos
-    ? [
-        input.photoPaths[0]!,
-        input.photoPaths[1] ?? input.photoPaths[0]!,
-        input.photoPaths[2] ?? input.photoPaths[0]!,
-      ]
-    : null;
+  const stills = await Promise.all(
+    IG_VARIATIONS.map((spec) =>
+      generateAiStill({
+        prompt: buildMoodPrompt({
+          spec,
+          brandEnglish,
+          visualEnglish: visualMood.englishVisual,
+          photoEnglish,
+          purpose,
+        }),
+        referencePath,
+      }),
+    ),
+  );
+
+  const moodHint = visualMood.koreanMood
+    ? ` (${visualMood.koreanMood})`
+    : "";
 
   const options: ImageOption[] = IG_VARIATIONS.map((spec, index) => {
-    const path = photoPaths ? photoPaths[index]! : sharedBg.storedName;
-    const url = photoPaths ? publicUploadUrl(path) : sharedBg.url;
+    const still = stills[index]!;
     return {
-      imagePath: path,
-      imageUrl: url,
+      imagePath: still.storedName,
+      imageUrl: still.url,
       headline: pickHeadline(input, spec.mood, brandCue),
       subline: brandCue,
       bodyText,
@@ -275,9 +378,7 @@ export async function generateImage(
       moodLabel: IMAGE_MOOD_LABELS[spec.mood],
       useCase: spec.useCase,
       photoTreatment: spec.treatment,
-      reason: hasPhotos
-        ? `${spec.reason} 원본 사진을 ${spec.treatment === "warm_film" ? "따뜻한 필름" : spec.treatment === "clean_bright" ? "맑고 또렷한" : "무디한 에디토리얼"} 느낌으로 다르게 연출했어요.`
-        : spec.reason,
+      reason: `${spec.reason}${moodHint}`,
     };
   });
 

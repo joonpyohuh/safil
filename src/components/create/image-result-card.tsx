@@ -270,7 +270,7 @@ export function ImageResultCard({
                   : "bg-cream text-ink-soft"
               }`}
             >
-              {usedReferencePhotos ? "원본 사진" : "AI 배경"}
+              {usedReferencePhotos ? "사진 참고" : "AI 신규"}
             </span>
           )}
           {isSample && (

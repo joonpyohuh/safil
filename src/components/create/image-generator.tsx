@@ -95,14 +95,12 @@ export function ImageGenerator({
     const id = window.setInterval(() => {
       const sec = Math.floor((Date.now() - started) / 1000);
       setElapsedSec(sec);
-      if (photosRef.current.length) {
-        setLoadingStep(
-          sec < 8
-            ? "사진으로 무드별 광고 3안을 만드는 중…"
-            : "거의 다 됐어요. 메뉴·공간·소식 느낌으로 다르게 연출해요.",
-        );
-      } else if (sec < 25) {
-        setLoadingStep("사진이 없어 AI 배경을 그리는 중… 보통 30초 안이에요.");
+      if (sec < 12) {
+        setLoadingStep("카페 인스타·리뷰 분위기를 조사하는 중…");
+      } else if (sec < 35) {
+        setLoadingStep("메뉴·공간·소식 느낌으로 홍보 이미지 3안을 그리는 중…");
+      } else if (sec < 70) {
+        setLoadingStep("거의 다 됐어요. 새로 만든 이미지를 다듬는 중…");
       } else {
         setLoadingStep("조금만 더 기다려 주세요. 거의 다 됐어요.");
       }
@@ -214,20 +212,13 @@ export function ImageGenerator({
     }
     setLoading(true);
     setElapsedSec(0);
-    setLoadingStep(
-      usePhotos.length
-        ? "사진으로 무드별 광고 3안을 만드는 중…"
-        : "사진이 없어 AI 배경을 그리는 중…",
-    );
+    setLoadingStep("카페 인스타·리뷰 분위기를 조사하는 중…");
     setError("");
     setStatus("");
     setNoticeKind("");
     const controller = new AbortController();
     abortRef.current = controller;
-    const timeout = window.setTimeout(
-      () => controller.abort(),
-      usePhotos.length ? 35_000 : 90_000,
-    );
+    const timeout = window.setTimeout(() => controller.abort(), 100_000);
     try {
       const body: ImageGenerationInput = {
         purpose,
@@ -255,13 +246,13 @@ export function ImageGenerator({
       } else if (usePhotos.length > 0) {
         setNoticeKind("ok");
         setStatus(
-          "올려주신 사진으로 메뉴·공간·소식 느낌 3안을 만들었어요. 본문은 적어 주신 내용 그대로예요.",
+          "올려주신 사진과 카페 인스타 분위기를 참고해 홍보 이미지 3안을 새로 그렸어요. 본문은 적어 주신 내용 그대로예요.",
         );
       } else {
         setNoticeKind("ok");
         setStatus(
           json.data.persisted
-            ? "이미지 3장이 완성됐어요. 글자는 아래에서 바로 고칠 수 있어요."
+            ? "카페 분위기를 보고 홍보 이미지 3안을 새로 그렸어요. 글자는 아래에서 바로 고칠 수 있어요."
             : "이미지가 완성됐어요. 기록 저장은 잠시 안 되지만 바로 받을 수 있어요.",
         );
       }
@@ -302,8 +293,8 @@ export function ImageGenerator({
         <p className="text-sm font-bold text-brand">이미지</p>
         <h1 className="mt-1 text-2xl font-bold">홍보 이미지 만들기</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          꼭 알릴 내용(메뉴·가격·기간 등)을 적고 사진을 올리면, 인스타 카페 피드처럼
-          메뉴·공간·소식 느낌이 다른 광고 3안을 만들어요. 사진이 없을 때만 AI가 배경을 그려요.
+          꼭 알릴 내용을 적으면, 카페 인스타·리뷰 분위기를 조사해 메뉴·공간·소식 느낌의
+          홍보 이미지 3안을 새로 그려 드려요. 사진은 있으면 참고만 하고 원본을 그대로 쓰지 않아요.
         </p>
       </header>
 
@@ -405,7 +396,7 @@ export function ImageGenerator({
             </ul>
           )}
           <p className="text-xs leading-5 text-ink-soft">
-            사진을 올리면 AI가 음식을 새로 그리지 않고, 원본으로 무드만 다르게 연출해요.
+            사진은 메뉴·공간 느낌을 맞추는 참고용이에요. AI가 홍보용으로 새로 그려요.
           </p>
         </div>
 
@@ -414,9 +405,7 @@ export function ImageGenerator({
             ? "만드는 중…"
             : record
               ? "다시 만들기"
-              : photos.length
-                ? "사진으로 광고 3안 만들기"
-                : "이미지 3장 만들기"}
+              : "홍보 이미지 3안 새로 만들기"}
         </button>
 
         <button
@@ -498,7 +487,7 @@ export function ImageGenerator({
             <div className="h-2 overflow-hidden rounded-full bg-cream">
               <div
                 className="h-full rounded-full bg-brand transition-all"
-                style={{ width: `${Math.min(95, 12 + elapsedSec * (photos.length ? 6 : 2))}%` }}
+                style={{ width: `${Math.min(95, 10 + elapsedSec * 1.15)}%` }}
               />
             </div>
             <button type="button" className="btn-secondary" onClick={cancelGenerate}>
@@ -519,9 +508,7 @@ export function ImageGenerator({
             ? "만드는 중…"
             : record
               ? "다시 만들기"
-              : photos.length
-                ? "사진으로 광고 3안 만들기"
-                : "이미지 3장 만들기"}
+              : "홍보 이미지 3안 새로 만들기"}
         </button>
       </div>
 

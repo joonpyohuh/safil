@@ -35,6 +35,7 @@
 - [x] Photo-first polished posters (8 layouts, Noto fonts, lazy PNG, gpt-image-2 fallback)
 - [x] Instagram-mood 3 variations (menu / space / promo) + photoTreatment + Toss motion UX
 - [x] Faster cafe search/deep-research single-pass + progress UI
+- [x] AI-new promo stills with Instagram visual research (photos as reference only)
 
 ### Quality Eval
 - [x] Golden dataset 72 curated café posts (`evals/golden`)
