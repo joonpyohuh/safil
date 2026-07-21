@@ -3,7 +3,7 @@ import { CopyHistoryActions } from "@/components/history/copy-history-actions";
 import { ImageResultCard } from "@/components/create/image-result-card";
 import { listGenerations } from "@/lib/history";
 import { getCafeProfile } from "@/lib/profile";
-import type { Channel, ImagePalette, ImageTemplate, Purpose } from "@/lib/schemas";
+import type { Channel, ImagePalette, ImageTemplate, PhotoTreatment, Purpose } from "@/lib/schemas";
 
 type CopyOption = {
   text?: string;
@@ -23,6 +23,9 @@ type ImageOption = {
   cafeName?: string;
   cafeLocation?: string;
   brandCue?: string;
+  moodLabel?: string;
+  useCase?: string;
+  photoTreatment?: PhotoTreatment;
 };
 
 type CopyInput = {
@@ -115,7 +118,7 @@ export default async function HistoryPage() {
                   </div>
                   {option.imageUrl ? (
                     <ImageResultCard
-                      label={headline}
+                      label={option.moodLabel || headline}
                       imageUrl={option.imageUrl}
                       initialHeadline={headline}
                       initialBodyText={
@@ -131,6 +134,8 @@ export default async function HistoryPage() {
                       initialPalette={option.palette ?? "auto"}
                       cafeName={option.cafeName || profileName}
                       cafeLocation={option.cafeLocation || profile?.location || ""}
+                      useCase={option.useCase}
+                      photoTreatment={option.photoTreatment}
                       isSample={record.isSample}
                       shareTitle={`${option.cafeName || profileName || "카페"} 홍보 이미지`}
                       persistId={record.id}

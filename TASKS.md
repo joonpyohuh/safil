@@ -33,6 +33,8 @@
 - [x] Multi reference photos (up to 6) + download/share
 - [x] Owner persona Human Judge loop ≥ 90 (30s cafe owner)
 - [x] Photo-first polished posters (8 layouts, Noto fonts, lazy PNG, gpt-image-2 fallback)
+- [x] Instagram-mood 3 variations (menu / space / promo) + photoTreatment + Toss motion UX
+- [x] Faster cafe search/deep-research single-pass + progress UI
 
 ### Quality Eval
 - [x] Golden dataset 72 curated café posts (`evals/golden`)

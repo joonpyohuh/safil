@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, Ref } from "react";
-import type { ImageTemplate } from "@/lib/schemas";
+import type { ImageTemplate, PhotoTreatment } from "@/lib/schemas";
 import { normalizeImageTemplate } from "@/lib/schemas";
 import type { PosterColors } from "@/lib/client/extract-colors";
 
@@ -22,6 +22,8 @@ export type PromoPosterProps = {
   templateId: ImageTemplate;
   colors: PosterColors;
   scale?: number;
+  /** 인스타 variation — 크롭·필터로 사진 연출을 다르게 */
+  photoTreatment?: PhotoTreatment;
 };
 
 const SANS =
@@ -40,20 +42,52 @@ const rootBase: CSSProperties = {
   WebkitFontSmoothing: "antialiased",
 };
 
-function Bg({ src }: { src: string }) {
+function treatmentImgStyle(treatment?: PhotoTreatment): CSSProperties {
+  const base: CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  };
+  switch (treatment) {
+    case "warm_film":
+      return {
+        ...base,
+        objectPosition: "50% 38%",
+        transform: "scale(1.14)",
+        transformOrigin: "center center",
+        filter: "saturate(1.1) contrast(1.06) sepia(0.22) brightness(1.03)",
+      };
+    case "clean_bright":
+      return {
+        ...base,
+        objectPosition: "50% 32%",
+        transform: "scale(1.06)",
+        transformOrigin: "center top",
+        filter: "saturate(1.18) contrast(1.1) brightness(1.1)",
+      };
+    case "moody_editorial":
+      return {
+        ...base,
+        objectPosition: "48% 58%",
+        transform: "scale(1.2)",
+        transformOrigin: "center center",
+        filter: "saturate(0.82) contrast(1.18) brightness(0.9)",
+      };
+    default:
+      return base;
+  }
+}
+
+function Bg({ src, treatment }: { src: string; treatment?: PhotoTreatment }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt=""
       crossOrigin="anonymous"
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-      }}
+      style={treatmentImgStyle(treatment)}
     />
   );
 }
@@ -140,6 +174,7 @@ export function PromoPoster({
   templateId,
   colors,
   scale = 1,
+  photoTreatment,
 }: PromoPosterProps) {
   const t = normalizeImageTemplate(templateId);
   const title = headline.trim() || " ";
@@ -172,7 +207,7 @@ export function PromoPoster({
   return (
     <div style={wrap}>
       <div ref={posterRef} data-safil-poster style={scaled}>
-        <Bg src={imageUrl} />
+        <Bg src={imageUrl} treatment={photoTreatment} />
 
         {/* 1. 에디토리얼 하단 타이포 */}
         {t === "fade_bottom" && (

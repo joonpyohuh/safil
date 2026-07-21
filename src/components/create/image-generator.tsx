@@ -98,8 +98,8 @@ export function ImageGenerator({
       if (photosRef.current.length) {
         setLoadingStep(
           sec < 8
-            ? "사진으로 광고 레이아웃 2안을 입히는 중…"
-            : "거의 다 됐어요. 원본 사진을 그대로 쓰고 있어요.",
+            ? "사진으로 무드별 광고 3안을 만드는 중…"
+            : "거의 다 됐어요. 메뉴·공간·소식 느낌으로 다르게 연출해요.",
         );
       } else if (sec < 25) {
         setLoadingStep("사진이 없어 AI 배경을 그리는 중… 보통 30초 안이에요.");
@@ -216,7 +216,7 @@ export function ImageGenerator({
     setElapsedSec(0);
     setLoadingStep(
       usePhotos.length
-        ? "사진으로 광고 레이아웃 2안을 입히는 중…"
+        ? "사진으로 무드별 광고 3안을 만드는 중…"
         : "사진이 없어 AI 배경을 그리는 중…",
     );
     setError("");
@@ -255,13 +255,13 @@ export function ImageGenerator({
       } else if (usePhotos.length > 0) {
         setNoticeKind("ok");
         setStatus(
-          "올려주신 사진으로 레이아웃 2안을 만들었어요. 본문은 적어 주신 내용 그대로예요.",
+          "올려주신 사진으로 메뉴·공간·소식 느낌 3안을 만들었어요. 본문은 적어 주신 내용 그대로예요.",
         );
       } else {
         setNoticeKind("ok");
         setStatus(
           json.data.persisted
-            ? "이미지 2장이 완성됐어요. 글자는 아래에서 바로 고칠 수 있어요."
+            ? "이미지 3장이 완성됐어요. 글자는 아래에서 바로 고칠 수 있어요."
             : "이미지가 완성됐어요. 기록 저장은 잠시 안 되지만 바로 받을 수 있어요.",
         );
       }
@@ -302,8 +302,8 @@ export function ImageGenerator({
         <p className="text-sm font-bold text-brand">이미지</p>
         <h1 className="mt-1 text-2xl font-bold">홍보 이미지 만들기</h1>
         <p className="mt-2 text-sm leading-6 text-ink-soft">
-          꼭 알릴 내용(메뉴·가격·기간 등)을 적고 사진을 올리면, 원본 사진에 세련된 광고
-          레이아웃 2안을 입혀드려요. 사진이 없을 때만 AI가 배경을 그려요.
+          꼭 알릴 내용(메뉴·가격·기간 등)을 적고 사진을 올리면, 인스타 카페 피드처럼
+          메뉴·공간·소식 느낌이 다른 광고 3안을 만들어요. 사진이 없을 때만 AI가 배경을 그려요.
         </p>
       </header>
 
@@ -405,18 +405,18 @@ export function ImageGenerator({
             </ul>
           )}
           <p className="text-xs leading-5 text-ink-soft">
-            사진을 올리면 AI가 음식을 새로 그리지 않고, 원본으로 광고 디자인만 입혀요.
+            사진을 올리면 AI가 음식을 새로 그리지 않고, 원본으로 무드만 다르게 연출해요.
           </p>
         </div>
 
-        <button type="submit" className="btn-primary !min-h-14" disabled={!canSubmit}>
+        <button type="submit" className="btn-primary !min-h-14 toss-press" disabled={!canSubmit}>
           {loading
             ? "만드는 중…"
             : record
               ? "다시 만들기"
               : photos.length
-                ? "사진으로 광고 2안 만들기"
-                : "이미지 2장 만들기"}
+                ? "사진으로 광고 3안 만들기"
+                : "이미지 3장 만들기"}
         </button>
 
         <button
@@ -520,8 +520,8 @@ export function ImageGenerator({
             : record
               ? "다시 만들기"
               : photos.length
-                ? "사진으로 광고 2안 만들기"
-                : "이미지 2장 만들기"}
+                ? "사진으로 광고 3안 만들기"
+                : "이미지 3장 만들기"}
         </button>
       </div>
 
@@ -532,28 +532,33 @@ export function ImageGenerator({
           tabIndex={-1}
           className="flex scroll-mt-4 flex-col gap-4 pb-4 outline-none"
         >
-          <div>
-            <p className="text-sm font-bold text-brand">완성</p>
-            <h2 className="text-xl font-bold">마음에 드는 이미지를 저장하세요</h2>
+          <div className="toss-rise">
+            <p className="text-sm font-bold text-brand">완성 · 3가지 무드</p>
+            <h2 className="text-xl font-bold">용도에 맞는 이미지를 골라 저장하세요</h2>
             <p className="mt-1 text-sm text-ink-soft">
-              제목·본문·브랜드 한 줄·날짜는 각 카드에서 바로 고칠 수 있어요.
+              메뉴 클로즈업 · 공간·분위기 · 소식·안내 — 제목·본문은 각 카드에서 바로 고칠 수 있어요.
             </p>
           </div>
 
           {(record.options as ImageOption[]).map((option, index) => (
             <ImageResultCard
-              key={`${record.id}-${index}-${option.imageUrl}-${option.templateId}`}
-              label={index === 0 ? "안 A" : "안 B"}
+              key={`${record.id}-${index}-${option.imageUrl}-${option.templateId}-${option.mood ?? index}`}
+              label={option.moodLabel || (index === 0 ? "안 A" : index === 1 ? "안 B" : "안 C")}
               imageUrl={option.imageUrl}
               initialHeadline={option.headline}
               initialBodyText={option.bodyText || option.subline || message}
               initialBrandCue={option.brandCue || profile.concept.slice(0, 18)}
               initialDateText={option.dateText ?? dateText}
-              initialTemplate={option.templateId ?? (index === 0 ? "fade_bottom" : "cream_panel")}
+              initialTemplate={
+                option.templateId ??
+                (index === 0 ? "fade_bottom" : index === 1 ? "cream_panel" : "bold_cover")
+              }
               initialPalette={option.palette ?? "auto"}
               cafeName={option.cafeName || profile.name}
               cafeLocation={option.cafeLocation || profile.location}
               reason={option.reason}
+              useCase={option.useCase}
+              photoTreatment={option.photoTreatment}
               isSample={record.isSample}
               usedReferencePhotos={
                 photos.length > 0 ? Boolean(option.usedReferencePhotos) : undefined

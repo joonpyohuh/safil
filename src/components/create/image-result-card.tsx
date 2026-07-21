@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ImagePalette, ImageTemplate } from "@/lib/schemas";
+import type { ImagePalette, ImageTemplate, PhotoTreatment } from "@/lib/schemas";
 import {
   EDITABLE_IMAGE_TEMPLATES,
   IMAGE_TEMPLATE_LABELS,
@@ -33,8 +33,10 @@ type ImageResultCardProps = {
   cafeName?: string;
   cafeLocation?: string;
   reason?: string;
+  useCase?: string;
   isSample?: boolean;
   usedReferencePhotos?: boolean;
+  photoTreatment?: PhotoTreatment;
   shareTitle: string;
   persistId?: string;
   onSaved?: () => void;
@@ -53,8 +55,10 @@ export function ImageResultCard({
   cafeName,
   cafeLocation,
   reason,
+  useCase,
   isSample,
   usedReferencePhotos,
+  photoTreatment,
   shareTitle,
   persistId,
   onSaved,
@@ -230,10 +234,11 @@ export function ImageResultCard({
     brandCue,
     templateId,
     colors,
+    photoTreatment,
   };
 
   return (
-    <article className="card flex flex-col gap-3">
+    <article className="card flex flex-col gap-3 toss-rise">
       <div
         aria-hidden
         style={{
@@ -250,8 +255,13 @@ export function ImageResultCard({
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-bold text-brand">{label}</span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-xs font-bold text-brand">{label}</span>
+          {useCase ? (
+            <span className="truncate text-[0.6875rem] text-ink-soft">{useCase}</span>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
           {usedReferencePhotos !== undefined && !isSample && (
             <span
               className={`rounded-full px-2 py-1 text-[0.6875rem] font-semibold ${

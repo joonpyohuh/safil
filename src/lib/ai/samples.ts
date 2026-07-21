@@ -1,5 +1,6 @@
 import {
   channelLabels,
+  IMAGE_MOOD_LABELS,
   noticeTypeLabels,
   purposeLabels,
   toneLabels,
@@ -81,12 +82,15 @@ export function sampleCopy(
 }
 
 /** 글자 없는 체험용 배경 (문구는 캔버스가 얹음) */
-function sampleBackgroundDataUrl(tone: "clean" | "warm"): string {
+function sampleBackgroundDataUrl(tone: "clean" | "warm" | "moody"): string {
   const stops =
     tone === "clean"
       ? ["#fdf9f3", "#f3e7d8", "#e7d4be"]
-      : ["#4a332a", "#3a2620", "#2a1a15"];
-  const accent = tone === "clean" ? "#d8bfa4" : "#6b4a3a";
+      : tone === "moody"
+        ? ["#2f2924", "#3d342c", "#1a1612"]
+        : ["#4a332a", "#3a2620", "#2a1a15"];
+  const accent =
+    tone === "clean" ? "#d8bfa4" : tone === "moody" ? "#a67c52" : "#6b4a3a";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -107,17 +111,21 @@ export function sampleImage(
   input: ImageGenerationInput,
   profile: CafeProfile | null,
 ): ImageGenerationOutput {
-  const headline = (input.title || "오늘의 카페 소식").slice(0, 14);
   const bodyText = input.message.trim();
   const cafeName = profile?.name || "";
   const cafeLocation = profile?.location || "";
   const brandCue = (profile?.concept || profile?.location || "").slice(0, 18);
+  const firstLine =
+    input.title.trim() ||
+    input.message.split(/[\n,·|]/)[0]?.trim() ||
+    purposeLabels[input.purpose];
+
   return {
     options: [
       {
         imagePath: "",
         imageUrl: sampleBackgroundDataUrl("warm"),
-        headline,
+        headline: firstLine.slice(0, 16),
         subline: brandCue,
         bodyText,
         dateText: input.dateText,
@@ -127,24 +135,51 @@ export function sampleImage(
         cafeName,
         cafeLocation,
         brandCue,
+        mood: "menu_hero",
+        moodLabel: IMAGE_MOOD_LABELS.menu_hero,
+        useCase: "메뉴·원두 소개 피드",
+        photoTreatment: "warm_film",
         reason: cafeName
-          ? `${cafeName} 톤에 맞춘 체험용 배경이에요. 글자는 바로 고칠 수 있어요.`
-          : "체험용 배경이에요. 글자·레이아웃은 지금도 자유롭게 고칠 수 있어요.",
+          ? `${cafeName} · 메뉴 클로즈업 체험용이에요. 글자는 바로 고칠 수 있어요.`
+          : "메뉴 클로즈업 체험용이에요. 글자·레이아웃은 바로 고칠 수 있어요.",
+      },
+      {
+        imagePath: "",
+        imageUrl: sampleBackgroundDataUrl("moody"),
+        headline: (brandCue || firstLine).slice(0, 16),
+        subline: brandCue,
+        bodyText,
+        dateText: input.dateText,
+        templateId: "side_rail",
+        palette: "espresso",
+        usedReferencePhotos: false,
+        cafeName,
+        cafeLocation,
+        brandCue,
+        mood: "space_story",
+        moodLabel: IMAGE_MOOD_LABELS.space_story,
+        useCase: "매장 분위기·방문 유도",
+        photoTreatment: "moody_editorial",
+        reason: "공간·분위기 체험용이에요. 감성 피드에 맞춰 보세요.",
       },
       {
         imagePath: "",
         imageUrl: sampleBackgroundDataUrl("clean"),
-        headline,
+        headline: firstLine.slice(0, 16),
         subline: brandCue,
         bodyText,
         dateText: input.dateText,
-        templateId: "cream_panel",
+        templateId: "bold_cover",
         palette: "cream",
         usedReferencePhotos: false,
         cafeName,
         cafeLocation,
         brandCue,
-        reason: "체험용 배경이에요. 다시 만들기를 누르면 실제 이미지로 시도해요.",
+        mood: "promo_clear",
+        moodLabel: IMAGE_MOOD_LABELS.promo_clear,
+        useCase: "가격·기간·행사 안내",
+        photoTreatment: "clean_bright",
+        reason: "소식·안내 체험용이에요. 다시 만들면 실제 이미지로 시도해요.",
       },
     ],
   };

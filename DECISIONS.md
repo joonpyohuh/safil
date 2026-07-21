@@ -36,8 +36,13 @@
 - **Reason**: Owner asked for these models; medium quality for usable SNS output
 
 ### Photo-first promo images
-- **Decision**: When owner uploads photos, use original photos as poster backgrounds (no image API). AI image generation only when no photos. Design plan (templates + title) via fast text model. Facts in `message` render verbatim on poster. PNG export only on save/share.
-- **Status**: Confirmed (2026-07-20)
+- **Decision**: When owner uploads photos, use original photos as poster backgrounds (no image API). AI image generation only when no photos. Always return **3 mood variations** (`menu_hero` / `space_story` / `promo_clear`) with different template + `photoTreatment` (crop/filter), inspired by specialty café Instagram feeds (나무사이로·커피리브르). Facts in `message` render verbatim. PNG export only on save/share.
+- **Status**: Confirmed (updated 2026-07-21)
+- **Reason**: Two near-identical layout overlays felt weak; owners need distinct mood/use cases for feed vs promo
+
+### Cafe research UX
+- **Decision**: Place search prefers Kakao/Naver Local APIs; deep research is single-pass Responses+web_search JSON (no double LLM). UI shows stepped progress for search vs analyze.
+- **Status**: Confirmed (2026-07-21)
 
 ### Café Place Search
 - **Decision**: Place lookup uses Kakao/Naver Local APIs when keys exist; otherwise OpenAI Responses `web_search` with `gpt-4o-mini` (`OPENAI_SEARCH_MODEL`). Do **not** use `gpt-5-mini` for web_search (slow / asks clarifying questions).

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CafeProfile, CafeProfileInput, Tone, VibeTag } from "@/lib/schemas";
 import { vibeTagLabels, vibeTagValues } from "@/lib/schemas";
@@ -19,6 +19,20 @@ type Candidate = {
   placeUrl: string;
   whyMatch: string;
 };
+
+type ResearchPhase = "idle" | "search" | "analyze";
+
+const SEARCH_STEPS = [
+  "지도에서 같은 상호를 찾는 중…",
+  "주소와 후보를 맞추는 중…",
+  "거의 다 찾았어요…",
+];
+
+const ANALYZE_STEPS = [
+  "리뷰·소개를 읽는 중…",
+  "분위기·메뉴를 정리하는 중…",
+  "홍보에 쓸 문장으로 다듬는 중…",
+];
 
 const empty: CafeProfileInput = {
   name: "",
@@ -51,11 +65,21 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
   const [menu, setMenu] = useState("");
   const [saving, setSaving] = useState(false);
   const [researching, setResearching] = useState(false);
+  const [researchPhase, setResearchPhase] = useState<ResearchPhase>("idle");
+  const [stepIndex, setStepIndex] = useState(0);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [researchOpen, setResearchOpen] = useState(!initial?.placeConfirmed);
+
+  useEffect(() => {
+    if (!researching) return;
+    const id = window.setInterval(() => {
+      setStepIndex((i) => i + 1);
+    }, 2200);
+    return () => window.clearInterval(id);
+  }, [researching, researchPhase]);
 
   const update = <K extends keyof CafeProfileInput>(key: K, value: CafeProfileInput[K]) => {
     setSaved(false);
@@ -77,8 +101,10 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
       return;
     }
     setResearching(true);
+    setResearchPhase("search");
+    setStepIndex(0);
     setError("");
-    setStatus("카페를 찾는 중…");
+    setStatus(SEARCH_STEPS[0]!);
     setCandidates([]);
     try {
       const res = await fetchWithTimeout(
@@ -92,7 +118,7 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
             location: form.location.trim(),
           }),
         },
-        35_000,
+        28_000,
       );
       const json = await res.json().catch(() => null);
       if (!json?.ok) throw new Error(json?.error || "검색하지 못했어요.");
@@ -104,13 +130,16 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
       setStatus("");
     } finally {
       setResearching(false);
+      setResearchPhase("idle");
     }
   }
 
   async function confirmPlace(candidate: Candidate) {
     setResearching(true);
+    setResearchPhase("analyze");
+    setStepIndex(0);
     setError("");
-    setStatus("리뷰와 소개를 읽고 카페 분위기를 정리하는 중…");
+    setStatus(ANALYZE_STEPS[0]!);
     try {
       const res = await fetchWithTimeout(
         "/api/profile/research",
@@ -126,7 +155,7 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
             placeUrl: candidate.placeUrl,
           }),
         },
-        55_000,
+        45_000,
       );
       const json = await res.json().catch(() => null);
       if (!json?.ok) throw new Error(json?.error || "조사하지 못했어요.");
@@ -152,6 +181,7 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
       setStatus("");
     } finally {
       setResearching(false);
+      setResearchPhase("idle");
     }
   }
 
@@ -198,14 +228,19 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
     }
   }
 
+  const phaseSteps = researchPhase === "analyze" ? ANALYZE_STEPS : SEARCH_STEPS;
+  const liveStep = researching
+    ? phaseSteps[Math.min(stepIndex, phaseSteps.length - 1)]
+    : status;
+
   return (
     <form onSubmit={submit} className="flex flex-col gap-4 pb-4" aria-busy={saving || researching}>
-      <section className="card flex flex-col gap-4">
+      <section className="card flex flex-col gap-4 toss-rise">
         <div>
-          <h2 className="font-bold">1. 카페 찾기 (딥리서치)</h2>
+          <h2 className="font-bold">1. 카페 찾기</h2>
           <p className="mt-1 text-xs leading-5 text-ink-soft">
-            이름과 위치를 적고 찾아보면, 네이버·구글에서 후보를 보여드려요. 맞다고 고르면 리뷰를
-            읽어 분위기를 정리해요.
+            이름과 위치를 적고 찾아보면 후보를 바로 보여드려요. 맞는 곳을 고르면 리뷰를 읽어
+            분위기를 빠르게 정리해요.
           </p>
         </div>
         <label className="flex flex-col gap-1.5">
@@ -236,13 +271,28 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
         </label>
         <button
           type="button"
-          className="btn-primary"
+          className="btn-primary toss-press"
           disabled={researching || saving || !form.name.trim() || !form.location.trim()}
           onClick={runSearch}
         >
-          {researching ? "조사 중…" : "카페 찾아 조사하기"}
+          {researching && researchPhase === "search" ? "찾는 중…" : "카페 찾아 조사하기"}
         </button>
-        {form.placeConfirmed && (
+
+        {researching && (
+          <div className="research-progress" role="status" aria-live="polite">
+            <div className="research-progress-bar">
+              <span className="research-progress-fill" />
+            </div>
+            <p className="text-xs font-semibold text-brand">{liveStep}</p>
+            <div className="research-dots" aria-hidden>
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+        )}
+
+        {form.placeConfirmed && !researching && (
           <p className="rounded-xl bg-brand-soft/50 px-3 py-2 text-xs font-semibold text-brand">
             이 카페로 조사·확인됨
           </p>
@@ -250,17 +300,21 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
       </section>
 
       {(researchOpen || candidates.length > 0) && candidates.length > 0 && (
-        <section className="card flex flex-col gap-3" aria-live="polite">
+        <section className="card flex flex-col gap-3 toss-rise" aria-live="polite">
           <h2 className="font-bold">이 카페가 맞나요?</h2>
           <p className="text-xs leading-5 text-ink-soft">
             맞는 곳을 누르면 리뷰를 읽고 컨셉·분위기를 채워 드려요.
           </p>
           <ul className="flex flex-col gap-2">
             {candidates.map((c, i) => (
-              <li key={`${c.placeName}-${i}`}>
+              <li
+                key={`${c.placeName}-${i}`}
+                className="toss-rise"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
                 <button
                   type="button"
-                  className="card w-full border border-line text-left active:scale-[0.99]"
+                  className="card toss-press w-full border border-line text-left"
                   disabled={researching}
                   onClick={() => confirmPlace(c)}
                 >
@@ -276,7 +330,7 @@ export function ProfileForm({ initial }: { initial: CafeProfile | null }) {
         </section>
       )}
 
-      <section className="card flex flex-col gap-4">
+      <section className="card flex flex-col gap-4 toss-rise">
         <div>
           <h2 className="font-bold">2. 컨셉·분위기 (사장님 입력)</h2>
           <p className="mt-1 text-xs leading-5 text-ink-soft">

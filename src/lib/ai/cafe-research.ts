@@ -3,7 +3,6 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import {
   getOpenAI,
   getSearchModel,
-  getTextModel,
   isAiConfigured,
 } from "@/lib/ai/client";
 import {
@@ -39,16 +38,14 @@ const candidatesSchema = z.object({
 });
 
 const deepSchema = z.object({
-  concept: z.string().describe("카페 컨셉 한 줄"),
-  atmosphere: z.string().describe("분위기·공간감 2~3문장"),
-  introduction: z.string().describe("홍보에 쓸 카페 이야기 3~5문장"),
-  menus: z.array(z.string()).describe("대표 메뉴 추정, 없으면 빈 배열"),
-  customerType: z.string().describe("주요 손님층"),
-  researchSummary: z.string().describe("리뷰·검색에서 파악한 요약"),
-  researchSources: z.array(z.string()).describe("참고한 URL"),
-  vibeHints: z
-    .array(z.string())
-    .describe("분위기 키워드 한글 3~6개 (예: 아늑함, 원두향)"),
+  concept: z.string(),
+  atmosphere: z.string(),
+  introduction: z.string(),
+  menus: z.array(z.string()),
+  customerType: z.string(),
+  researchSummary: z.string(),
+  researchSources: z.array(z.string()),
+  vibeHints: z.array(z.string()),
 });
 
 function extractOutputText(response: unknown): string {
@@ -66,24 +63,20 @@ function extractOutputText(response: unknown): string {
   return String(chunks).trim();
 }
 
-function parseCandidatesJson(text: string): CafePlaceCandidate[] {
+function parseJsonObject<T>(text: string, schema: z.ZodType<T>): T | null {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const raw = fenced?.[1]?.trim() ?? text.trim();
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
-  if (start < 0 || end <= start) return [];
+  if (start < 0 || end <= start) return null;
   try {
-    const parsed = candidatesSchema.safeParse(
-      JSON.parse(raw.slice(start, end + 1)),
-    );
-    if (!parsed.success) return [];
-    return parsed.data.candidates.slice(0, 5);
+    const parsed = schema.safeParse(JSON.parse(raw.slice(start, end + 1)));
+    return parsed.success ? parsed.data : null;
   } catch {
-    return [];
+    return null;
   }
 }
 
-/** 상호명이 검색어와 전혀 안 맞는 후보 제거 */
 function filterRelevant(
   candidates: CafePlaceCandidate[],
   name: string,
@@ -108,6 +101,18 @@ function filterRelevant(
   return scored.length > 0 ? scored.slice(0, 5) : candidates.slice(0, 3);
 }
 
+function dedupeCandidates(list: CafePlaceCandidate[]): CafePlaceCandidate[] {
+  const seen = new Set<string>();
+  const out: CafePlaceCandidate[] = [];
+  for (const c of list) {
+    const key = `${c.placeName}|${c.placeAddress}`.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(c);
+  }
+  return out.slice(0, 5);
+}
+
 async function webSearchJsonCandidates(
   name: string,
   location: string,
@@ -118,91 +123,30 @@ async function webSearchJsonCandidates(
       model: getSearchModel(),
       tools: [{ type: "web_search" }],
       tool_choice: "required",
-      max_output_tokens: 900,
+      max_output_tokens: 700,
       input: [
-        "한국 카페 장소 검색. 절대 질문하지 말고 JSON만 출력.",
-        `찾을 카페: "${name}"`,
-        `위치 힌트: "${location}"`,
-        "네이버 지도/플레이스·구글 맵에서 같은 상호(또는 분점)만 찾아라.",
-        "근처의 다른 카페를 끼워 넣지 마라.",
-        '형식: {"candidates":[{"placeName":"","placeAddress":"","placeUrl":"","whyMatch":""}]}',
-        "최대 5개. 없으면 {\"candidates\":[]}",
+        "한국 카페 장소 검색. 질문 금지. JSON만.",
+        `카페: "${name}" / 위치: "${location}"`,
+        "네이버·구글 맵에서 같은 상호만. 다른 카페 금지.",
+        '{"candidates":[{"placeName":"","placeAddress":"","placeUrl":"","whyMatch":""}]}',
       ].join("\n"),
     },
-    { timeout: 22_000 },
+    { timeout: 18_000 },
   );
-  return parseCandidatesJson(extractOutputText(response));
+  const parsed = parseJsonObject(extractOutputText(response), candidatesSchema);
+  return parsed?.candidates.slice(0, 5) ?? [];
 }
 
-async function parseStructured<T>(
-  system: string,
-  user: string,
-  schema: z.ZodType<T>,
-  name: string,
-): Promise<T> {
-  const openai = getOpenAI();
-  const completion = await openai.chat.completions.parse(
-    {
-      model: getTextModel(),
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      response_format: zodResponseFormat(schema, name),
-      max_completion_tokens: 1200,
-      reasoning_effort: "minimal",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
-    { timeout: 20_000 },
-  );
-  const parsed = completion.choices[0]?.message.parsed as T | null;
-  if (!parsed) throw new Error("RESEARCH_PARSE_FAILED");
-  return parsed;
-}
-
-async function webResearchText(query: string): Promise<string> {
-  const openai = getOpenAI();
-  try {
-    const response = await openai.responses.create(
-      {
-        model: getSearchModel(),
-        tools: [{ type: "web_search" }],
-        tool_choice: "required",
-        max_output_tokens: 1600,
-        input: `${query}\n\n규칙: 질문하지 말고 바로 조사 결과만 한국어로 요약.`,
-      },
-      { timeout: 28_000 },
-    );
-    const text = extractOutputText(response);
-    if (text) return text;
-  } catch (error) {
-    console.error("[safil web_search fallback]", error);
-  }
-
-  const completion = await openai.chat.completions.create(
-    {
-      model: getSearchModel(),
-      messages: [
-        {
-          role: "system",
-          content:
-            "한국 카페 조사 도우미. 확실하지 않으면 추측이라고 밝히고, 없는 URL을 지어내지 않는다.",
-        },
-        { role: "user", content: query },
-      ],
-      max_completion_tokens: 1200,
-    },
-    { timeout: 20_000 },
-  );
-  return completion.choices[0]?.message.content?.trim() ?? "";
-}
-
-/** 1단계: 카페 이름·위치로 후보 검색 → 사장님 확인용 */
+/** 1단계: 빠른 장소 후보 */
 export async function searchCafePlaces(
   name: string,
   location: string,
 ): Promise<{ candidates: CafePlaceCandidate[]; rawNote: string }> {
-  if (!isAiConfigured() && !process.env.KAKAO_REST_API_KEY && !process.env.NAVER_CLIENT_ID) {
+  if (
+    !isAiConfigured() &&
+    !process.env.KAKAO_REST_API_KEY &&
+    !process.env.NAVER_CLIENT_ID
+  ) {
     return {
       candidates: [
         {
@@ -216,17 +160,10 @@ export async function searchCafePlaces(
     };
   }
 
-  // 1) 카카오·네이버 로컬 API (빠르고 정확)
   try {
     const [kakao, naver] = await Promise.all([
-      searchKakaoPlaces(name, location).catch((e) => {
-        console.error("[safil kakao]", e);
-        return [] as CafePlaceCandidate[];
-      }),
-      searchNaverPlaces(name, location).catch((e) => {
-        console.error("[safil naver]", e);
-        return [] as CafePlaceCandidate[];
-      }),
+      searchKakaoPlaces(name, location).catch(() => [] as CafePlaceCandidate[]),
+      searchNaverPlaces(name, location).catch(() => [] as CafePlaceCandidate[]),
     ]);
     const merged = dedupeCandidates([...kakao, ...naver]);
     if (merged.length > 0) {
@@ -236,7 +173,6 @@ export async function searchCafePlaces(
     console.error("[safil place api]", error);
   }
 
-  // 2) OpenAI web_search (검색 전용 빠른 모델)
   if (isAiConfigured()) {
     try {
       const fromWeb = await webSearchJsonCandidates(name, location);
@@ -249,34 +185,23 @@ export async function searchCafePlaces(
     }
   }
 
-  // 3) 최후: 입력값으로 확인 진행 가능하게
   return {
     candidates: [
       {
         placeName: name,
         placeAddress: location,
         placeUrl: "",
-        whyMatch:
-          "자동으로 못 찾아 입력하신 정보로 보여드려요. 맞으면 골라 주세요.",
+        whyMatch: "자동으로 못 찾아 입력하신 정보로 보여드려요. 맞으면 골라 주세요.",
       },
     ],
     rawNote: "user_input_fallback",
   };
 }
 
-function dedupeCandidates(list: CafePlaceCandidate[]): CafePlaceCandidate[] {
-  const seen = new Set<string>();
-  const out: CafePlaceCandidate[] = [];
-  for (const c of list) {
-    const key = `${c.placeName}|${c.placeAddress}`.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(c);
-  }
-  return out.slice(0, 5);
-}
-
-/** 2단계: 확인된 매장에 대해 리뷰·소개 딥리서치 */
+/**
+ * 2단계: 단일 패스 딥리서치
+ * web_search + JSON을 한 번에 → 이중 LLM 호출 제거로 속도와 품질 개선
+ */
 export async function deepResearchCafe(params: {
   name: string;
   location: string;
@@ -297,23 +222,97 @@ export async function deepResearchCafe(params: {
     };
   }
 
-  const raw = await webResearchText(
-    [
-      `확정된 카페: "${params.placeName}"`,
-      `주소: ${params.placeAddress || params.location}`,
-      params.placeUrl ? `참고 URL: ${params.placeUrl}` : "",
-      "네이버 플레이스·지도 리뷰, 블로그, 구글 리뷰를 조사해 이 카페의 분위기·강점·대표 메뉴·손님층을 정리해줘.",
-      "과장·보장성 표현 금지. 리뷰에 없는 사실은 쓰지 말 것.",
-      "홍보 문구/이미지에 바로 쓸 수 있게 쉬운 한국어로.",
-    ]
-      .filter(Boolean)
-      .join("\n"),
-  );
+  const openai = getOpenAI();
+  const placeLine = [
+    `확정 카페: ${params.placeName}`,
+    `주소: ${params.placeAddress || params.location}`,
+    params.placeUrl ? `URL: ${params.placeUrl}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
-  return parseStructured(
-    "카페 브랜드 리서처. 리뷰 근거만 요약. 과장 금지. 쉬운 한국어.",
-    `딥리서치 원문:\n${raw}\n\n프로필에 넣을 필드로 정리해.`,
-    deepSchema,
-    "cafe_deep_research",
-  );
+  const jsonSpec = `반드시 아래 JSON만 출력 (질문·설명 금지):
+{"concept":"컨셉 한 줄","atmosphere":"분위기 2~3문장","introduction":"홍보용 이야기 3~5문장","menus":["대표메뉴"],"customerType":"손님층","researchSummary":"리뷰·검색 요약 4~8문장","researchSources":["https://..."],"vibeHints":["키워드","키워드","키워드"]}`;
+
+  try {
+    const response = await openai.responses.create(
+      {
+        model: getSearchModel(),
+        tools: [{ type: "web_search" }],
+        tool_choice: "required",
+        max_output_tokens: 1400,
+        input: [
+          "한국 카페 브랜드 리서처. 네이버 플레이스·지도 리뷰·블로그·구글 리뷰를 조사.",
+          placeLine,
+          "과장·보장·없는 가격/수상 금지. 쉬운 한국어. 홍보에 바로 쓸 톤.",
+          "스페셜티·로스터리라면 원두·공간·철학을 짧게. 일반 동네 카페면 메뉴·분위기·손님 경험을 짧게.",
+          "researchSummary는 실제 리뷰에서 반복되는 표현을 모아 4~8문장.",
+          "menus는 공개된 대표 메뉴만(없으면 빈 배열). vibeHints는 2~5개.",
+          jsonSpec,
+        ].join("\n\n"),
+      },
+      { timeout: 28_000 },
+    );
+
+    const fromText = parseJsonObject(extractOutputText(response), deepSchema);
+    if (fromText) return normalizeDeep(fromText, params.placeName);
+  } catch (error) {
+    console.error("[safil deep research single-pass]", error);
+  }
+
+  // 폴백: 웹검색 없이 구조화만 (빠르지만 약함)
+  try {
+    const completion = await openai.chat.completions.parse(
+      {
+        model: getSearchModel(),
+        messages: [
+          {
+            role: "system",
+            content:
+              "카페 프로필 작성. 확실하지 않으면 솔직히. 없는 URL·사실 금지. 쉬운 한국어.",
+          },
+          {
+            role: "user",
+            content: `${placeLine}\n공개 지식 범위에서 프로필 JSON 필드를 채워라.`,
+          },
+        ],
+        response_format: zodResponseFormat(deepSchema, "cafe_deep_fast"),
+        max_completion_tokens: 900,
+      },
+      { timeout: 16_000 },
+    );
+    const parsed = completion.choices[0]?.message.parsed;
+    if (parsed) return normalizeDeep(parsed, params.placeName);
+  } catch (error) {
+    console.error("[safil deep research fallback]", error);
+  }
+
+  return {
+    concept: `${params.placeName}만의 개성`,
+    atmosphere: "손님이 편안하게 머무는 동네 카페 분위기",
+    introduction: `${params.placeName}의 이야기를 사장님 말로 조금 더 적어 주시면 홍보에 반영돼요.`,
+    menus: [],
+    customerType: "동네·방문 손님",
+    researchSummary: "웹 조사가 불완전해요. 아래 내용을 확인·수정해 주세요.",
+    researchSources: params.placeUrl ? [params.placeUrl] : [],
+    vibeHints: ["편안함", "정갈함"],
+  };
+}
+
+function normalizeDeep(
+  data: CafeResearchDeep,
+  placeName: string,
+): CafeResearchDeep {
+  return {
+    concept: data.concept?.trim() || `${placeName}만의 분위기`,
+    atmosphere: data.atmosphere?.trim() || "따뜻하고 편안한 카페 분위기",
+    introduction: data.introduction?.trim() || "",
+    menus: (data.menus ?? []).filter(Boolean).slice(0, 12),
+    customerType: data.customerType?.trim() || "동네 손님",
+    researchSummary: data.researchSummary?.trim() || "",
+    researchSources: (data.researchSources ?? [])
+      .filter((u) => /^https?:\/\//i.test(u))
+      .slice(0, 12),
+    vibeHints: (data.vibeHints ?? []).filter(Boolean).slice(0, 6),
+  };
 }

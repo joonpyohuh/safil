@@ -222,6 +222,26 @@ export const imageGenerationInputSchema = z.object({
 
 export type ImageGenerationInput = z.infer<typeof imageGenerationInputSchema>;
 
+export const photoTreatmentValues = [
+  "warm_film",
+  "clean_bright",
+  "moody_editorial",
+] as const;
+export type PhotoTreatment = (typeof photoTreatmentValues)[number];
+
+export const imageMoodValues = [
+  "menu_hero",
+  "space_story",
+  "promo_clear",
+] as const;
+export type ImageMood = (typeof imageMoodValues)[number];
+
+export const IMAGE_MOOD_LABELS: Record<ImageMood, string> = {
+  menu_hero: "메뉴 클로즈업",
+  space_story: "공간·분위기",
+  promo_clear: "소식·안내",
+};
+
 export const imageOptionSchema = z.object({
   imagePath: z.string().describe("배경 파일명"),
   imageUrl: z.string().describe("배경 이미지 URL"),
@@ -238,12 +258,17 @@ export const imageOptionSchema = z.object({
   cafeName: z.string().default(""),
   cafeLocation: z.string().default(""),
   brandCue: z.string().default(""),
+  /** 3안 각각의 무드·용도 */
+  mood: z.enum(imageMoodValues).default("menu_hero"),
+  moodLabel: z.string().default(""),
+  useCase: z.string().default(""),
+  photoTreatment: z.enum(photoTreatmentValues).default("warm_film"),
 });
 
 export type ImageOption = z.infer<typeof imageOptionSchema>;
 
 export const imageGenerationOutputSchema = z.object({
-  options: z.array(imageOptionSchema).length(2),
+  options: z.array(imageOptionSchema).length(3),
 });
 
 export type ImageGenerationOutput = z.infer<typeof imageGenerationOutputSchema>;
